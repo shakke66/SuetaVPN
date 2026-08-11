@@ -152,6 +152,69 @@
     return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
   }
 
+  function safeString(value, fallback, allowEmpty) {
+    if (typeof value !== 'string') return fallback;
+    if (!allowEmpty && value.trim() === '') return fallback;
+    return value;
+  }
+
+  function safeNumber(value, fallback, options) {
+    const settings = { min: 0, integer: false, ...(options || {}) };
+    if (!Number.isFinite(value) || value < settings.min) return fallback;
+    if (settings.integer && !Number.isInteger(value)) return fallback;
+    return value;
+  }
+
+  function normalizeTransaction(value) {
+    if (!isRecord(value)) return null;
+    if (typeof value.id !== 'string' || !value.id.trim()) return null;
+    if (!['deposit', 'promo', 'purchase'].includes(value.type)) return null;
+    if (!Number.isFinite(value.amount)) return null;
+    if (typeof value.description !== 'string' || !value.description.trim()) return null;
+    if (typeof value.date !== 'string' || !value.date.trim()) return null;
+
+    return {
+      id: value.id,
+      type: value.type,
+      amount: value.amount,
+      description: value.description,
+      date: value.date,
+      status: 'completed',
+    };
+  }
+
+  function normalizeMessage(value) {
+    if (!isRecord(value)) return null;
+    if (typeof value.id !== 'string' || !value.id.trim()) return null;
+    if (value.author !== 'user' && value.author !== 'support') return null;
+    if (typeof value.text !== 'string' || !value.text.trim()) return null;
+    if (typeof value.date !== 'string' || !value.date.trim()) return null;
+
+    return {
+      id: value.id,
+      author: value.author,
+      text: value.text,
+      date: value.date,
+    };
+  }
+
+  function normalizeTicket(value) {
+    if (!isRecord(value)) return null;
+    if (typeof value.id !== 'string' || !value.id.trim()) return null;
+    if (typeof value.subject !== 'string' || !value.subject.trim()) return null;
+    if (typeof value.createdAt !== 'string' || !value.createdAt.trim()) return null;
+    if (!Array.isArray(value.messages)) return null;
+
+    return {
+      id: value.id,
+      subject: value.subject,
+      status: value.status === 'answered' ? 'answered' : 'open',
+      createdAt: value.createdAt,
+      attachmentName: safeString(value.attachmentName, '', true),
+      messages: value.messages.map(normalizeMessage).filter(Boolean),
+    };
+  }
+
   function hydrateState(raw) {
     const defaults = createInitialState();
     let parsed;
@@ -166,12 +229,45 @@
       return defaults;
     }
 
-    const profile = isRecord(parsed.profile)
-      ? { ...defaults.profile, ...parsed.profile }
-      : defaults.profile;
-    const notifications = isRecord(parsed.notifications)
-      ? { ...defaults.notifications, ...parsed.notifications }
-      : defaults.notifications;
+    const storedProfile = isRecord(parsed.profile) ? parsed.profile : {};
+    const profile = {
+      name: safeString(storedProfile.name, defaults.profile.name),
+      username: safeString(storedProfile.username, defaults.profile.username),
+      role: safeString(storedProfile.role, defaults.profile.role),
+      email: safeString(storedProfile.email, defaults.profile.email, true),
+      emailVerified: storedProfile.emailVerified === true,
+      registeredAt: safeString(storedProfile.registeredAt, defaults.profile.registeredAt),
+    };
+    const storedNotifications = isRecord(parsed.notifications) ? parsed.notifications : {};
+    const notifications = Object.fromEntries(NOTIFICATION_KEYS.map((key) => [
+      key,
+      typeof storedNotifications[key] === 'boolean'
+        ? storedNotifications[key]
+        : defaults.notifications[key],
+    ]));
+    const storedSubscription = isRecord(parsed.subscription) ? parsed.subscription : {};
+    const subscription = {
+      id: safeString(storedSubscription.id, defaults.subscription.id),
+      tariffId: TARIFFS.some((tariff) => tariff.id === storedSubscription.tariffId)
+        ? storedSubscription.tariffId
+        : defaults.subscription.tariffId,
+      status: storedSubscription.status === 'expired' ? 'expired' : 'active',
+      daysLeft: safeNumber(storedSubscription.daysLeft, defaults.subscription.daysLeft, { integer: true }),
+      expiresAt: safeString(storedSubscription.expiresAt, defaults.subscription.expiresAt),
+      trafficUsed: safeNumber(storedSubscription.trafficUsed, defaults.subscription.trafficUsed),
+      trafficLimit: safeNumber(storedSubscription.trafficLimit, defaults.subscription.trafficLimit, { min: 0.01 }),
+      devicesUsed: safeNumber(storedSubscription.devicesUsed, defaults.subscription.devicesUsed, { integer: true }),
+      devicesLimit: safeNumber(storedSubscription.devicesLimit, defaults.subscription.devicesLimit, { min: 1, integer: true }),
+    };
+    const storedReferral = isRecord(parsed.referral) ? parsed.referral : {};
+    const referral = {
+      rewardPercent: safeNumber(storedReferral.rewardPercent, defaults.referral.rewardPercent),
+      invited: safeNumber(storedReferral.invited, defaults.referral.invited, { integer: true }),
+      active: safeNumber(storedReferral.active, defaults.referral.active, { integer: true }),
+      earned: safeNumber(storedReferral.earned, defaults.referral.earned),
+      botLink: safeString(storedReferral.botLink, defaults.referral.botLink),
+      cabinetLink: safeString(storedReferral.cabinetLink, defaults.referral.cabinetLink),
+    };
 
     return {
       ...defaults,
@@ -185,18 +281,16 @@
         ? parsed.balance
         : defaults.balance,
       tariffs: clone(TARIFFS),
-      subscription: isRecord(parsed.subscription)
-        ? { ...defaults.subscription, ...parsed.subscription }
-        : defaults.subscription,
+      subscription,
       transactions: Array.isArray(parsed.transactions)
-        ? clone(parsed.transactions)
+        ? parsed.transactions.map(normalizeTransaction).filter(Boolean)
         : defaults.transactions,
-      referral: isRecord(parsed.referral)
-        ? { ...defaults.referral, ...parsed.referral }
-        : defaults.referral,
-      tickets: Array.isArray(parsed.tickets) ? clone(parsed.tickets) : defaults.tickets,
+      referral,
+      tickets: Array.isArray(parsed.tickets)
+        ? parsed.tickets.map(normalizeTicket).filter(Boolean)
+        : defaults.tickets,
       appliedPromos: Array.isArray(parsed.appliedPromos)
-        ? parsed.appliedPromos.filter((code) => typeof code === 'string')
+        ? parsed.appliedPromos.filter((code) => code === 'SUETA10')
         : [],
       selectedTariffId: TARIFFS.some((tariff) => tariff.id === parsed.selectedTariffId)
         ? parsed.selectedTariffId

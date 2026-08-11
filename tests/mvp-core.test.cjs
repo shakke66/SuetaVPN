@@ -44,6 +44,90 @@ test('hydrateState keeps valid user values and repairs missing nested fields', (
   assert.equal(restored.notifications.subscription, true);
 });
 
+test('hydrateState repairs invalid nested scalar types before rendering', () => {
+  const restored = core.hydrateState(JSON.stringify({
+    version: 1,
+    profile: {
+      name: null,
+      username: { value: '@broken' },
+      role: 7,
+      email: 'demo@example.com',
+      emailVerified: 'yes',
+      registeredAt: [],
+    },
+    notifications: { news: 'false', promo: false },
+    subscription: {
+      tariffId: '<img src=x onerror=alert(1)>',
+      daysLeft: -5,
+      trafficUsed: '38.4',
+      trafficLimit: 0,
+      devicesUsed: null,
+      devicesLimit: '5',
+    },
+    referral: {
+      rewardPercent: '20',
+      invited: -3,
+      active: null,
+      earned: '1480',
+      botLink: null,
+    },
+  }));
+
+  assert.equal(restored.profile.name, 'Алексей');
+  assert.equal(restored.profile.username, '@sueta_demo');
+  assert.equal(restored.profile.role, 'Пользователь');
+  assert.equal(restored.profile.email, 'demo@example.com');
+  assert.equal(restored.profile.emailVerified, false);
+  assert.equal(restored.profile.registeredAt, '11 августа 2026');
+  assert.equal(restored.notifications.news, true);
+  assert.equal(restored.notifications.promo, false);
+  assert.equal(restored.subscription.tariffId, 'base');
+  assert.equal(restored.subscription.daysLeft, 24);
+  assert.equal(restored.subscription.trafficUsed, 38.4);
+  assert.equal(restored.subscription.trafficLimit, 100);
+  assert.equal(restored.subscription.devicesUsed, 2);
+  assert.equal(restored.subscription.devicesLimit, 5);
+  assert.equal(restored.referral.rewardPercent, 20);
+  assert.equal(restored.referral.invited, 8);
+  assert.equal(restored.referral.active, 5);
+  assert.equal(restored.referral.earned, 1480);
+  assert.equal(restored.referral.botLink, 'https://example.com/suetavpn-demo/bot?ref=DEMO2026');
+});
+
+test('hydrateState drops malformed collection entries and normalizes valid ones', () => {
+  const restored = core.hydrateState(JSON.stringify({
+    version: 1,
+    transactions: [
+      null,
+      { id: 'bad-amount', type: 'deposit', amount: '100', description: 'bad', date: NOW },
+      { id: 'valid-deposit', type: 'deposit', amount: 250, description: '<b>Демо</b>', date: NOW, status: 'completed' },
+    ],
+    tickets: [
+      { id: 'broken-ticket', subject: null, messages: 'not-an-array' },
+      {
+        id: 'valid-ticket',
+        subject: '<img src=x onerror=alert(1)>',
+        status: 'open',
+        createdAt: NOW,
+        attachmentName: 'screen.png',
+        messages: [
+          null,
+          { id: 'valid-message', author: 'user', text: '<script>alert(1)</script>', date: NOW },
+        ],
+      },
+    ],
+  }));
+
+  assert.equal(restored.transactions.length, 1);
+  assert.equal(restored.transactions[0].id, 'valid-deposit');
+  assert.equal(restored.transactions[0].amount, 250);
+  assert.equal(restored.transactions[0].description, '<b>Демо</b>');
+  assert.equal(restored.tickets.length, 1);
+  assert.equal(restored.tickets[0].id, 'valid-ticket');
+  assert.equal(restored.tickets[0].messages.length, 1);
+  assert.equal(restored.tickets[0].messages[0].text, '<script>alert(1)</script>');
+});
+
 test('topUp rejects amounts below 100 rubles without changing state', () => {
   const before = core.createInitialState();
   const result = core.topUp(before, 99, 'СБП', NOW);
@@ -231,4 +315,3 @@ test('setOnboarding marks completion without mutating state', () => {
   assert.equal(result.state.onboardingCompleted, true);
   assert.equal(state.onboardingCompleted, false);
 });
-

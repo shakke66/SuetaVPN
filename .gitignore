@@ -1,0 +1,10 @@
+# ОС и редакторы
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Локальные артефакты
+*.log
+coverage/
+.nyc_output/
