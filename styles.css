@@ -671,6 +671,12 @@ html[data-theme="light"] .static-backdrop__glow {
   margin-bottom: 14px;
 }
 
+.preview-welcome > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
 .preview-welcome strong {
   font-size: 15px;
 }

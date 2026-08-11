@@ -145,7 +145,7 @@ test('topUp rejects amounts above 50000 rubles', () => {
   assert.equal(result.code, 'AMOUNT_TOO_HIGH');
 });
 
-test('topUp accepts boundary amounts and does not mutate its input', () => {
+test('topUp accepts the 100 ruble lower boundary and does not mutate its input', () => {
   const before = core.createInitialState();
   const result = core.topUp(before, 100, 'СБП', NOW);
 
@@ -155,6 +155,19 @@ test('topUp accepts boundary amounts and does not mutate its input', () => {
   assert.equal(result.state.transactions.length, 3);
   assert.equal(result.state.transactions[0].amount, 100);
   assert.equal(result.state.transactions[0].type, 'deposit');
+  assert.equal(result.state.transactions[0].date, NOW);
+});
+
+test('topUp accepts the 50000 ruble upper boundary and records the transaction', () => {
+  const before = core.createInitialState();
+  const result = core.topUp(before, 50000, 'Карта', NOW);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.state.balance, 50790);
+  assert.equal(before.balance, 790);
+  assert.equal(result.state.transactions.length, 3);
+  assert.equal(result.state.transactions[0].amount, 50000);
+  assert.equal(result.state.transactions[0].description, 'Демо-пополнение · Карта');
   assert.equal(result.state.transactions[0].date, NOW);
 });
 

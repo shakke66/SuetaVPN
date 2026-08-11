@@ -192,9 +192,7 @@
   }
 
   function navigate(route) {
-    closeDrawer(false);
-    closeModal();
-    stopOnboarding(false);
+    cleanupTransientUi();
     const normalized = route === 'home' ? 'dashboard' : route;
     if (getRoute() === normalized) {
       render();
@@ -202,6 +200,12 @@
       return;
     }
     window.location.hash = `#/${normalized}`;
+  }
+
+  function cleanupTransientUi() {
+    closeDrawer(false);
+    closeModal(false);
+    stopOnboarding(false, false);
   }
 
   function ensureRoute(route) {
@@ -1161,20 +1165,20 @@
     `;
     document.body.classList.add('is-modal-open');
     window.requestAnimationFrame(() => {
-      const focusTarget = options.initialFocus
-        ? modalRoot.querySelector(options.initialFocus)
-        : modalRoot.querySelector('[autofocus], input, textarea, select, button, [href]');
+      const focusTarget = (options.initialFocus ? modalRoot.querySelector(options.initialFocus) : null)
+        || modalRoot.querySelector('[autofocus]')
+        || modalRoot.querySelector('input, textarea, select, button, [href]');
       focusTarget?.focus();
     });
   }
 
-  function closeModal() {
+  function closeModal(restoreFocus) {
     if (!modalRoot.firstElementChild) return;
     modalRoot.innerHTML = '';
     document.body.classList.remove('is-modal-open');
     const target = ui.modalReturnFocus;
     ui.modalReturnFocus = null;
-    target?.focus?.();
+    if (restoreFocus !== false) target?.focus?.();
   }
 
   function showToast(message, type) {
@@ -1254,11 +1258,22 @@
   }
 
   function setTheme(theme) {
+    const activeControl = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const focusAction = activeControl?.dataset.action;
+    const focusTheme = activeControl?.dataset.theme;
+    const focusInDrawer = Boolean(activeControl?.closest('.mobile-drawer'));
     const result = core.setTheme(state, theme);
     if (applyResult(result, { toast: false, renderAfter: false })) {
       const landingMenuOpen = modalRoot.querySelector('#modal-title')?.textContent === 'Меню';
       render();
-      if (landingMenuOpen) openLandingMenu(true);
+      if (landingMenuOpen) {
+        openLandingMenu(true);
+      } else if (focusAction) {
+        const focusScope = focusInDrawer ? app.querySelector('.mobile-drawer') : app;
+        const nextControl = Array.from(focusScope?.querySelectorAll(`[data-action="${focusAction}"]`) || [])
+          .find((element) => !focusTheme || element.dataset.theme === focusTheme);
+        window.requestAnimationFrame(() => nextControl?.focus());
+      }
       showToast(theme === 'dark' ? 'Включена тёмная тема.' : 'Включена светлая тема.', 'success');
     }
   }
@@ -1712,6 +1727,7 @@
 
   document.addEventListener('keydown', handleKeyboard);
   window.addEventListener('hashchange', () => {
+    cleanupTransientUi();
     window.scrollTo({ top: 0, behavior: 'auto' });
     render();
     window.requestAnimationFrame(focusMainHeading);
