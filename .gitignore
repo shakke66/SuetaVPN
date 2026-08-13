@@ -3,6 +3,7 @@
 Thumbs.db
 .idea/
 .vscode/
+.worktrees/
 
 # Локальные артефакты
 *.log
