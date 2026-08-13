@@ -1,0 +1,28 @@
+import type { CreateTicketRequest, TopUpRequest } from '../domain/operations';
+import type { AppStateV2, Period, Result, TariffId } from '../domain/types';
+
+export interface BillingAdapter {
+  topUp(state: AppStateV2, request: TopUpRequest): Promise<Result<AppStateV2>>;
+  applyPromo(state: AppStateV2, code: string): Promise<Result<AppStateV2>>;
+}
+
+export interface SubscriptionAdapter {
+  purchase(state: AppStateV2, tariffId: TariffId, months: Period): Promise<Result<AppStateV2>>;
+}
+
+export interface TicketAdapter {
+  create(state: AppStateV2, request: CreateTicketRequest): Promise<Result<AppStateV2>>;
+  reply(state: AppStateV2, ticketId: string, message: string): Promise<Result<AppStateV2>>;
+}
+
+export interface NotificationAdapter {
+  markRead(state: AppStateV2, notificationId: string): Promise<Result<AppStateV2>>;
+  markAllRead(state: AppStateV2): Promise<Result<AppStateV2>>;
+}
+
+export interface LocalAdapters {
+  billing: BillingAdapter;
+  subscriptions: SubscriptionAdapter;
+  tickets: TicketAdapter;
+  notifications: NotificationAdapter;
+}
