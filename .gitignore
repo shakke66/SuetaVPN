@@ -9,3 +9,7 @@ Thumbs.db
 *.log
 coverage/
 .nyc_output/
+
+# Node.js build artefacts
+node_modules/
+dist/
