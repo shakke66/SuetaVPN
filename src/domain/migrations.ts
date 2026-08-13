@@ -1,6 +1,6 @@
 import { getTariff } from './tariffs';
 import { createInitialState } from './state';
-import type { AppStateV2, Locale, Period, Subscription, TariffId, Theme, Ticket, TicketMessage, TicketNotification, Transaction } from './types';
+import type { AppStateV2, Period, Subscription, TariffId, Ticket, TicketMessage, TicketNotification, Transaction } from './types';
 
 export const STORAGE_KEY = 'suetavpn_app_v2';
 export const LEGACY_STORAGE_KEY = 'suetavpn_mvp_v1';
@@ -58,9 +58,10 @@ function normalizeMessage(value: unknown): TicketMessage | null {
 
 function normalizeTicket(value: unknown): Ticket | null {
   if (!isRecord(value) || typeof value.id !== 'string' || !value.id.trim() || typeof value.subject !== 'string' || !value.subject.trim() ||
+    (value.status !== 'open' && value.status !== 'answered') ||
     typeof value.createdAt !== 'string' || !value.createdAt.trim() || !Array.isArray(value.messages)) return null;
   return {
-    id: value.id, subject: value.subject, status: value.status === 'answered' ? 'answered' : 'open', createdAt: value.createdAt,
+    id: value.id, subject: value.subject, status: value.status, createdAt: value.createdAt,
     attachmentName: string(value.attachmentName, '', true), messages: value.messages.map(normalizeMessage).filter((message): message is TicketMessage => message !== null),
   };
 }

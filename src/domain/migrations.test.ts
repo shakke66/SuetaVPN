@@ -110,4 +110,31 @@ describe('hydrateState', () => {
     expect(first.tickets).toEqual(state.tickets);
     expect(first.notifications).toEqual(state.notifications);
   });
+
+  it('drops collection members with invalid ticket enum values', () => {
+    const state = createInitialState();
+    const hydrated = hydrateState(JSON.stringify({
+      ...state,
+      tickets: [
+        ...state.tickets,
+        { id: 'invalid-ticket-status', subject: 'Status', status: 'closed', createdAt: '2026-08-12T10:00:00.000Z', attachmentName: '', messages: [] },
+        {
+          id: 'invalid-message-author', subject: 'Author', status: 'open', createdAt: '2026-08-12T10:00:00.000Z', attachmentName: '',
+          messages: [{ id: 'invalid-message', author: 'system', text: 'Invalid', date: '2026-08-12T10:00:00.000Z' }],
+        },
+      ],
+      notifications: [
+        ...state.notifications,
+        { id: 'invalid-notification-type', type: 'subscription-expired', ticketId: 'ticket-current', read: false, createdAt: '2026-08-12T10:00:00.000Z' },
+      ],
+    }), null);
+
+    expect(hydrated.tickets).toEqual([
+      ...state.tickets,
+      {
+        id: 'invalid-message-author', subject: 'Author', status: 'open', createdAt: '2026-08-12T10:00:00.000Z', attachmentName: '', messages: [],
+      },
+    ]);
+    expect(hydrated.notifications).toEqual(state.notifications);
+  });
 });

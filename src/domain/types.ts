@@ -4,12 +4,12 @@ export type TariffId = 'base' | 'elite';
 export type Period = 1 | 3 | 6 | 12;
 
 export interface Tariff {
-  id: TariffId;
-  devices: number;
-  locations: number;
-  speedGbps: number;
-  prices: Readonly<Record<Period, number>>;
-  traffic: { kind: 'unlimited' } | { kind: 'bypass'; bypassGb: number };
+  readonly id: TariffId;
+  readonly devices: number;
+  readonly locations: number;
+  readonly speedGbps: number;
+  readonly prices: Readonly<Record<Period, number>>;
+  readonly traffic: Readonly<{ kind: 'unlimited' }> | Readonly<{ kind: 'bypass'; bypassGb: number }>;
 }
 
 export interface Transaction {
