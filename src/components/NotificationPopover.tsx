@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type JSX, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+  type RefObject,
+} from 'react';
 import { Link } from 'react-router';
 import type { Ticket, TicketNotification } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
@@ -15,6 +24,16 @@ interface NotificationPopoverProps {
   triggerRef: RefObject<HTMLButtonElement | null>;
 }
 
+interface AnchorPosition {
+  left: number;
+  top: number;
+}
+
+const DESKTOP_POPOVER_MAX_WIDTH = 390;
+const DESKTOP_POPOVER_EDGE = 16;
+const DESKTOP_POPOVER_GAP = 12;
+const DESKTOP_POPOVER_NARROW_GUTTER = 24;
+
 export function NotificationPopover({
   notifications,
   tickets,
@@ -28,18 +47,61 @@ export function NotificationPopover({
   const panelRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [mounted, setMounted] = useState(open);
+  const [anchorPosition, setAnchorPosition] = useState<AnchorPosition | null>(null);
+  const openerKind = triggerRef.current?.dataset.notificationOpener === 'drawer'
+    ? 'drawer'
+    : 'desktop';
   const ticketEvents = useMemo(() => notifications.filter(
     ({ type }) => type === 'ticket-created' || type === 'ticket-replied',
   ), [notifications]);
   const unreadCount = ticketEvents.filter(({ read }) => !read).length;
   const close = useCallback(() => {
     onClose();
-    triggerRef.current?.focus();
-  }, [onClose, triggerRef]);
+  }, [onClose]);
 
   useEffect(() => {
     if (open) setMounted(true);
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open || !mounted) return;
+    if (openerKind === 'drawer') {
+      setAnchorPosition(null);
+      return;
+    }
+
+    const updatePosition = () => {
+      const opener = triggerRef.current;
+      if (!opener) return;
+      const openerRect = opener.getBoundingClientRect();
+      const measuredWidth = panelRef.current?.getBoundingClientRect().width ?? 0;
+      const fallbackWidth = Math.min(
+        DESKTOP_POPOVER_MAX_WIDTH,
+        Math.max(0, window.innerWidth - (DESKTOP_POPOVER_NARROW_GUTTER * 2)),
+      );
+      const popoverWidth = measuredWidth || fallbackWidth;
+      const maximumLeft = Math.max(
+        DESKTOP_POPOVER_EDGE,
+        window.innerWidth - popoverWidth - DESKTOP_POPOVER_EDGE,
+      );
+      const left = Math.min(
+        maximumLeft,
+        Math.max(DESKTOP_POPOVER_EDGE, openerRect.right - popoverWidth),
+      );
+      const top = Math.max(DESKTOP_POPOVER_EDGE, openerRect.bottom + DESKTOP_POPOVER_GAP);
+      setAnchorPosition((current) => (
+        current?.left === left && current.top === top ? current : { left, top }
+      ));
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [mounted, open, openerKind, triggerRef]);
 
   useEffect(() => {
     if (!open || !mounted) return;
@@ -69,14 +131,20 @@ export function NotificationPopover({
       ref={panelRef}
       aria-hidden={open ? undefined : 'true'}
       aria-label={t('ticketNotifications.title')}
-      aria-modal={open ? 'false' : undefined}
+      aria-modal={open ? (openerKind === 'drawer' ? 'true' : 'false') : undefined}
       className="notification-popover"
+      data-anchor={openerKind}
       data-state={open ? 'open' : 'closing'}
       inert={!open}
       onAnimationEnd={() => {
         if (!open) setMounted(false);
       }}
       role="dialog"
+      style={openerKind === 'desktop' && anchorPosition ? {
+        left: `${anchorPosition.left}px`,
+        right: 'auto',
+        top: `${anchorPosition.top}px`,
+      } : undefined}
       tabIndex={-1}
     >
       <div className="notification-popover__header">

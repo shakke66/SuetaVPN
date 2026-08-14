@@ -1,4 +1,4 @@
-import { useRef, useState, type JSX } from 'react';
+import { useLayoutEffect, useRef, useState, type JSX } from 'react';
 import { NavLink, useNavigate, useOutlet } from 'react-router';
 import { RouteTransition } from '../app/RouteTransition';
 import { useApp } from '../app/AppProvider';
@@ -61,6 +61,7 @@ export function AppShell(): JSX.Element {
   const outlet = useOutlet();
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const notificationOpenerRef = useRef<HTMLButtonElement>(null);
+  const notificationsWereOpenRef = useRef(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = state.notifications.filter(
@@ -74,6 +75,16 @@ export function AppShell(): JSX.Element {
   const localeLabelKey: MessageKey = nextLocale === 'ru'
     ? 'shell.language.switchToRussian'
     : 'shell.language.switchToEnglish';
+
+  useLayoutEffect(() => {
+    if (notificationsOpen) {
+      notificationsWereOpenRef.current = true;
+      return;
+    }
+    if (!notificationsWereOpenRef.current) return;
+    notificationsWereOpenRef.current = false;
+    notificationOpenerRef.current?.focus();
+  }, [notificationsOpen]);
 
   const signOut = async () => {
     setReturnPath(null);

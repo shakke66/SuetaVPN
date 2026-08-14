@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useRef, useState, type JSX, type ReactNode, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type JSX,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { useI18n } from '../i18n/I18nProvider';
 import { Button } from './Button';
 import { Icon } from './Icon';
@@ -58,7 +67,7 @@ export function Drawer({
     }
   }, [mounted, open]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!active || !open || !mounted) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -93,10 +102,10 @@ export function Drawer({
   if (!mounted) return null;
   return (
     <div
-      aria-hidden={open ? undefined : 'true'}
+      aria-hidden={open && active ? undefined : 'true'}
       className="drawer-backdrop"
       data-state={open ? 'open' : 'closing'}
-      inert={!open}
+      inert={!open || !active}
       onAnimationEnd={() => {
         if (!open) setMounted(false);
       }}
@@ -107,7 +116,7 @@ export function Drawer({
       <aside
         ref={dialogRef}
         aria-label={t('shell.drawer.title')}
-        aria-modal={open ? 'true' : undefined}
+        aria-modal={active && open ? 'true' : undefined}
         className="drawer"
         role="dialog"
         tabIndex={-1}

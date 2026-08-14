@@ -67,6 +67,10 @@ beforeEach(() => {
   delete (window as TelegramWindow).Telegram;
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('persistent application shell', () => {
   it('keeps the header node mounted while route content and active navigation change', async () => {
     const user = userEvent.setup();
@@ -121,6 +125,42 @@ describe('persistent application shell', () => {
       expect(persistedState().notifications.every(({ read }) => read)).toBe(true);
     });
     expect(screen.queryByText('2')).not.toBeInTheDocument();
+  });
+
+  it('anchors the desktop notification popover to the actual bell and clamps it to the viewport', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(800);
+    renderCabinet();
+
+    const header = await screen.findByTestId('app-shell-header');
+    const opener = within(header).getByRole('button', { name: 'Открыть уведомления' });
+    let openerRect = {
+      bottom: 56,
+      height: 44,
+      left: 600,
+      right: 644,
+      top: 12,
+      width: 44,
+      x: 600,
+      y: 12,
+      toJSON: () => ({}),
+    } as DOMRect;
+    vi.spyOn(opener, 'getBoundingClientRect').mockImplementation(() => openerRect);
+
+    await user.click(opener);
+    const popover = screen.getByRole('dialog', { name: 'Уведомления о тикетах' });
+    expect(popover).toHaveAttribute('data-anchor', 'desktop');
+    expect(popover).toHaveStyle({ left: '254px', top: '68px' });
+
+    openerRect = {
+      ...openerRect,
+      left: 755,
+      right: 799,
+      x: 755,
+    };
+    fireEvent(window, new Event('resize'));
+
+    expect(popover).toHaveStyle({ left: '394px', top: '68px' });
   });
 
   it('closes the mobile drawer with Escape and returns focus to its trigger', async () => {
@@ -186,6 +226,36 @@ describe('persistent application shell', () => {
     expect(drawerOpener).toHaveFocus();
     expect(desktopOpener.closest('.shell-desktop-only')).not.toBeNull();
     expect(drawerOpener).toHaveAttribute('data-notification-opener', 'drawer');
+  });
+
+  it('transfers modal ownership to drawer notifications and restores the drawer trap on close', async () => {
+    const user = userEvent.setup();
+    renderCabinet();
+
+    const menuTrigger = await screen.findByRole('button', { name: 'Открыть меню' });
+    await user.click(menuTrigger);
+    const drawer = screen.getByRole('dialog', { name: 'Меню' });
+    const drawerOpener = within(drawer).getByRole('button', { name: 'Открыть уведомления' });
+
+    await user.click(drawerOpener);
+    const popover = screen.getByRole('dialog', { name: 'Уведомления о тикетах' });
+    const modalDialogs = screen.getAllByRole('dialog').filter(
+      (dialog) => dialog.getAttribute('aria-modal') === 'true',
+    );
+    expect(modalDialogs).toEqual([popover]);
+    expect(drawer).not.toHaveAttribute('aria-modal');
+    expect(popover).toHaveAttribute('aria-modal', 'true');
+
+    await user.keyboard('{Escape}');
+
+    expect(drawer).toHaveAttribute('aria-modal', 'true');
+    expect(drawerOpener).toHaveFocus();
+
+    const closeButton = within(drawer).getByRole('button', { name: 'Закрыть меню' });
+    const lastButton = within(drawer).getByRole('button', { name: 'Выйти' });
+    closeButton.focus();
+    await user.tab({ shift: true });
+    expect(lastButton).toHaveFocus();
   });
 
   it('omits logout controls inside a Telegram Mini App', async () => {
