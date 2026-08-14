@@ -45,6 +45,7 @@ function persisted(): AppStateV2 {
 
 beforeEach(() => {
   localStorage.clear();
+  delete (window as Window & { Telegram?: unknown }).Telegram;
   document.documentElement.removeAttribute('lang');
   document.documentElement.removeAttribute('data-theme');
 });
@@ -99,6 +100,43 @@ describe('AppProvider hydration and preferences', () => {
 });
 
 describe('AppProvider commands', () => {
+  it('consumes a successful email challenge so its one-time code cannot be reused', async () => {
+    const view = renderProvider();
+
+    await act(async () => {
+      await view.app().startEmail('mira@example.com');
+    });
+    const challenge = view.app().emailChallenge;
+    expect(challenge).not.toBeNull();
+
+    await act(async () => {
+      await view.app().verifyEmail(challenge?.code ?? '');
+    });
+
+    expect(view.app().state.session.active).toBe(true);
+    expect(view.app().emailChallenge).toBeNull();
+  });
+
+  it('keeps a Telegram Mini App session active when logout is invoked programmatically', async () => {
+    const initial = createInitialState();
+    initial.session = { active: true };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+    (window as Window & { Telegram?: unknown }).Telegram = {
+      WebApp: { initDataUnsafe: { user: { id: 42, first_name: 'Mira' } } },
+    };
+    const view = renderProvider();
+
+    let result: Result<AppStateV2> | undefined;
+    await act(async () => {
+      result = await view.app().logout();
+    });
+
+    expect(view.app().telegramMiniApp).toBe(true);
+    expect(result?.ok).toBe(true);
+    expect(view.app().state.session.active).toBe(true);
+    expect(persisted().session.active).toBe(true);
+  });
+
   it('persists the complete state after a successful real domain command', async () => {
     const view = renderProvider();
     const before = view.app().state.wallet.balance;
@@ -191,6 +229,10 @@ describe('AppProvider commands', () => {
   it('exposes the planned preferences, billing, subscription, ticket and notification commands', () => {
     const app = renderProvider().app();
     expect([
+      app.startEmail,
+      app.verifyEmail,
+      app.loginTelegram,
+      app.logout,
       app.setTheme,
       app.setLocale,
       app.setPurchaseDraft,

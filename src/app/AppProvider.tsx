@@ -8,7 +8,12 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { LocalAdapters } from '../adapters/contracts';
+import type {
+  EmailChallenge,
+  LocalAdapters,
+  StartEmailResult,
+  TelegramUser,
+} from '../adapters/contracts';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
 import { LEGACY_STORAGE_KEY, STORAGE_KEY, hydrateState } from '../domain/migrations';
 import type { CreateTicketRequest, TopUpRequest } from '../domain/operations';
@@ -23,6 +28,10 @@ import type {
 import { I18nProvider } from '../i18n/I18nProvider';
 
 export type CommandName =
+  | 'startEmail'
+  | 'verifyEmail'
+  | 'loginTelegram'
+  | 'logout'
   | 'topUp'
   | 'applyPromo'
   | 'purchase'
@@ -34,6 +43,15 @@ export type CommandName =
 export interface AppContextValue {
   state: AppStateV2;
   pending: CommandName[];
+  emailChallenge: EmailChallenge | null;
+  returnPath: string | null;
+  telegramMiniApp: boolean;
+  telegramUser: TelegramUser | null;
+  setReturnPath: (path: string | null) => void;
+  startEmail: (email: string) => Promise<StartEmailResult>;
+  verifyEmail: (code: string) => Promise<Result<AppStateV2>>;
+  loginTelegram: () => Promise<Result<AppStateV2>>;
+  logout: () => Promise<Result<AppStateV2>>;
   setTheme: (theme: Theme) => Promise<void>;
   setLocale: (locale: Locale) => Promise<void>;
   setPurchaseDraft: (tariffId: TariffId, months: Period) => Promise<void>;
@@ -64,7 +82,9 @@ function hydrateStoredState(): AppStateV2 {
   );
 }
 
-function pendingResult(state: AppStateV2): Result<AppStateV2> {
+function pendingResult(
+  state: AppStateV2,
+): Extract<Result<AppStateV2>, { ok: false }> {
   return {
     ok: false,
     state,
@@ -75,6 +95,9 @@ function pendingResult(state: AppStateV2): Result<AppStateV2> {
 
 export function AppProvider({ children, adapters = defaultAdapters }: AppProviderProps) {
   const [state, setRenderedState] = useState(hydrateStoredState);
+  const [emailChallenge, setEmailChallenge] = useState<EmailChallenge | null>(null);
+  const [returnPath, setReturnPath] = useState<string | null>(null);
+  const telegramUser = useMemo(() => adapters.auth.detectTelegramUser(), [adapters]);
   const stateRef = useRef(state);
   const queueRef = useRef(Promise.resolve());
   const pendingRef = useRef(new Set<CommandName>());
@@ -153,9 +176,61 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
     return result;
   }, [commit]);
 
+  const startEmail = useCallback(async (email: string): Promise<StartEmailResult> => {
+    if (pendingRef.current.has('startEmail')) {
+      return pendingResult(stateRef.current);
+    }
+
+    pendingRef.current.add('startEmail');
+    setPending(Array.from(pendingRef.current));
+    try {
+      const result = await adapters.auth.startEmail(stateRef.current, email);
+      if (result.ok) setEmailChallenge(result.challenge);
+      return result;
+    } finally {
+      pendingRef.current.delete('startEmail');
+      setPending(Array.from(pendingRef.current));
+    }
+  }, [adapters]);
+
+  const verifyEmail = useCallback(async (code: string) => {
+    const result = await run(
+      'verifyEmail',
+      (current) => adapters.auth.verifyEmail(current, emailChallenge, code),
+    );
+    if (result.ok) setEmailChallenge(null);
+    return result;
+  }, [adapters, emailChallenge, run]);
+
+  const loginTelegram = useCallback(() => run(
+    'loginTelegram',
+    (current) => adapters.auth.loginTelegram(current, telegramUser),
+  ), [adapters, run, telegramUser]);
+
+  const logout = useCallback((): Promise<Result<AppStateV2>> => {
+    if (telegramUser) {
+      return Promise.resolve({
+        ok: true,
+        state: stateRef.current,
+        code: 'success',
+        messageKey: 'auth.telegram.success',
+      });
+    }
+    return run('logout', (current) => adapters.auth.logout(current));
+  }, [adapters, run, telegramUser]);
+
   const value = useMemo<AppContextValue>(() => ({
     state,
     pending,
+    emailChallenge,
+    returnPath,
+    telegramMiniApp: telegramUser !== null,
+    telegramUser,
+    setReturnPath,
+    startEmail,
+    verifyEmail,
+    loginTelegram,
+    logout,
     setTheme,
     setLocale,
     setPurchaseDraft,
@@ -191,12 +266,19 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
   }), [
     adapters,
     completeOnboarding,
+    emailChallenge,
+    loginTelegram,
+    logout,
     pending,
+    returnPath,
     run,
+    startEmail,
     setLocale,
     setPurchaseDraft,
     setTheme,
     state,
+    telegramUser,
+    verifyEmail,
   ]);
 
   return (

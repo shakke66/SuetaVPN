@@ -1,9 +1,19 @@
 import type { JSX } from 'react';
+import { HashRouter } from 'react-router';
+import type { LocalAdapters } from '../adapters/contracts';
+import { AppProvider } from './AppProvider';
+import { AppRoutes } from './routes';
 
-export function App(): JSX.Element {
+interface AppProps {
+  adapters?: LocalAdapters;
+}
+
+export function App({ adapters }: AppProps): JSX.Element {
   return (
-    <main>
-      <h1>SuetaVPN</h1>
-    </main>
+    <AppProvider adapters={adapters}>
+      <HashRouter>
+        <AppRoutes />
+      </HashRouter>
+    </AppProvider>
   );
 }

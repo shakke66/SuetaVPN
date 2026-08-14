@@ -53,6 +53,7 @@ export const ru = {
       pending: 'Открываем Telegram',
       miniApp: 'Вход через Telegram Mini App',
       success: 'Вход выполнен',
+      backendValidation: 'Будущий backend должен проверить данные Telegram перед подтверждением личности.',
     },
     email: {
       label: 'Электронная почта',
@@ -62,6 +63,7 @@ export const ru = {
       codePlaceholder: 'Шесть цифр',
       verify: 'Подтвердить код',
       change: 'Изменить почту',
+      success: 'Электронная почта подтверждена',
       localVerification: {
         title: 'Локальная проверка',
         description: 'Используйте этот код для входа в текущем браузере',
@@ -273,8 +275,8 @@ export const en = {
   accessibility: { skipToContent: 'Skip to content', closeDialog: 'Close dialog', openMenu: 'Open menu', closeMenu: 'Close menu', loading: 'Loading', currentPage: 'Current page', externalLink: 'Opens in a new tab' },
   auth: {
     title: 'Sign in to SuetaVPN', subtitle: 'Choose a convenient method', tabs: { login: 'Sign in', register: 'Create account' },
-    telegram: { title: 'With Telegram', continue: 'Continue with Telegram', pending: 'Opening Telegram', miniApp: 'Sign in with Telegram Mini App', success: 'Signed in' },
-    email: { label: 'Email', placeholder: 'name@example.com', continue: 'Get code', codeLabel: 'Verification code', codePlaceholder: 'Six digits', verify: 'Verify code', change: 'Change email', localVerification: { title: 'Local verification', description: 'Use this code to sign in in this browser', code: 'Code: {amount}' } },
+    telegram: { title: 'With Telegram', continue: 'Continue with Telegram', pending: 'Opening Telegram', miniApp: 'Sign in with Telegram Mini App', success: 'Signed in', backendValidation: 'A future backend must validate Telegram data before confirming identity.' },
+    email: { label: 'Email', placeholder: 'name@example.com', continue: 'Get code', codeLabel: 'Verification code', codePlaceholder: 'Six digits', verify: 'Verify code', change: 'Change email', success: 'Email verified', localVerification: { title: 'Local verification', description: 'Use this code to sign in in this browser', code: 'Code: {amount}' } },
     validation: { emailRequired: 'Enter your email', emailInvalid: 'Enter a valid address', codeRequired: 'Enter the code', codeInvalid: 'The code must contain six digits', codeWrong: 'Incorrect code', codeExpired: 'The code has expired' },
     actions: { logout: 'Sign out' }, accessibility: { loginMethods: 'Sign-in methods', verificationCode: 'Local verification code' },
   },
