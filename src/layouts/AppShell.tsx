@@ -75,6 +75,8 @@ export function AppShell(): JSX.Element {
   const localeLabelKey: MessageKey = nextLocale === 'ru'
     ? 'shell.language.switchToRussian'
     : 'shell.language.switchToEnglish';
+  const notificationsModal = notificationsOpen
+    && notificationOpenerRef.current?.dataset.notificationOpener === 'drawer';
 
   useLayoutEffect(() => {
     if (notificationsOpen) {
@@ -94,7 +96,12 @@ export function AppShell(): JSX.Element {
 
   return (
     <div className="app-shell">
-      <header className="app-header" data-testid="app-shell-header">
+      <header
+        aria-hidden={notificationsModal ? 'true' : undefined}
+        className="app-header"
+        data-testid="app-shell-header"
+        inert={notificationsModal}
+      >
         <div className="app-header__inner">
           <Brand compact />
           <nav aria-label={t('landing.header.navigation')} className="shell-nav shell-nav--desktop">
@@ -177,14 +184,25 @@ export function AppShell(): JSX.Element {
       />
 
       {telegramMiniApp ? (
-        <p className="mini-app-notice">{t('auth.telegram.backendValidation')}</p>
+        <p
+          aria-hidden={notificationsModal ? 'true' : undefined}
+          className="mini-app-notice"
+          inert={notificationsModal}
+        >
+          {t('auth.telegram.backendValidation')}
+        </p>
       ) : null}
 
-      <main className="route-viewport" id="main-content">
+      <main
+        aria-hidden={notificationsModal ? 'true' : undefined}
+        className="route-viewport"
+        id="main-content"
+        inert={notificationsModal}
+      >
         <RouteTransition>{outlet}</RouteTransition>
       </main>
 
-      <BottomNavigation items={BOTTOM_NAV_ITEMS} />
+      <BottomNavigation inert={notificationsModal} items={BOTTOM_NAV_ITEMS} />
 
       <Drawer
         active={!notificationsOpen}

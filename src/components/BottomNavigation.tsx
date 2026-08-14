@@ -11,10 +11,11 @@ export interface BottomNavigationItem {
 }
 
 interface BottomNavigationProps {
+  inert?: boolean;
   items: readonly BottomNavigationItem[];
 }
 
-export function BottomNavigation({ items }: BottomNavigationProps): JSX.Element {
+export function BottomNavigation({ inert = false, items }: BottomNavigationProps): JSX.Element {
   const { t } = useI18n();
   const { pathname } = useLocation();
   const normalizedPath = pathname === '/purchase' ? '/subscriptions' : pathname;
@@ -23,9 +24,11 @@ export function BottomNavigation({ items }: BottomNavigationProps): JSX.Element 
 
   return (
     <nav
+      aria-hidden={inert ? 'true' : undefined}
       aria-label={t('shell.bottomNav.label')}
       className="bottom-navigation"
       data-active-index={activeIndex}
+      inert={inert}
       style={style}
     >
       {items.map(({ icon, path, titleKey }) => (

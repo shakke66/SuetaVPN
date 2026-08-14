@@ -258,6 +258,81 @@ describe('persistent application shell', () => {
     expect(lastButton).toHaveFocus();
   });
 
+  it('wraps Tab and Shift+Tab inside drawer notification modal boundaries', async () => {
+    const user = userEvent.setup();
+    renderCabinet();
+
+    await user.click(await screen.findByRole('button', { name: 'Открыть меню' }));
+    const drawer = screen.getByRole('dialog', { name: 'Меню' });
+    await user.click(within(drawer).getByRole('button', { name: 'Открыть уведомления' }));
+
+    const popover = screen.getByRole('dialog', { name: 'Уведомления о тикетах' });
+    const firstButton = within(popover).getByRole('button', { name: 'Закрыть' });
+    const lastButton = within(popover).getByRole('button', { name: 'Прочитать все' });
+    expect(firstButton).toHaveFocus();
+
+    await user.tab({ shift: true });
+    expect(lastButton).toHaveFocus();
+
+    await user.tab();
+    expect(firstButton).toHaveFocus();
+  });
+
+  it('isolates shell regions for drawer notification modality and restores them before focus', async () => {
+    const user = userEvent.setup();
+    renderCabinet();
+
+    const header = await screen.findByTestId('app-shell-header');
+    const main = document.getElementById('main-content');
+    const bottomNavigation = screen.getByRole('navigation', { name: 'Основная навигация' });
+    await user.click(within(header).getByRole('button', { name: 'Открыть меню' }));
+    const drawer = screen.getByRole('dialog', { name: 'Меню' });
+    const drawerBackdrop = drawer.closest('.drawer-backdrop');
+    const drawerOpener = within(drawer).getByRole('button', { name: 'Открыть уведомления' });
+
+    await user.click(drawerOpener);
+
+    for (const region of [header, main, bottomNavigation, drawerBackdrop]) {
+      expect(region).toHaveAttribute('aria-hidden', 'true');
+      expect(region).toHaveAttribute('inert');
+    }
+
+    await user.keyboard('{Escape}');
+
+    for (const region of [header, main, bottomNavigation, drawerBackdrop]) {
+      expect(region).not.toHaveAttribute('aria-hidden');
+      expect(region).not.toHaveAttribute('inert');
+    }
+    expect(drawer).toHaveAttribute('aria-modal', 'true');
+    expect(drawerOpener).toHaveFocus();
+  });
+
+  it('keeps desktop notifications nonmodal and leaves the page interactive on outside close', async () => {
+    const user = userEvent.setup();
+    renderCabinet();
+
+    const header = await screen.findByTestId('app-shell-header');
+    const main = document.getElementById('main-content');
+    const bottomNavigation = screen.getByRole('navigation', { name: 'Основная навигация' });
+    const desktopOpener = within(header).getByRole('button', { name: 'Открыть уведомления' });
+
+    await user.click(desktopOpener);
+    expect(screen.getByRole('dialog', { name: 'Уведомления о тикетах' })).toHaveAttribute(
+      'aria-modal',
+      'false',
+    );
+    for (const region of [header, main, bottomNavigation]) {
+      expect(region).not.toHaveAttribute('aria-hidden');
+      expect(region).not.toHaveAttribute('inert');
+    }
+
+    if (!main) throw new Error('expected route viewport');
+    fireEvent.pointerDown(main);
+
+    expect(screen.queryByRole('dialog', { name: 'Уведомления о тикетах' })).not.toBeInTheDocument();
+    expect(desktopOpener).toHaveFocus();
+  });
+
   it('omits logout controls inside a Telegram Mini App', async () => {
     (window as TelegramWindow).Telegram = {
       WebApp: {

@@ -33,6 +33,20 @@ const DESKTOP_POPOVER_MAX_WIDTH = 390;
 const DESKTOP_POPOVER_EDGE = 16;
 const DESKTOP_POPOVER_GAP = 12;
 const DESKTOP_POPOVER_NARROW_GUTTER = 24;
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+function focusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (element) => element.getAttribute('aria-hidden') !== 'true' && !element.closest('[inert]'),
+  );
+}
 
 export function NotificationPopover({
   notifications,
@@ -103,13 +117,33 @@ export function NotificationPopover({
     };
   }, [mounted, open, openerKind, triggerRef]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open || !mounted) return;
     closeButtonRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         close();
+        return;
+      }
+      if (event.key !== 'Tab' || openerKind !== 'drawer' || !panelRef.current) return;
+
+      const focusable = focusableElements(panelRef.current);
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) {
+        event.preventDefault();
+        panelRef.current.focus();
+        return;
+      }
+
+      const activeElement = document.activeElement;
+      if (event.shiftKey && (activeElement === first || !panelRef.current.contains(activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (activeElement === last || !panelRef.current.contains(activeElement))) {
+        event.preventDefault();
+        first.focus();
       }
     };
     const onPointerDown = (event: PointerEvent) => {
@@ -123,7 +157,7 @@ export function NotificationPopover({
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('pointerdown', onPointerDown);
     };
-  }, [close, mounted, open, triggerRef]);
+  }, [close, mounted, open, openerKind, triggerRef]);
 
   if (!mounted) return null;
   return (
