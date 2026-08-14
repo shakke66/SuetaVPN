@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router';
 import type { MessageKey } from '../i18n/messages';
 import { useI18n } from '../i18n/I18nProvider';
@@ -25,7 +25,6 @@ export function AuthPage() {
     returnPath,
     startEmail,
     state,
-    telegramMiniApp,
     verifyEmail,
   } = useApp();
   const { t } = useI18n();
@@ -39,15 +38,6 @@ export function AuthPage() {
     const destination = returnPath ?? '/dashboard';
     navigate(destination, { replace: true });
   }, [navigate, returnPath]);
-
-  useEffect(() => {
-    if (!telegramMiniApp || state.session.active || pending.includes('loginTelegram')) return;
-    let active = true;
-    void loginTelegram().then((result) => {
-      if (active && result.ok) navigateAfterLogin();
-    });
-    return () => { active = false; };
-  }, [loginTelegram, navigateAfterLogin, pending, state.session.active, telegramMiniApp]);
 
   if (state.session.active) {
     return <Navigate to={returnPath ?? '/dashboard'} replace />;

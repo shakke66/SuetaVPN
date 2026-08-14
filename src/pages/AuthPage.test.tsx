@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { StrictMode } from 'react';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
 import { App } from '../app/App';
 import { STORAGE_KEY } from '../domain/migrations';
@@ -39,10 +40,12 @@ function renderApp({
   path = '/auth',
   delayMs = 0,
   now = () => new Date(NOW).toISOString(),
+  strictMode = false,
 }: {
   path?: string;
   delayMs?: number;
   now?: () => string;
+  strictMode?: boolean;
 } = {}) {
   setHash(path);
   const adapters = createLocalAdapters({
@@ -50,7 +53,8 @@ function renderApp({
     now,
     verificationCodeSource: () => VERIFICATION_CODE,
   });
-  return render(<App adapters={adapters} />);
+  const app = <App adapters={adapters} />;
+  return render(strictMode ? <StrictMode>{app}</StrictMode> : app);
 }
 
 beforeEach(() => {
@@ -217,6 +221,25 @@ describe('email authorization', () => {
 });
 
 describe('Telegram Mini App authorization', () => {
+  it('auto-authorizes on the public route without forcing navigation', async () => {
+    const stored = createInitialState();
+    stored.session = { active: false };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+    (window as TelegramWindow).Telegram = {
+      WebApp: {
+        initDataUnsafe: {
+          user: { id: 42, first_name: 'Mira', username: 'mira' },
+        },
+      },
+    };
+
+    renderApp({ path: '/', strictMode: true });
+
+    expect(await screen.findByRole('heading', { name: 'SuetaVPN' })).toBeInTheDocument();
+    await waitFor(() => expect(persistedState().session.active).toBe(true));
+    expect(window.location.hash).toBe('#/');
+  });
+
   it('auto-authorizes only initDataUnsafe.user, explains backend validation and omits logout', async () => {
     (window as TelegramWindow).Telegram = {
       WebApp: {

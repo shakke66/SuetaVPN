@@ -101,6 +101,7 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
   const stateRef = useRef(state);
   const queueRef = useRef(Promise.resolve());
   const pendingRef = useRef(new Set<CommandName>());
+  const miniAppLoginStartedRef = useRef(false);
   const [pending, setPending] = useState<CommandName[]>([]);
 
   const commit = useCallback((nextState: AppStateV2) => {
@@ -206,6 +207,12 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
     'loginTelegram',
     (current) => adapters.auth.loginTelegram(current, telegramUser),
   ), [adapters, run, telegramUser]);
+
+  useEffect(() => {
+    if (!telegramUser || state.session.active || miniAppLoginStartedRef.current) return;
+    miniAppLoginStartedRef.current = true;
+    void loginTelegram();
+  }, [loginTelegram, state.session.active, telegramUser]);
 
   const logout = useCallback((): Promise<Result<AppStateV2>> => {
     if (telegramUser) {
