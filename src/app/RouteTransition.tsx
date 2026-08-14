@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type JSX, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useState, type JSX, type ReactNode } from 'react';
 import { useLocation } from 'react-router';
 
 export const ROUTE_TRANSITION_MS = 260;
@@ -18,12 +18,16 @@ interface RouteTransitionProps {
 }
 
 interface RouteSnapshot {
+  key: string;
   node: ReactNode;
   pathname: string;
 }
 
-interface OutgoingSnapshot extends RouteSnapshot {
+interface TransitionState {
+  current: RouteSnapshot;
   direction: Direction;
+  generation: number;
+  outgoing: RouteSnapshot | null;
 }
 
 function routeDirection(previousPath: string, nextPath: string): Direction {
@@ -53,49 +57,72 @@ function useReducedMotion(): boolean {
 }
 
 export function RouteTransition({ children }: RouteTransitionProps): JSX.Element {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const reducedMotion = useReducedMotion();
-  const previousRef = useRef<RouteSnapshot>({ node: children, pathname });
-  const [outgoing, setOutgoing] = useState<OutgoingSnapshot | null>(null);
-  const [direction, setDirection] = useState<Direction>('neutral');
+  const snapshotKey = `${location.key}:${pathname}`;
+  const [transition, setTransition] = useState<TransitionState>(() => ({
+    current: { key: snapshotKey, node: children, pathname },
+    direction: 'neutral',
+    generation: 0,
+    outgoing: null,
+  }));
 
   useLayoutEffect(() => {
-    const previous = previousRef.current;
-    if (previous.pathname !== pathname) {
-      const nextDirection = routeDirection(previous.pathname, pathname);
-      setDirection(nextDirection);
-      setOutgoing(reducedMotion ? null : { ...previous, direction: nextDirection });
-    } else if (reducedMotion) {
-      setOutgoing(null);
-    }
-    previousRef.current = { node: children, pathname };
-  }, [children, pathname, reducedMotion]);
+    setTransition((previous) => {
+      if (previous.current.key === snapshotKey) {
+        if (previous.current.node === children && (!reducedMotion || !previous.outgoing)) {
+          return previous;
+        }
+        return {
+          ...previous,
+          current: { ...previous.current, node: children },
+          outgoing: reducedMotion ? null : previous.outgoing,
+        };
+      }
+
+      const direction = routeDirection(previous.current.pathname, pathname);
+      return {
+        current: { key: snapshotKey, node: children, pathname },
+        direction,
+        generation: previous.generation + 1,
+        outgoing: reducedMotion ? null : previous.current,
+      };
+    });
+  }, [children, pathname, reducedMotion, snapshotKey]);
 
   useEffect(() => {
-    if (!outgoing) return;
-    const timeout = window.setTimeout(() => setOutgoing(null), ROUTE_TRANSITION_MS);
+    if (!transition.outgoing) return;
+    const generation = transition.generation;
+    const timeout = window.setTimeout(() => {
+      setTransition((current) => (
+        current.generation === generation ? { ...current, outgoing: null } : current
+      ));
+    }, ROUTE_TRANSITION_MS);
     return () => window.clearTimeout(timeout);
-  }, [outgoing]);
+  }, [transition.generation, transition.outgoing]);
 
   return (
     <div className="route-transition">
-      {outgoing ? (
+      {transition.outgoing ? (
         <div
+          key={transition.outgoing.key}
           aria-hidden="true"
           className="route-layer route-layer--outgoing"
-          data-direction={outgoing.direction}
+          data-direction={transition.direction}
           data-route-layer="outgoing"
           inert
         >
-          {outgoing.node}
+          {transition.outgoing.node}
         </div>
       ) : null}
       <div
+        key={transition.current.key}
         className="route-layer route-layer--incoming"
-        data-direction={direction}
-        data-route-layer={outgoing ? 'incoming' : 'current'}
+        data-direction={transition.direction}
+        data-route-layer={transition.outgoing ? 'incoming' : 'current'}
       >
-        {children}
+        {transition.current.node}
       </div>
     </div>
   );

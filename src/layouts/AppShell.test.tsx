@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
 import { App } from '../app/App';
@@ -135,6 +135,57 @@ describe('persistent application shell', () => {
 
     expect(screen.queryByRole('dialog', { name: 'Меню' })).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
+  });
+
+  it('cycles focus in both directions inside the modal drawer', async () => {
+    const user = userEvent.setup();
+    renderCabinet();
+
+    const trigger = await screen.findByRole('button', { name: 'Открыть меню' });
+    await user.click(trigger);
+    const drawer = screen.getByRole('dialog', { name: 'Меню' });
+    const closeButton = within(drawer).getByRole('button', { name: 'Закрыть меню' });
+    const lastButton = within(drawer).getByRole('button', { name: 'Выйти' });
+    expect(closeButton).toHaveFocus();
+
+    await user.tab({ shift: true });
+    expect(lastButton).toHaveFocus();
+
+    await user.tab();
+    expect(closeButton).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(trigger).toHaveFocus();
+  });
+
+  it('returns ticket popover focus to the actual drawer opener on Escape and outside click', async () => {
+    const user = userEvent.setup();
+    renderCabinet();
+
+    const header = await screen.findByTestId('app-shell-header');
+    const desktopOpener = within(header).getByRole('button', { name: 'Открыть уведомления' });
+
+    await user.click(within(header).getByRole('button', { name: 'Открыть меню' }));
+    const drawer = screen.getByRole('dialog', { name: 'Меню' });
+    const drawerOpener = within(drawer).getByRole('button', { name: 'Открыть уведомления' });
+
+    await user.click(drawerOpener);
+    expect(screen.getByRole('dialog', { name: 'Уведомления о тикетах' })).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+
+    expect(screen.getByRole('dialog', { name: 'Меню' })).toBeInTheDocument();
+    expect(drawerOpener).toHaveFocus();
+    expect(desktopOpener).not.toHaveFocus();
+
+    await user.click(drawerOpener);
+    expect(screen.getByRole('dialog', { name: 'Уведомления о тикетах' })).toBeInTheDocument();
+    fireEvent.pointerDown(header);
+
+    expect(screen.queryByRole('dialog', { name: 'Уведомления о тикетах' })).not.toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Меню' })).toBeInTheDocument();
+    expect(drawerOpener).toHaveFocus();
+    expect(desktopOpener.closest('.shell-desktop-only')).not.toBeNull();
+    expect(drawerOpener).toHaveAttribute('data-notification-opener', 'drawer');
   });
 
   it('omits logout controls inside a Telegram Mini App', async () => {

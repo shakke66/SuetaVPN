@@ -4,16 +4,39 @@ import { Button } from './Button';
 import { Icon } from './Icon';
 
 interface DrawerProps {
+  active?: boolean;
   children: ReactNode;
   open: boolean;
   onClose: () => void;
   returnFocusRef: RefObject<HTMLButtonElement | null>;
 }
 
-export function Drawer({ children, open, onClose, returnFocusRef }: DrawerProps): JSX.Element | null {
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+function focusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (element) => element.getAttribute('aria-hidden') !== 'true' && !element.closest('[inert]'),
+  );
+}
+
+export function Drawer({
+  active = true,
+  children,
+  open,
+  onClose,
+  returnFocusRef,
+}: DrawerProps): JSX.Element | null {
   const { t } = useI18n();
   const dialogRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const openedRef = useRef(false);
   const [mounted, setMounted] = useState(open);
   const close = useCallback(() => {
     onClose();
@@ -25,17 +48,47 @@ export function Drawer({ children, open, onClose, returnFocusRef }: DrawerProps)
   }, [open]);
 
   useEffect(() => {
-    if (!open || !mounted) return;
-    closeButtonRef.current?.focus();
+    if (!open) {
+      openedRef.current = false;
+      return;
+    }
+    if (mounted && !openedRef.current) {
+      openedRef.current = true;
+      closeButtonRef.current?.focus();
+    }
+  }, [mounted, open]);
+
+  useEffect(() => {
+    if (!active || !open || !mounted) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         close();
+        return;
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+
+      const focusable = focusableElements(dialogRef.current);
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) {
+        event.preventDefault();
+        dialogRef.current.focus();
+        return;
+      }
+
+      const activeElement = document.activeElement;
+      if (event.shiftKey && (activeElement === first || !dialogRef.current.contains(activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (activeElement === last || !dialogRef.current.contains(activeElement))) {
+        event.preventDefault();
+        first.focus();
       }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [close, mounted, open]);
+  }, [active, close, mounted, open]);
 
   if (!mounted) return null;
   return (
@@ -48,7 +101,7 @@ export function Drawer({ children, open, onClose, returnFocusRef }: DrawerProps)
         if (!open) setMounted(false);
       }}
       onPointerDown={(event) => {
-        if (open && event.target === event.currentTarget) close();
+        if (active && open && event.target === event.currentTarget) close();
       }}
     >
       <aside

@@ -164,10 +164,10 @@
 }
 
 .notification-popover {
-  position: absolute;
-  top: calc(100% + var(--space-3));
-  right: 0;
-  z-index: 45;
+  position: fixed;
+  top: calc(var(--header-height) + var(--space-3));
+  right: var(--space-4);
+  z-index: 70;
   width: min(390px, calc(100vw - (var(--space-6) * 2)));
   overflow: hidden;
   border: 1px solid var(--color-border);

@@ -60,7 +60,7 @@ export function AppShell(): JSX.Element {
   const navigate = useNavigate();
   const outlet = useOutlet();
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
-  const notificationTriggerRef = useRef<HTMLButtonElement>(null);
+  const notificationOpenerRef = useRef<HTMLButtonElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = state.notifications.filter(
@@ -89,7 +89,7 @@ export function AppShell(): JSX.Element {
           <nav aria-label={t('landing.header.navigation')} className="shell-nav shell-nav--desktop">
             {NAV_ITEMS.map((item) => <ShellNavLink key={item.path} {...item} />)}
           </nav>
-          <div className="app-header__utilities">
+          <div className="app-header__utilities shell-desktop-only">
             <Button
               aria-label={t(themeLabelKey)}
               iconOnly
@@ -100,11 +100,14 @@ export function AppShell(): JSX.Element {
             </Button>
             <div className="notification-anchor">
               <Button
-                ref={notificationTriggerRef}
                 aria-expanded={notificationsOpen}
                 aria-label={t('shell.notifications.open')}
+                data-notification-opener="desktop"
                 iconOnly
-                onClick={() => setNotificationsOpen((current) => !current)}
+                onClick={(event) => {
+                  notificationOpenerRef.current = event.currentTarget;
+                  setNotificationsOpen((current) => !current);
+                }}
                 variant="utility"
               >
                 <Icon name="bell" />
@@ -117,15 +120,6 @@ export function AppShell(): JSX.Element {
                   </span>
                 ) : null}
               </Button>
-              <NotificationPopover
-                notifications={state.notifications}
-                onClose={() => setNotificationsOpen(false)}
-                onMarkAllRead={markAllNotificationsRead}
-                onMarkRead={markNotificationRead}
-                open={notificationsOpen}
-                tickets={state.tickets}
-                triggerRef={notificationTriggerRef}
-              />
             </div>
             <Button
               aria-label={t(localeLabelKey)}
@@ -161,6 +155,16 @@ export function AppShell(): JSX.Element {
         </div>
       </header>
 
+      <NotificationPopover
+        notifications={state.notifications}
+        onClose={() => setNotificationsOpen(false)}
+        onMarkAllRead={markAllNotificationsRead}
+        onMarkRead={markNotificationRead}
+        open={notificationsOpen}
+        tickets={state.tickets}
+        triggerRef={notificationOpenerRef}
+      />
+
       {telegramMiniApp ? (
         <p className="mini-app-notice">{t('auth.telegram.backendValidation')}</p>
       ) : null}
@@ -172,6 +176,7 @@ export function AppShell(): JSX.Element {
       <BottomNavigation items={BOTTOM_NAV_ITEMS} />
 
       <Drawer
+        active={!notificationsOpen}
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
         returnFocusRef={menuTriggerRef}
@@ -198,8 +203,10 @@ export function AppShell(): JSX.Element {
         </nav>
         <div className="drawer__utilities">
           <Button
-            onClick={() => {
-              setDrawerOpen(false);
+            aria-expanded={notificationsOpen}
+            data-notification-opener="drawer"
+            onClick={(event) => {
+              notificationOpenerRef.current = event.currentTarget;
               setNotificationsOpen(true);
             }}
             variant="utility"

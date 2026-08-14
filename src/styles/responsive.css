@@ -4,18 +4,14 @@
   }
 
   .shell-nav--desktop,
-  .app-header__utilities > .button,
+  .shell-desktop-only,
   .profile-control {
     display: none;
   }
 
-  .app-header__utilities {
-    margin-left: auto;
-  }
-
   .app-header__menu {
     display: inline-flex;
-    margin-left: 0;
+    margin-left: auto;
   }
 
   .route-viewport {

@@ -57,7 +57,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.runOnlyPendingTimers();
+  act(() => vi.runOnlyPendingTimers());
   vi.useRealTimers();
   Reflect.deleteProperty(window, 'matchMedia');
 });
@@ -100,6 +100,46 @@ describe('RouteTransition', () => {
 
     expect(screen.queryByTestId('dashboard-screen')).not.toBeInTheDocument();
     expect(screen.getByTestId('balance-screen')).toBeInTheDocument();
+    expect(screen.getAllByTestId(/-screen$/)).toHaveLength(1);
+  });
+
+  it('preserves the destination HTMLElement when its incoming layer becomes current', () => {
+    renderTransition();
+
+    const source = screen.getByTestId('dashboard-screen');
+    fireEvent.click(screen.getByRole('button', { name: 'balance' }));
+    const destination = screen.getByTestId('balance-screen');
+    expect(destination).not.toBe(source);
+
+    act(() => vi.advanceTimersByTime(260));
+
+    expect(screen.getByTestId('balance-screen')).toBe(destination);
+    expect(layerFor(destination)).toHaveAttribute('data-route-layer', 'current');
+  });
+
+  it('retires only the latest outgoing layer after rapid navigation', () => {
+    renderTransition();
+
+    fireEvent.click(screen.getByRole('button', { name: 'balance' }));
+    const intermediateDestination = screen.getByTestId('balance-screen');
+    act(() => vi.advanceTimersByTime(200));
+    fireEvent.click(screen.getByRole('button', { name: 'subscriptions' }));
+
+    const latestDestination = screen.getByTestId('subscriptions-screen');
+    expect(latestDestination).not.toBe(intermediateDestination);
+    expect(screen.queryByTestId('dashboard-screen')).not.toBeInTheDocument();
+    expect(screen.getByTestId('balance-screen')).toBe(intermediateDestination);
+    expect(screen.getAllByTestId(/-screen$/)).toHaveLength(2);
+
+    act(() => vi.advanceTimersByTime(60));
+    expect(screen.getAllByTestId(/-screen$/)).toHaveLength(2);
+
+    act(() => vi.advanceTimersByTime(199));
+    expect(screen.getAllByTestId(/-screen$/)).toHaveLength(2);
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByTestId('balance-screen')).not.toBeInTheDocument();
+    expect(screen.getByTestId('subscriptions-screen')).toBe(latestDestination);
     expect(screen.getAllByTestId(/-screen$/)).toHaveLength(1);
   });
 });
