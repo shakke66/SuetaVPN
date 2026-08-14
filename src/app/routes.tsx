@@ -1,4 +1,5 @@
-import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router';
+import { Navigate, Route, Routes } from 'react-router';
+import { AppShell } from '../layouts/AppShell';
 import { PublicLayout } from '../layouts/PublicLayout';
 import { AuthPage } from '../pages/AuthPage';
 import { useI18n } from '../i18n/I18nProvider';
@@ -29,31 +30,9 @@ function LandingPage() {
 function CabinetPage({ titleKey }: { titleKey: MessageKey }) {
   const { t } = useI18n();
   return (
-    <main>
+    <section className="page-surface">
       <h1>{t(titleKey)}</h1>
-    </main>
-  );
-}
-
-function ProtectedLayout() {
-  const { logout, setReturnPath, telegramMiniApp } = useApp();
-  const { t } = useI18n();
-  const navigate = useNavigate();
-
-  const signOut = async () => {
-    setReturnPath(null);
-    navigate('/', { replace: true });
-    await logout();
-  };
-
-  return (
-    <>
-      {telegramMiniApp ? <p>{t('auth.telegram.backendValidation')}</p> : null}
-      {!telegramMiniApp ? (
-        <button type="button" onClick={() => void signOut()}>{t('auth.actions.logout')}</button>
-      ) : null}
-      <Outlet />
-    </>
+    </section>
   );
 }
 
@@ -71,7 +50,7 @@ export function AppRoutes() {
       <Route path="auth" element={<AuthPage />} />
       <Route path="welcome" element={<Navigate to="/" replace />} />
       <Route element={<ProtectedRoute />}>
-        <Route element={<ProtectedLayout />}>
+        <Route element={<AppShell />}>
           {PROTECTED_ROUTES.map(({ path, titleKey }) => (
             <Route key={path} path={path} element={<CabinetPage titleKey={titleKey} />} />
           ))}

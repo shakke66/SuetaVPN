@@ -104,7 +104,7 @@ export const ru = {
       title: 'Уведомления',
       open: 'Открыть уведомления',
       markAllRead: 'Прочитать все',
-      empty: 'Новых уведомлений нет',
+      empty: 'Нет уведомлений',
       unreadCount: 'Непрочитанных уведомлений: {amount}',
     },
     drawer: { title: 'Меню', open: 'Открыть меню', close: 'Закрыть меню' },
@@ -224,7 +224,7 @@ export const ru = {
     reply: { success: 'Ответ отправлен', messageRequired: 'Введите сообщение', notFound: 'Обращение не найдено' },
   },
   ticketNotifications: {
-    title: 'Уведомления поддержки',
+    title: 'Уведомления о тикетах',
     ticketCreated: 'Обращение «{name}» создано',
     ticketReplied: 'Получен ответ по обращению «{name}»',
     openTicket: 'Открыть обращение',
@@ -283,7 +283,7 @@ export const en = {
   navigation: { dashboard: 'Dashboard', subscriptions: 'Subscriptions', balance: 'Balance', referrals: 'Referrals', support: 'Support', info: 'Information', profile: 'Profile', purchase: 'Purchase subscription' },
   shell: {
     theme: { switchToLight: 'Switch to light theme', switchToDark: 'Switch to dark theme' }, language: { switchToRussian: 'Switch to Russian', switchToEnglish: 'Switch to English' },
-    notifications: { title: 'Notifications', open: 'Open notifications', markAllRead: 'Mark all as read', empty: 'No new notifications', unreadCount: '{amount} unread notifications' },
+    notifications: { title: 'Notifications', open: 'Open notifications', markAllRead: 'Mark all as read', empty: 'No notifications', unreadCount: '{amount} unread notifications' },
     drawer: { title: 'Menu', open: 'Open menu', close: 'Close menu' }, bottomNav: { label: 'Primary navigation', more: 'More' },
   },
   landing: {
@@ -336,7 +336,7 @@ export const en = {
     reply: { messageLabel: 'Reply', messagePlaceholder: 'Enter your reply', submit: 'Send reply', success: 'Reply sent', messageRequired: 'Enter a message', notFound: 'Ticket not found' }, accessibility: { ticketList: 'Ticket list', conversation: 'Ticket conversation' },
   },
   tickets: { create: { success: 'Ticket created', subjectRequired: 'Enter a subject', messageRequired: 'Enter a message' }, reply: { success: 'Reply sent', messageRequired: 'Enter a message', notFound: 'Ticket not found' } },
-  ticketNotifications: { title: 'Support notifications', ticketCreated: 'Ticket “{name}” created', ticketReplied: 'New reply in “{name}”', openTicket: 'Open ticket', markRead: 'Mark as read' },
+  ticketNotifications: { title: 'Ticket notifications', ticketCreated: 'Ticket “{name}” created', ticketReplied: 'New reply in “{name}”', openTicket: 'Open ticket', markRead: 'Mark as read' },
   notifications: { markRead: { success: 'Notification marked as read', notFound: 'Notification not found' }, markAllRead: { success: 'All notifications marked as read' } },
   info: {
     title: 'Information', tabs: { faq: 'FAQ', agreement: 'User agreement', privacy: 'Privacy policy' },

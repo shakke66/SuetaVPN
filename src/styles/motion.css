@@ -1,0 +1,134 @@
+.button,
+.profile-control,
+.shell-nav__link,
+.bottom-navigation::before,
+.bottom-navigation__item {
+  transition:
+    color var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) var(--motion-ease),
+    transform var(--motion-route) var(--motion-ease);
+}
+
+.drawer-backdrop[data-state='open'] {
+  animation: overlay-fade-in var(--motion-overlay) var(--motion-ease) both;
+}
+
+.drawer-backdrop[data-state='open'] .drawer {
+  animation: drawer-enter var(--motion-overlay) var(--motion-ease) both;
+}
+
+.drawer-backdrop[data-state='closing'] {
+  animation: overlay-fade-out var(--motion-overlay) var(--motion-ease) both;
+  pointer-events: none;
+}
+
+.drawer-backdrop[data-state='closing'] .drawer {
+  animation: drawer-leave var(--motion-overlay) var(--motion-ease) both;
+}
+
+.notification-popover[data-state='open'] {
+  animation: popover-enter var(--motion-overlay) var(--motion-ease) both;
+  transform-origin: top right;
+}
+
+.notification-popover[data-state='closing'] {
+  animation: popover-leave var(--motion-overlay) var(--motion-ease) both;
+  pointer-events: none;
+  transform-origin: top right;
+}
+
+.route-layer--incoming[data-route-layer='incoming'][data-direction='forward'] {
+  animation: route-enter-forward var(--motion-route) var(--motion-ease) both;
+}
+
+.route-layer--outgoing[data-direction='forward'] {
+  animation: route-leave-forward var(--motion-route) var(--motion-ease) both;
+}
+
+.route-layer--incoming[data-route-layer='incoming'][data-direction='backward'] {
+  animation: route-enter-backward var(--motion-route) var(--motion-ease) both;
+}
+
+.route-layer--outgoing[data-direction='backward'] {
+  animation: route-leave-backward var(--motion-route) var(--motion-ease) both;
+}
+
+.route-layer--incoming[data-route-layer='incoming'][data-direction='neutral'] {
+  animation: route-fade-in var(--motion-route) var(--motion-ease) both;
+}
+
+.route-layer--outgoing[data-direction='neutral'] {
+  animation: route-fade-out var(--motion-route) var(--motion-ease) both;
+}
+
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes overlay-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes drawer-enter {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes drawer-leave {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(24px); opacity: 0; }
+}
+
+@keyframes popover-enter {
+  from { transform: translateY(-8px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes popover-leave {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to { transform: translateY(-8px) scale(0.98); opacity: 0; }
+}
+
+@keyframes route-enter-forward {
+  from { transform: translateX(36px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes route-leave-forward {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-24px); opacity: 0; }
+}
+
+@keyframes route-enter-backward {
+  from { transform: translateX(-36px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes route-leave-backward {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(24px); opacity: 0; }
+}
+
+@keyframes route-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes route-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}
