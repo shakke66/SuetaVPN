@@ -4,5 +4,5 @@ import { App } from './App';
 it('renders the SuetaVPN application root', () => {
   render(<App />);
 
-  expect(screen.getByRole('heading', { name: 'SuetaVPN' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Интернет на вашей стороне' })).toBeInTheDocument();
 });

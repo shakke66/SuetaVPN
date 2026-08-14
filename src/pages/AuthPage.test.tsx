@@ -85,7 +85,7 @@ describe('protected hash routing', () => {
   });
 
   it.each([
-    [false, 'SuetaVPN', '#/'],
+    [false, 'Интернет на вашей стороне', '#/'],
     [true, 'Главная', '#/dashboard'],
   ])(
     'redirects an unknown route according to session.active=%s',
@@ -119,7 +119,7 @@ describe('protected hash routing', () => {
   it('redirects the legacy welcome URL to the public landing route', async () => {
     renderApp({ path: '/welcome' });
 
-    expect(await screen.findByRole('heading', { name: 'SuetaVPN' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Интернет на вашей стороне' })).toBeInTheDocument();
     await waitFor(() => expect(window.location.hash).toBe('#/'));
   });
 
@@ -131,7 +131,7 @@ describe('protected hash routing', () => {
     expect(await screen.findByRole('heading', { name: 'Главная' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Выйти' }));
 
-    expect(await screen.findByRole('heading', { name: 'SuetaVPN' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Интернет на вашей стороне' })).toBeInTheDocument();
     expect(window.location.hash).toBe('#/');
     await waitFor(() => expect(persistedState().session.active).toBe(false));
 
@@ -235,7 +235,7 @@ describe('Telegram Mini App authorization', () => {
 
     renderApp({ path: '/', strictMode: true });
 
-    expect(await screen.findByRole('heading', { name: 'SuetaVPN' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Интернет на вашей стороне' })).toBeInTheDocument();
     await waitFor(() => expect(persistedState().session.active).toBe(true));
     expect(window.location.hash).toBe('#/');
   });

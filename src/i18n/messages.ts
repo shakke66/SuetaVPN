@@ -131,7 +131,7 @@ export const ru = {
   },
   tariffs: {
     base: { name: 'БАЗА', description: 'Уверенный доступ на каждый день', traffic: 'Безлимитный трафик', devices: 'До {amount} устройств', locations: '{amount} локаций', speed: 'До {amount} Гбит/с' },
-    elite: { name: 'ЭЛИТА', description: 'Больше возможностей для сложных маршрутов', traffic: '40 ГБ обходного трафика', devices: 'До {amount} устройств', locations: '{amount} локаций', speed: 'До {amount} Гбит/с' },
+    elite: { name: 'ЭЛИТА', description: 'Больше возможностей для сложных маршрутов', traffic: '{amount} ГБ обходного трафика', devices: 'До {amount} устройств', locations: '{amount} локаций', speed: 'До {amount} Гбит/с' },
     period: { one: '1 месяц', three: '3 месяца', six: '6 месяцев', twelve: '12 месяцев' },
     perMonth: '{amount} в месяц',
   },
@@ -301,7 +301,7 @@ export const en = {
   },
   tariffs: {
     base: { name: 'BASE', description: 'Reliable everyday access', traffic: 'Unlimited traffic', devices: 'Up to {amount} devices', locations: '{amount} locations', speed: 'Up to {amount} Gbps' },
-    elite: { name: 'ELITE', description: 'More options for complex routes', traffic: '40 GB bypass traffic', devices: 'Up to {amount} devices', locations: '{amount} locations', speed: 'Up to {amount} Gbps' },
+    elite: { name: 'ELITE', description: 'More options for complex routes', traffic: '{amount} GB bypass traffic', devices: 'Up to {amount} devices', locations: '{amount} locations', speed: 'Up to {amount} Gbps' },
     period: { one: '1 month', three: '3 months', six: '6 months', twelve: '12 months' }, perMonth: '{amount} per month',
   },
   dashboard: {
