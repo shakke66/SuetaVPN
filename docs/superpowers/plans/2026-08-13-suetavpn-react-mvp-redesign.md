@@ -522,7 +522,7 @@ Expected: PASS. If any behavior only exists in the legacy files, add replacement
 
 - [ ] **Step 3: Remove legacy runtime files and run secret/path/copy scans**
 
-Run searches for `DEMO|демо|демонстрац`, `C:\Users\Redmi`, old tariff ids/names, Canvas/particle/background animation, and obvious secret patterns. User-facing source must have zero banned-copy matches; test fixtures/migration code may mention legacy ids only where required.
+Run searches for `DEMO|демо|демонстрац`, legacy absolute user-profile paths, old tariff ids/names, Canvas/particle/background animation, and obvious secret patterns. User-facing source must have zero banned-copy matches; test fixtures/migration code may mention legacy ids only where required.
 
 - [ ] **Step 4: Perform local Browser QA at the required widths**
 
