@@ -1,0 +1,193 @@
+.support-page,
+.info-page,
+.profile-page {
+  display: grid;
+  gap: clamp(var(--space-5), 3vw, var(--space-8));
+  margin: 0 auto;
+  max-width: var(--content-max);
+  padding: clamp(var(--space-5), 4vw, var(--space-10));
+  width: 100%;
+}
+
+.support-page__heading {
+  align-items: center;
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+
+.support-layout {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1.5fr);
+}
+
+.ticket-list-panel,
+.ticket-detail,
+.profile-card,
+.info-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.ticket-list-panel {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.ticket-list-panel h2,
+.ticket-detail h2,
+.info-panel h2,
+.profile-card h2 {
+  margin-bottom: 0;
+}
+
+.ticket-list,
+.ticket-conversation {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ticket-list__button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  min-height: var(--control-min);
+  padding: var(--space-3);
+  text-align: left;
+  width: 100%;
+}
+
+.ticket-list__button:hover,
+.ticket-list__button[aria-pressed='true'] {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border);
+}
+
+.ticket-list__button span,
+.ticket-list__button time,
+.ticket-detail time,
+.ticket-message time,
+.ticket-detail__header p,
+.ticket-list__empty,
+.ticket-detail__empty {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.ticket-detail {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: clamp(var(--space-5), 3vw, var(--space-8));
+}
+
+.ticket-detail__header {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+}
+
+.ticket-detail__header p {
+  margin: var(--space-1) 0 0;
+}
+
+.ticket-attachment {
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-control);
+  margin: 0;
+  padding: var(--space-3);
+}
+
+.ticket-conversation {
+  align-content: start;
+  min-height: 180px;
+}
+
+.ticket-message {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  max-width: min(90%, 620px);
+  padding: var(--space-3) var(--space-4);
+}
+
+.ticket-message--user {
+  background: var(--color-surface-raised);
+  justify-self: end;
+}
+
+.ticket-message p {
+  margin: var(--space-2) 0;
+}
+
+.ticket-create-form,
+.ticket-reply {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.ticket-create-form input,
+.ticket-create-form textarea,
+.ticket-reply textarea {
+  background: var(--color-field);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  min-height: var(--control-min);
+  padding: var(--space-3);
+}
+
+.ticket-create-form textarea,
+.ticket-reply textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.field-error {
+  color: var(--color-danger);
+  margin: 0;
+}
+
+.toast-region {
+  bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
+  display: grid;
+  gap: var(--space-2);
+  pointer-events: none;
+  position: fixed;
+  right: var(--space-5);
+  z-index: 60;
+}
+
+.toast {
+  align-items: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-overlay);
+  display: flex;
+  gap: var(--space-3);
+  max-width: min(380px, calc(100vw - var(--space-10)));
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  pointer-events: auto;
+}
+
+.toast--error { border-color: var(--color-danger); }
+.toast--success { border-color: var(--color-positive); }
+
+@media (max-width: 767px) {
+  .support-layout { grid-template-columns: 1fr; }
+  .ticket-detail__header { flex-direction: column; }
+  .toast-region { left: var(--space-3); right: var(--space-3); }
+  .toast { max-width: none; }
+}

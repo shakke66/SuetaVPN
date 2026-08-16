@@ -215,6 +215,7 @@ export function NotificationPopover({
                     close();
                   }}
                   to="/support"
+                  state={{ ticketId: notification.ticketId }}
                 >
                   <span>{t(messageKey, { name: subject })}</span>
                   <time dateTime={notification.createdAt}>{formatDate(notification.createdAt)}</time>

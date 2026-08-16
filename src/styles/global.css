@@ -4,6 +4,9 @@
 @import './wallet.css';
 @import './motion.css';
 @import './responsive.css';
+@import './support.css';
+@import './info.css';
+@import './onboarding.css';
 
 *,
 *::before,

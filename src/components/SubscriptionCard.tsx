@@ -14,7 +14,7 @@ export function SubscriptionCard({ actions, subscription, title }: SubscriptionC
 
   if (!subscription) {
     return (
-      <article className="subscription-card">
+      <article className="subscription-card" data-onboarding-target="subscription">
         <h2>{title}</h2>
         <p className="subscription-card__empty">{t('subscriptions.empty')}</p>
         {actions ? <div className="subscription-card__actions">{actions}</div> : null}
@@ -32,7 +32,7 @@ export function SubscriptionCard({ actions, subscription, title }: SubscriptionC
     </>;
 
   return (
-    <article className="subscription-card">
+    <article className="subscription-card" data-onboarding-target="subscription">
       <div className="subscription-card__heading">
         <div>
           <h2>{title}</h2>

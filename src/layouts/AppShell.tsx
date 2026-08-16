@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type JSX } from 'react';
-import { NavLink, useNavigate, useOutlet } from 'react-router';
+import { NavLink, useLocation, useNavigate, useOutlet } from 'react-router';
 import { RouteTransition } from '../app/RouteTransition';
 import { useApp } from '../app/AppProvider';
 import { BottomNavigation, type BottomNavigationItem } from '../components/BottomNavigation';
@@ -8,6 +8,7 @@ import { Button } from '../components/Button';
 import { Drawer } from '../components/Drawer';
 import { Icon, type IconName } from '../components/Icon';
 import { NotificationPopover } from '../components/NotificationPopover';
+import { Onboarding } from '../components/Onboarding';
 import type { MessageKey } from '../i18n/messages';
 import { useI18n } from '../i18n/I18nProvider';
 
@@ -49,6 +50,7 @@ function ShellNavLink({
 export function AppShell(): JSX.Element {
   const {
     logout,
+    completeOnboarding,
     markAllNotificationsRead,
     markNotificationRead,
     setReturnPath,
@@ -57,6 +59,7 @@ export function AppShell(): JSX.Element {
     telegramMiniApp,
   } = useApp();
   const { locale, setLocale, t } = useI18n();
+  const location = useLocation();
   const navigate = useNavigate();
   const outlet = useOutlet();
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
@@ -77,6 +80,7 @@ export function AppShell(): JSX.Element {
     : 'shell.language.switchToEnglish';
   const notificationsModal = notificationsOpen
     && notificationOpenerRef.current?.dataset.notificationOpener === 'drawer';
+  const profileRoute = location.pathname === '/profile';
 
   useLayoutEffect(() => {
     if (notificationsOpen) {
@@ -104,7 +108,7 @@ export function AppShell(): JSX.Element {
       >
         <div className="app-header__inner">
           <Brand compact />
-          <nav aria-label={t('landing.header.navigation')} className="shell-nav shell-nav--desktop">
+          <nav aria-label={t('landing.header.navigation')} className="shell-nav shell-nav--desktop" data-onboarding-target="navigation">
             {NAV_ITEMS.map((item) => <ShellNavLink key={item.path} {...item} />)}
           </nav>
           <div className="app-header__utilities shell-desktop-only">
@@ -121,6 +125,7 @@ export function AppShell(): JSX.Element {
                 aria-expanded={notificationsOpen}
                 aria-label={t('shell.notifications.open')}
                 data-notification-opener="desktop"
+                data-onboarding-target="notifications"
                 iconOnly
                 onClick={(event) => {
                   notificationOpenerRef.current = event.currentTarget;
@@ -150,9 +155,8 @@ export function AppShell(): JSX.Element {
             </Button>
             <NavLink aria-label={t('navigation.profile')} className="profile-control" to="/profile">
               <Icon name="profile" />
-              <span>{state.profile.name}</span>
             </NavLink>
-            {!telegramMiniApp ? (
+            {!telegramMiniApp && !profileRoute ? (
               <Button onClick={() => void signOut()} variant="danger">
                 <Icon name="logout" />
                 <span>{t('auth.actions.logout')}</span>
@@ -201,6 +205,11 @@ export function AppShell(): JSX.Element {
       >
         <RouteTransition>{outlet}</RouteTransition>
       </main>
+
+      <Onboarding
+        onComplete={completeOnboarding}
+        open={!state.preferences.onboardingCompleted}
+      />
 
       <BottomNavigation inert={notificationsModal} items={BOTTOM_NAV_ITEMS} />
 
@@ -251,7 +260,7 @@ export function AppShell(): JSX.Element {
             <Icon name="globe" />
             <span>{t(localeLabelKey)}</span>
           </Button>
-          {!telegramMiniApp ? (
+          {!telegramMiniApp && !profileRoute ? (
             <Button onClick={() => void signOut()} variant="danger">
               <Icon name="logout" />
               <span>{t('auth.actions.logout')}</span>
