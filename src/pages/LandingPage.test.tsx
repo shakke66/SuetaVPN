@@ -70,6 +70,32 @@ describe('public landing', () => {
     await waitFor(() => expect(persistedState().purchaseDraft).toEqual({ tariffId: 'elite', months: 12 }));
   });
 
+  it('routes the main connect CTA to auth instead of only scrolling to plans', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const connect = within(await screen.findByRole('banner')).getByRole('link', { name: 'Подключиться' });
+    expect(connect).toHaveAttribute('href', '#/auth');
+
+    await user.click(connect);
+    expect(await screen.findByRole('heading', { name: 'Вход в SuetaVPN' })).toBeInTheDocument();
+    expect(window.location.hash).toBe('#/auth');
+  });
+
+  it('shows every required catalog fact on each tariff card', async () => {
+    render(<App />);
+
+    const planList = await screen.findByRole('list', { name: 'Список тарифов' });
+    const base = within(planList).getByRole('heading', { name: 'БАЗА' }).closest('article');
+    const elite = within(planList).getByRole('heading', { name: 'ЭЛИТА' }).closest('article');
+
+    expect(base).not.toBeNull();
+    expect(elite).not.toBeNull();
+    expect(within(base as HTMLElement).getByText('Android TV и Apple TV')).toBeInTheDocument();
+    expect(within(elite as HTMLElement).getByText('Android TV и Apple TV')).toBeInTheDocument();
+    expect(within(elite as HTMLElement).getByText('Обычные серверы без ограничений')).toBeInTheDocument();
+  });
+
   it('offers working navigation, theme and locale controls without leaving the public route', async () => {
     const user = userEvent.setup();
     render(<App />);

@@ -4,7 +4,7 @@ import { Accordion } from './Accordion';
 
 const items = [
   { id: 'connection', title: 'Как подключиться?', content: 'Откройте инструкции.' },
-  { id: 'payment', title: 'Как оплатить?', content: 'Пополните баланс.' },
+  { id: 'payment', title: 'Как оплатить?', content: <a href="#payment-help">Пополните баланс.</a> },
 ] as const;
 
 describe('Accordion', () => {
@@ -46,5 +46,22 @@ describe('Accordion', () => {
     await user.keyboard(' ');
     expect(connection).toHaveAttribute('aria-expanded', 'true');
     expect(payment).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('keeps interactive content in a closed panel out of the Tab order', async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <Accordion items={items} defaultOpenIds={['connection']} />
+        <button type="button">После аккордеона</button>
+      </>,
+    );
+
+    const payment = screen.getByRole('button', { name: 'Как оплатить?' });
+    const afterAccordion = screen.getByRole('button', { name: 'После аккордеона' });
+    payment.focus();
+
+    await user.tab();
+    expect(afterAccordion).toHaveFocus();
   });
 });

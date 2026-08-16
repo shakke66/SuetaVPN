@@ -130,8 +130,8 @@ export const ru = {
     accessibility: { heroArtwork: 'Защищённое соединение SuetaVPN', tariffList: 'Список тарифов', faqList: 'Частые вопросы' },
   },
   tariffs: {
-    base: { name: 'БАЗА', description: 'Уверенный доступ на каждый день', traffic: 'Безлимитный трафик', devices: 'До {amount} устройств', locations: '{amount} локаций', speed: 'До {amount} Гбит/с' },
-    elite: { name: 'ЭЛИТА', description: 'Больше возможностей для сложных маршрутов', traffic: '{amount} ГБ обходного трафика', devices: 'До {amount} устройств', locations: '{amount} локаций', speed: 'До {amount} Гбит/с' },
+    base: { name: 'БАЗА', description: 'Уверенный доступ на каждый день', traffic: 'Безлимитный трафик', devices: 'До {amount} устройств', locations: '{amount} локаций', speed: 'До {amount} Гбит/с', platforms: 'Android TV и Apple TV' },
+    elite: { name: 'ЭЛИТА', description: 'Больше возможностей для сложных маршрутов', traffic: '{amount} ГБ обходного трафика', devices: 'До {amount} устройств', locations: '{amount} локаций', speed: 'До {amount} Гбит/с', platforms: 'Android TV и Apple TV', regularServers: 'Обычные серверы без ограничений' },
     period: { one: '1 месяц', three: '3 месяца', six: '6 месяцев', twelve: '12 месяцев' },
     perMonth: '{amount} в месяц',
   },
@@ -300,8 +300,8 @@ export const en = {
     accessibility: { heroArtwork: 'Protected SuetaVPN connection', tariffList: 'Plan list', faqList: 'Frequently asked questions' },
   },
   tariffs: {
-    base: { name: 'BASE', description: 'Reliable everyday access', traffic: 'Unlimited traffic', devices: 'Up to {amount} devices', locations: '{amount} locations', speed: 'Up to {amount} Gbps' },
-    elite: { name: 'ELITE', description: 'More options for complex routes', traffic: '{amount} GB bypass traffic', devices: 'Up to {amount} devices', locations: '{amount} locations', speed: 'Up to {amount} Gbps' },
+    base: { name: 'BASE', description: 'Reliable everyday access', traffic: 'Unlimited traffic', devices: 'Up to {amount} devices', locations: '{amount} locations', speed: 'Up to {amount} Gbps', platforms: 'Android TV and Apple TV' },
+    elite: { name: 'ELITE', description: 'More options for complex routes', traffic: '{amount} GB bypass traffic', devices: 'Up to {amount} devices', locations: '{amount} locations', speed: 'Up to {amount} Gbps', platforms: 'Android TV and Apple TV', regularServers: 'Unlimited regular servers' },
     period: { one: '1 month', three: '3 months', six: '6 months', twelve: '12 months' }, perMonth: '{amount} per month',
   },
   dashboard: {

@@ -33,6 +33,11 @@ const TARIFF_COPY = {
   Readonly<Record<'name' | 'description' | 'traffic' | 'devices' | 'locations' | 'speed', MessageKey>>
 >>;
 
+const TARIFF_EXTRA_FACTS = {
+  base: ['tariffs.base.platforms'],
+  elite: ['tariffs.elite.platforms', 'tariffs.elite.regularServers'],
+} as const satisfies Readonly<Record<TariffId, readonly MessageKey[]>>;
+
 const TRUST_ITEMS = [
   ['dashboard', 'landing.trust.secure'],
   ['support', 'landing.trust.support'],
@@ -114,9 +119,9 @@ export function LandingPage(): JSX.Element {
               {locale === 'ru' ? 'EN' : 'RU'}
             </Button>
             <Link className="button button--ghost landing-header__sign-in" to="/auth">{t('landing.header.signIn')}</Link>
-            <a className="button button--primary landing-header__cta" href="#tariffs" onClick={(event) => focusSection(event, 'tariffs')}>
+            <Link className="button button--primary landing-header__cta" to="/auth">
               {t('landing.header.getStarted')}
-            </a>
+            </Link>
           </div>
         </div>
       </header>
@@ -192,6 +197,7 @@ export function LandingPage(): JSX.Element {
                       <li>{t(copy.devices, { amount: tariff.devices })}</li>
                       <li>{t(copy.locations, { amount: tariff.locations })}</li>
                       <li>{t(copy.speed, { amount: tariff.speedGbps })}</li>
+                      {TARIFF_EXTRA_FACTS[tariff.id].map((key) => <li key={key}>{t(key)}</li>)}
                     </ul>
                     <Button
                       aria-busy={selectingTariff === tariff.id}
