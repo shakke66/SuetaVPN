@@ -2,20 +2,40 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useNavigate, useOutlet } from 'react-router';
 import { RouteTransition } from './RouteTransition';
 
+type ReducedMotionListener = (event: MediaQueryListEvent) => void;
+let reducedMotionMatches = false;
+let reducedMotionListeners = new Set<ReducedMotionListener>();
+
 function installReducedMotion(matches: boolean) {
+  reducedMotionMatches = matches;
+  reducedMotionListeners = new Set();
   Object.defineProperty(window, 'matchMedia', {
     configurable: true,
     value: (query: string): MediaQueryList => ({
-      matches,
+      get matches() { return reducedMotionMatches; },
       media: query,
       onchange: null,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
+      addEventListener: (type: string, listener: EventListenerOrEventListenerObject | null) => {
+        if (type === 'change' && typeof listener === 'function') {
+          reducedMotionListeners.add(listener as unknown as ReducedMotionListener);
+        }
+      },
+      removeEventListener: (type: string, listener: EventListenerOrEventListenerObject | null) => {
+        if (type === 'change' && typeof listener === 'function') {
+          reducedMotionListeners.delete(listener as unknown as ReducedMotionListener);
+        }
+      },
       addListener: vi.fn(),
       removeListener: vi.fn(),
       dispatchEvent: vi.fn(),
     }),
   });
+}
+
+function setReducedMotion(matches: boolean) {
+  reducedMotionMatches = matches;
+  const event = { matches, media: '(prefers-reduced-motion: reduce)' } as MediaQueryListEvent;
+  reducedMotionListeners.forEach((listener) => listener(event));
 }
 
 function TransitionHarness() {
@@ -101,6 +121,19 @@ describe('RouteTransition', () => {
     expect(screen.queryByTestId('dashboard-screen')).not.toBeInTheDocument();
     expect(screen.getByTestId('balance-screen')).toBeInTheDocument();
     expect(screen.getAllByTestId(/-screen$/)).toHaveLength(1);
+  });
+
+  it('retires an in-flight outgoing layer when reduced motion is enabled', () => {
+    renderTransition();
+
+    fireEvent.click(screen.getByRole('button', { name: 'balance' }));
+    expect(screen.getByTestId('dashboard-screen')).toBeInTheDocument();
+    expect(screen.getByTestId('balance-screen')).toBeInTheDocument();
+
+    act(() => setReducedMotion(true));
+
+    expect(screen.queryByTestId('dashboard-screen')).not.toBeInTheDocument();
+    expect(screen.getByTestId('balance-screen')).toBeInTheDocument();
   });
 
   it('preserves the destination HTMLElement when its incoming layer becomes current', () => {

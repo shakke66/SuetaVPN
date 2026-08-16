@@ -1,5 +1,6 @@
 @import './tokens.css';
 @import './components.css';
+@import './auth.css';
 @import './subscriptions.css';
 @import './wallet.css';
 @import './motion.css';

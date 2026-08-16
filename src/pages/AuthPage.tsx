@@ -1,10 +1,37 @@
-import { useCallback, useState, type FormEvent } from 'react';
+import { useCallback, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router';
 import type { MessageKey } from '../i18n/messages';
 import { useI18n } from '../i18n/I18nProvider';
 import { useApp } from '../app/AppProvider';
 
 type AuthTab = 'login' | 'register';
+const AUTH_TABS = ['login', 'register'] as const satisfies readonly AuthTab[];
+
+function moveAuthTabSelection(
+  event: KeyboardEvent<HTMLButtonElement>,
+  currentIndex: number,
+  select: (tab: AuthTab) => void,
+): void {
+  let nextIndex: number | null = null;
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    nextIndex = (currentIndex + 1) % AUTH_TABS.length;
+  } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    nextIndex = (currentIndex - 1 + AUTH_TABS.length) % AUTH_TABS.length;
+  } else if (event.key === 'Home') {
+    nextIndex = 0;
+  } else if (event.key === 'End') {
+    nextIndex = AUTH_TABS.length - 1;
+  }
+  if (nextIndex === null) return;
+
+  event.preventDefault();
+  select(AUTH_TABS[nextIndex]);
+  event.currentTarget
+    .closest('[role="tablist"]')
+    ?.querySelectorAll<HTMLElement>('[role="tab"]')
+    .item(nextIndex)
+    .focus();
+}
 
 function authErrorKey(code: string): MessageKey {
   switch (code) {
@@ -70,16 +97,18 @@ export function AuthPage() {
   const errorId = error ? 'auth-error' : undefined;
 
   return (
-    <main>
+    <main className="auth-page">
       <h1>{t('auth.title')}</h1>
       <p>{t('auth.subtitle')}</p>
 
-      <div role="tablist" aria-label={t('auth.accessibility.loginMethods')}>
+      <div className="auth-tabs" role="tablist" aria-label={t('auth.accessibility.loginMethods')}>
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'login'}
+          onKeyDown={(event) => moveAuthTabSelection(event, 0, setTab)}
           onClick={() => setTab('login')}
+          tabIndex={tab === 'login' ? 0 : -1}
         >
           {t('auth.tabs.login')}
         </button>
@@ -87,20 +116,22 @@ export function AuthPage() {
           type="button"
           role="tab"
           aria-selected={tab === 'register'}
+          onKeyDown={(event) => moveAuthTabSelection(event, 1, setTab)}
           onClick={() => setTab('register')}
+          tabIndex={tab === 'register' ? 0 : -1}
         >
           {t('auth.tabs.register')}
         </button>
       </div>
 
-      <section aria-labelledby="telegram-title">
+      <section className="auth-method" aria-labelledby="telegram-title">
         <h2 id="telegram-title">{t('auth.telegram.title')}</h2>
         <button type="button" onClick={() => void submitTelegram()} disabled={telegramPending}>
           {t(telegramPending ? 'auth.telegram.pending' : 'auth.telegram.continue')}
         </button>
       </section>
 
-      <form onSubmit={emailChallenge ? submitCode : submitEmail} noValidate>
+      <form className="auth-form" onSubmit={emailChallenge ? submitCode : submitEmail} noValidate>
         {!emailChallenge ? (
           <>
             <label htmlFor="auth-email">{t('auth.email.label')}</label>

@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { StrictMode } from 'react';
 import { App } from '../app/App';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
 import { STORAGE_KEY } from '../domain/migrations';
@@ -78,4 +79,25 @@ it('keeps one hidden portal overlay until geometry exists and persists completio
   await user.click(within(overlay).getByRole('button', { name: 'Пропустить' }));
   await waitFor(() => expect(storedState().preferences.onboardingCompleted).toBe(true));
   expect(screen.queryByTestId('onboarding-overlay')).not.toBeInTheDocument();
+});
+
+it('falls back to the visible route viewport when a responsive target is hidden', async () => {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {
+    if (this.matches('[data-onboarding-target]')) return rect(0, 0, 0, 0);
+    if (this.id === 'main-content') return rect(12, 72, 336, 240);
+    if (this.classList.contains('onboarding__tooltip')) return rect(0, 0, 280, 180);
+    return rect(0, 0, 0, 0);
+  });
+  const state = createInitialState();
+  state.session.active = true;
+  state.preferences.onboardingCompleted = false;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  window.location.hash = '#/dashboard';
+
+  render(<StrictMode><App adapters={createLocalAdapters({ delayMs: 0 })} /></StrictMode>);
+
+  const overlay = await screen.findByTestId('onboarding-overlay');
+  await waitFor(() => expect(overlay).toHaveAttribute('data-ready', 'true'));
+  expect(within(overlay).getByRole('dialog', { name: 'Короткое знакомство' })).toBeVisible();
+  expect(within(overlay).getByRole('button', { name: 'Далее' })).toHaveFocus();
 });

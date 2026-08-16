@@ -141,6 +141,31 @@ describe('protected hash routing', () => {
 });
 
 describe('email authorization', () => {
+  it('moves focus and selection through auth tabs with keyboard navigation', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    const loginTab = screen.getByRole('tab', { name: 'Войти' });
+    const registerTab = screen.getByRole('tab', { name: 'Создать аккаунт' });
+    loginTab.focus();
+
+    await user.keyboard('{ArrowRight}');
+    expect(registerTab).toHaveFocus();
+    expect(registerTab).toHaveAttribute('aria-selected', 'true');
+
+    await user.keyboard('{Home}');
+    expect(loginTab).toHaveFocus();
+    expect(loginTab).toHaveAttribute('aria-selected', 'true');
+
+    await user.keyboard('{End}');
+    expect(registerTab).toHaveFocus();
+    expect(registerTab).toHaveAttribute('aria-selected', 'true');
+
+    await user.keyboard('{ArrowLeft}');
+    expect(loginTab).toHaveFocus();
+    expect(loginTab).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('offers login and registration tabs and reports an invalid email next to the field', async () => {
     const user = userEvent.setup();
     renderApp();

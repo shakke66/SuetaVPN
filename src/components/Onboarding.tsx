@@ -48,7 +48,7 @@ function selectTarget(selector: string): HTMLElement | null {
     const rectangle = candidate.getBoundingClientRect();
     return rectangle.width > 0 && rectangle.height > 0;
   });
-  return visible ?? candidates[0] ?? document.getElementById('main-content');
+  return visible ?? document.getElementById('main-content');
 }
 
 function sameGeometry(current: Geometry | null, next: Geometry): boolean {
