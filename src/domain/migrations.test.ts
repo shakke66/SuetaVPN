@@ -157,4 +157,20 @@ describe('hydrateState', () => {
       { id: 'timestamped-read', type: 'ticket-created', ticketId: 'ticket-current', read: true, readAt: explicitReadAt, createdAt },
     ]);
   });
+
+  it('drops a legacy read notification when its createdAt cannot become an ISO readAt', () => {
+    const state = createInitialState();
+    const hydrated = hydrateState(JSON.stringify({
+      ...state,
+      notifications: [{
+        id: 'legacy-invalid-time',
+        type: 'ticket-created',
+        ticketId: 'ticket-current',
+        read: true,
+        createdAt: 'yesterday afternoon',
+      }],
+    }), null);
+
+    expect(hydrated.notifications).toEqual([]);
+  });
 });

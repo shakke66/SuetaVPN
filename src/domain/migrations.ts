@@ -74,10 +74,11 @@ function normalizeNotification(value: unknown): TicketNotification | null {
   if (explicitReadAt !== undefined && explicitReadAt !== null && (
     typeof explicitReadAt !== 'string' || !explicitReadAt.trim() || Number.isNaN(Date.parse(explicitReadAt))
   )) return null;
+  if (value.read && typeof explicitReadAt !== 'string' && Number.isNaN(Date.parse(value.createdAt))) return null;
   const readAt = typeof explicitReadAt === 'string'
     ? new Date(explicitReadAt).toISOString()
     : value.read
-      ? value.createdAt
+      ? new Date(value.createdAt).toISOString()
       : null;
   return {
     id: value.id,
