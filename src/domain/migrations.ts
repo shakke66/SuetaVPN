@@ -70,7 +70,23 @@ function normalizeNotification(value: unknown): TicketNotification | null {
   if (!isRecord(value) || typeof value.id !== 'string' || !value.id.trim() ||
     (value.type !== 'ticket-created' && value.type !== 'ticket-replied') || typeof value.ticketId !== 'string' || !value.ticketId.trim() ||
     typeof value.read !== 'boolean' || typeof value.createdAt !== 'string' || !value.createdAt.trim()) return null;
-  return { id: value.id, type: value.type, ticketId: value.ticketId, read: value.read, createdAt: value.createdAt };
+  const explicitReadAt = value.readAt;
+  if (explicitReadAt !== undefined && explicitReadAt !== null && (
+    typeof explicitReadAt !== 'string' || !explicitReadAt.trim() || Number.isNaN(Date.parse(explicitReadAt))
+  )) return null;
+  const readAt = typeof explicitReadAt === 'string'
+    ? new Date(explicitReadAt).toISOString()
+    : value.read
+      ? value.createdAt
+      : null;
+  return {
+    id: value.id,
+    type: value.type,
+    ticketId: value.ticketId,
+    read: readAt !== null,
+    readAt,
+    createdAt: value.createdAt,
+  };
 }
 
 function normalizeCollection<T>(value: unknown, fallback: T[], normalize: (item: unknown) => T | null): T[] {

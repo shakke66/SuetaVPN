@@ -61,7 +61,7 @@ describe('support page', () => {
     expect(screen.getByText('Вложение: apple-tv.png')).toBeInTheDocument();
     await waitFor(() => {
       expect(storedState().tickets[0]).toMatchObject({ subject: 'Не подключается TV', status: 'open', attachmentName: 'apple-tv.png' });
-      expect(storedState().notifications[0]).toMatchObject({ type: 'ticket-created', read: false });
+      expect(storedState().notifications[0]).toMatchObject({ type: 'ticket-created', read: false, readAt: null });
     });
 
     await user.click(screen.getByRole('button', { name: 'Открыть уведомления' }));
@@ -69,7 +69,7 @@ describe('support page', () => {
     await user.click(within(notifications).getByRole('link', { name: /Не подключается TV/ }));
 
     expect(await screen.findByRole('heading', { name: 'Не подключается TV' })).toBeInTheDocument();
-    await waitFor(() => expect(storedState().notifications[0]?.read).toBe(true));
+    await waitFor(() => expect(storedState().notifications[0]).toMatchObject({ read: true, readAt: NOW }));
   });
 
   it('keeps the selected dialogue and validates a local user reply inline', async () => {

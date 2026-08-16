@@ -227,6 +227,7 @@ export function createTicket(
     type: 'ticket-created',
     ticketId,
     read: false,
+    readAt: null,
     createdAt: normalizedNow,
   };
   return success({
@@ -265,19 +266,28 @@ export function replyToTicket(
   return success({ ...state, tickets }, 'tickets.reply.success');
 }
 
-export function markNotificationRead(state: AppStateV2, notificationId: string): Result<AppStateV2> {
+export function markNotificationRead(
+  state: AppStateV2,
+  notificationId: string,
+  now: string,
+): Result<AppStateV2> {
   if (!state.notifications.some((notification) => notification.id === notificationId)) {
     return failure(state, 'NOTIFICATION_NOT_FOUND', 'notifications.markRead.notFound');
   }
-  const notifications = state.notifications.map((notification) => (
-    notification.id === notificationId ? { ...notification, read: true } : notification
-  ));
+  const readAt = normalizeNow(now);
+  const notifications = state.notifications.map((notification) => {
+    if (notification.id !== notificationId || notification.read) return notification;
+    return { ...notification, read: true, readAt };
+  });
   return success({ ...state, notifications }, 'notifications.markRead.success');
 }
 
-export function markAllNotificationsRead(state: AppStateV2): Result<AppStateV2> {
+export function markAllNotificationsRead(state: AppStateV2, now: string): Result<AppStateV2> {
+  const readAt = normalizeNow(now);
   return success({
     ...state,
-    notifications: state.notifications.map((notification) => ({ ...notification, read: true })),
+    notifications: state.notifications.map((notification) => (
+      notification.read ? notification : { ...notification, read: true, readAt }
+    )),
   }, 'notifications.markAllRead.success');
 }

@@ -65,6 +65,7 @@ describe('createLocalAdapters', () => {
     expect(created.ok).toBe(true);
     expect(created.state.tickets[0].id).toBe('ticket-adapter');
     expect(created.state.notifications[0].read).toBe(false);
+    expect(created.state.notifications[0].readAt).toBeNull();
 
     const replied = await adapters.tickets.reply(created.state, 'ticket-adapter', 'Дополнение');
     expect(replied.ok).toBe(true);
@@ -74,13 +75,15 @@ describe('createLocalAdapters', () => {
     const marked = await adapters.notifications.markRead(replied.state, 'notification-adapter');
     expect(marked.ok).toBe(true);
     expect(marked.state.notifications[0].read).toBe(true);
+    expect(marked.state.notifications[0].readAt).toBe(NOW);
 
     const withUnread = {
       ...marked.state,
-      notifications: marked.state.notifications.map((notification) => ({ ...notification, read: false })),
+      notifications: marked.state.notifications.map((notification) => ({ ...notification, read: false, readAt: null })),
     };
     const allRead = await adapters.notifications.markAllRead(withUnread);
     expect(allRead.ok).toBe(true);
     expect(allRead.state.notifications.every(({ read }) => read)).toBe(true);
+    expect(allRead.state.notifications.every(({ readAt }) => readAt === NOW)).toBe(true);
   });
 });

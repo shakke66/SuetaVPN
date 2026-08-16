@@ -166,8 +166,8 @@ export function createLocalAdapters(options: LocalAdapterOptions = {}): LocalAda
       )),
     },
     notifications: {
-      markRead: (state, notificationId) => run(() => markNotificationRead(state, notificationId)),
-      markAllRead: (state) => run(() => markAllNotificationsRead(state)),
+      markRead: (state, notificationId) => run(() => markNotificationRead(state, notificationId, now())),
+      markAllRead: (state) => run(() => markAllNotificationsRead(state, now())),
     },
   };
 }

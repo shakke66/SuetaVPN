@@ -42,6 +42,7 @@ export interface TicketNotification {
   type: 'ticket-created' | 'ticket-replied';
   ticketId: string;
   read: boolean;
+  readAt: string | null;
   createdAt: string;
 }
 

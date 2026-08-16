@@ -36,6 +36,7 @@ function activeState(): AppStateV2 {
       type: 'ticket-replied',
       ticketId: 'ticket-current',
       read: false,
+      readAt: null,
       createdAt: '2026-08-14T10:00:00.000Z',
     },
     {
@@ -43,6 +44,7 @@ function activeState(): AppStateV2 {
       type: 'ticket-created',
       ticketId: 'ticket-current',
       read: false,
+      readAt: null,
       createdAt: '2026-08-13T10:00:00.000Z',
     },
   ];

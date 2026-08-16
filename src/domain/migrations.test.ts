@@ -137,4 +137,24 @@ describe('hydrateState', () => {
     ]);
     expect(hydrated.notifications).toEqual(state.notifications);
   });
+
+  it('hydrates legacy notification read booleans into persistent readAt timestamps', () => {
+    const createdAt = '2026-08-12T10:00:00.000Z';
+    const explicitReadAt = '2026-08-12T11:00:00.000Z';
+    const state = createInitialState();
+    const hydrated = hydrateState(JSON.stringify({
+      ...state,
+      notifications: [
+        { id: 'legacy-read', type: 'ticket-created', ticketId: 'ticket-current', read: true, createdAt },
+        { id: 'legacy-unread', type: 'ticket-replied', ticketId: 'ticket-current', read: false, createdAt },
+        { id: 'timestamped-read', type: 'ticket-created', ticketId: 'ticket-current', read: false, readAt: explicitReadAt, createdAt },
+      ],
+    }), null);
+
+    expect(hydrated.notifications).toEqual([
+      { id: 'legacy-read', type: 'ticket-created', ticketId: 'ticket-current', read: true, readAt: createdAt, createdAt },
+      { id: 'legacy-unread', type: 'ticket-replied', ticketId: 'ticket-current', read: false, readAt: null, createdAt },
+      { id: 'timestamped-read', type: 'ticket-created', ticketId: 'ticket-current', read: true, readAt: explicitReadAt, createdAt },
+    ]);
+  });
 });

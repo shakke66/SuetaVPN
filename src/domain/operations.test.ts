@@ -12,6 +12,7 @@ import {
 import type { AppStateV2, TicketNotification } from './types';
 
 const NOW = '2026-08-13T10:00:00.000Z';
+const READ_AT = '2026-08-13T11:00:00.000Z';
 const fixedId = (prefix: string) => `${prefix}-fixed`;
 
 function stateWithBalance(balance: number): AppStateV2 {
@@ -280,6 +281,7 @@ describe('ticket operations', () => {
       type: 'ticket-created',
       ticketId: 'ticket-fixed',
       read: false,
+      readAt: null,
       createdAt: NOW,
     });
     expect(state).toEqual(before);
@@ -341,25 +343,25 @@ describe('ticket operations', () => {
 
 describe('ticket notification operations', () => {
   const notifications: TicketNotification[] = [
-    { id: 'notification-1', type: 'ticket-created', ticketId: 'ticket-1', read: false, createdAt: NOW },
-    { id: 'notification-2', type: 'ticket-replied', ticketId: 'ticket-2', read: false, createdAt: NOW },
-    { id: 'notification-3', type: 'ticket-created', ticketId: 'ticket-3', read: true, createdAt: NOW },
+    { id: 'notification-1', type: 'ticket-created', ticketId: 'ticket-1', read: false, readAt: null, createdAt: NOW },
+    { id: 'notification-2', type: 'ticket-replied', ticketId: 'ticket-2', read: false, readAt: null, createdAt: NOW },
+    { id: 'notification-3', type: 'ticket-created', ticketId: 'ticket-3', read: true, readAt: NOW, createdAt: NOW },
   ];
 
   it('marks only the selected ticket notification as read', () => {
     const state = { ...stateWithBalance(0), notifications };
 
-    const result = markNotificationRead(state, 'notification-2');
+    const result = markNotificationRead(state, 'notification-2', READ_AT);
 
     expect(result).toMatchObject({
       ok: true,
       code: 'success',
       messageKey: 'notifications.markRead.success',
     });
-    expect(result.state.notifications.map(({ id, read }) => ({ id, read }))).toEqual([
-      { id: 'notification-1', read: false },
-      { id: 'notification-2', read: true },
-      { id: 'notification-3', read: true },
+    expect(result.state.notifications.map(({ id, read, readAt }) => ({ id, read, readAt }))).toEqual([
+      { id: 'notification-1', read: false, readAt: null },
+      { id: 'notification-2', read: true, readAt: READ_AT },
+      { id: 'notification-3', read: true, readAt: NOW },
     ]);
     expect(state.notifications[1].read).toBe(false);
   });
@@ -367,7 +369,7 @@ describe('ticket notification operations', () => {
   it('marks all ticket notifications read without changing their event data', () => {
     const state = { ...stateWithBalance(0), notifications };
 
-    const result = markAllNotificationsRead(state);
+    const result = markAllNotificationsRead(state, READ_AT);
 
     expect(result).toMatchObject({
       ok: true,
@@ -377,6 +379,7 @@ describe('ticket notification operations', () => {
     expect(result.state.notifications).toEqual(notifications.map((notification) => ({
       ...notification,
       read: true,
+      readAt: notification.readAt ?? READ_AT,
     })));
     expect(state.notifications[0].read).toBe(false);
   });
@@ -384,7 +387,7 @@ describe('ticket notification operations', () => {
   it('rejects an unknown notification without mutation', () => {
     const state = { ...stateWithBalance(0), notifications };
 
-    const result = markNotificationRead(state, 'missing');
+    const result = markNotificationRead(state, 'missing', READ_AT);
 
     expect(result).toMatchObject({
       ok: false,
