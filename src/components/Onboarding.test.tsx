@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StrictMode } from 'react';
 import { App } from '../app/App';
@@ -63,12 +63,21 @@ it('keeps one hidden portal overlay until geometry exists and persists completio
 
   const overlay = await screen.findByTestId('onboarding-overlay');
   const tooltip = within(overlay).getByRole('dialog', { hidden: true });
+  const header = screen.getByTestId('app-shell-header');
+  const main = document.getElementById('main-content');
+  const bottomNavigation = document.querySelector('.bottom-navigation');
   expect(overlay).toHaveAttribute('data-ready', 'false');
   expect(tooltip).toHaveStyle({ left: '-9999px', top: '-9999px', visibility: 'hidden' });
 
   canMeasure = true;
-  resizeCallback?.([], {} as ResizeObserver);
+  act(() => resizeCallback?.([], {} as ResizeObserver));
   await waitFor(() => expect(overlay).toHaveAttribute('data-ready', 'true'));
+  expect(header).toHaveAttribute('aria-hidden', 'true');
+  expect(header).toHaveAttribute('inert');
+  expect(main).toHaveAttribute('aria-hidden', 'true');
+  expect(main).toHaveAttribute('inert');
+  expect(bottomNavigation).toHaveAttribute('aria-hidden', 'true');
+  expect(bottomNavigation).toHaveAttribute('inert');
   expect(tooltip).not.toHaveStyle({ left: '0px' });
   expect(tooltip).not.toHaveStyle({ top: '0px' });
 
@@ -79,6 +88,35 @@ it('keeps one hidden portal overlay until geometry exists and persists completio
   await user.click(within(overlay).getByRole('button', { name: 'Пропустить' }));
   await waitFor(() => expect(storedState().preferences.onboardingCompleted).toBe(true));
   expect(screen.queryByTestId('onboarding-overlay')).not.toBeInTheDocument();
+  expect(header).not.toHaveAttribute('aria-hidden');
+  expect(header).not.toHaveAttribute('inert');
+  expect(main).not.toHaveAttribute('aria-hidden');
+  expect(main).not.toHaveAttribute('inert');
+  expect(bottomNavigation).not.toHaveAttribute('aria-hidden');
+  expect(bottomNavigation).not.toHaveAttribute('inert');
+  expect(screen.getByRole('link', { name: 'Управлять подпиской' })).toHaveFocus();
+});
+
+it('traps Tab and Shift+Tab within onboarding controls', async () => {
+  const user = userEvent.setup();
+  const state = createInitialState();
+  state.session.active = true;
+  state.preferences.onboardingCompleted = false;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  window.location.hash = '#/dashboard';
+  canMeasure = true;
+
+  render(<App adapters={createLocalAdapters({ delayMs: 0 })} />);
+
+  const overlay = await screen.findByTestId('onboarding-overlay');
+  const next = within(overlay).getByRole('button', { name: 'Далее' });
+  const skip = within(overlay).getByRole('button', { name: 'Пропустить' });
+  await waitFor(() => expect(next).toHaveFocus());
+
+  await user.tab();
+  expect(skip).toHaveFocus();
+  await user.tab({ shift: true });
+  expect(next).toHaveFocus();
 });
 
 it('falls back to the visible route viewport when a responsive target is hidden', async () => {

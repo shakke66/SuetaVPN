@@ -12,6 +12,7 @@ import { Button } from './Button';
 
 interface OnboardingProps {
   onComplete: () => Promise<void> | void;
+  onReady?: (ready: boolean) => void;
   open: boolean;
 }
 
@@ -41,6 +42,18 @@ const STEPS = [
 const EDGE = 12;
 const GAP = 16;
 const SPOTLIGHT_PADDING = 8;
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+function focusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+}
 
 function selectTarget(selector: string): HTMLElement | null {
   const candidates = Array.from(document.querySelectorAll<HTMLElement>(selector));
@@ -60,18 +73,41 @@ function sameGeometry(current: Geometry | null, next: Geometry): boolean {
     && current.tooltip.top === next.tooltip.top;
 }
 
-export function Onboarding({ onComplete, open }: OnboardingProps): JSX.Element | null {
+export function Onboarding({ onComplete, onReady, open }: OnboardingProps): JSX.Element | null {
   const { t } = useI18n();
   const [stepIndex, setStepIndex] = useState(0);
   const [geometry, setGeometry] = useState<Geometry | null>(null);
   const [ready, setReady] = useState(false);
   const tooltipRef = useRef<HTMLElement>(null);
   const primaryActionRef = useRef<HTMLButtonElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const wasOpenRef = useRef(false);
   const step = STEPS[stepIndex];
 
   useLayoutEffect(() => {
-    if (!open) return;
+    if (open) {
+      if (!wasOpenRef.current) {
+        previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      }
+      wasOpenRef.current = true;
+      return;
+    }
+    if (!wasOpenRef.current) return;
+    wasOpenRef.current = false;
+    const focusTarget = restoreFocusRef.current ?? previousFocusRef.current;
+    restoreFocusRef.current = null;
+    previousFocusRef.current = null;
+    focusTarget?.focus();
+  }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      onReady?.(false);
+      return;
+    }
     setReady(false);
+    onReady?.(false);
     const target = selectTarget(step.target);
     const tooltip = tooltipRef.current;
     if (!target || !tooltip) return;
@@ -81,6 +117,7 @@ export function Onboarding({ onComplete, open }: OnboardingProps): JSX.Element |
       const tooltipRect = tooltip.getBoundingClientRect();
       if (targetRect.width <= 0 || targetRect.height <= 0 || tooltipRect.width <= 0 || tooltipRect.height <= 0) {
         setReady(false);
+        onReady?.(false);
         return;
       }
 
@@ -104,6 +141,7 @@ export function Onboarding({ onComplete, open }: OnboardingProps): JSX.Element |
       };
       setGeometry((current) => (sameGeometry(current, nextGeometry) ? current : nextGeometry));
       setReady(true);
+      onReady?.(true);
     };
 
     measure();
@@ -117,11 +155,36 @@ export function Onboarding({ onComplete, open }: OnboardingProps): JSX.Element |
       window.removeEventListener('resize', measure);
       window.removeEventListener('scroll', measure, true);
     };
-  }, [open, step.target]);
+  }, [onReady, open, step.target]);
 
   useEffect(() => {
     if (ready) primaryActionRef.current?.focus();
   }, [ready, stepIndex]);
+
+  useEffect(() => {
+    if (!open || !ready || !tooltipRef.current) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !tooltipRef.current) return;
+      const focusable = focusableElements(tooltipRef.current);
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) {
+        event.preventDefault();
+        tooltipRef.current.focus();
+        return;
+      }
+      const activeElement = document.activeElement;
+      if (event.shiftKey && (activeElement === first || !tooltipRef.current.contains(activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (activeElement === last || !tooltipRef.current.contains(activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open, ready, stepIndex]);
 
   if (!open) return null;
 
@@ -138,6 +201,13 @@ export function Onboarding({ onComplete, open }: OnboardingProps): JSX.Element |
     width: geometry ? `${geometry.spotlight.width}px` : '0px',
   };
   const lastStep = stepIndex === STEPS.length - 1;
+  const complete = () => {
+    const target = selectTarget(step.target);
+    restoreFocusRef.current = target
+      ? (target.matches(FOCUSABLE_SELECTOR) ? target : focusableElements(target)[0])
+      : previousFocusRef.current;
+    void onComplete();
+  };
 
   return createPortal(
     <div className="onboarding" data-ready={ready} data-testid="onboarding-overlay">
@@ -159,11 +229,11 @@ export function Onboarding({ onComplete, open }: OnboardingProps): JSX.Element |
               {t('onboarding.actions.back')}
             </Button>
           ) : null}
-          <Button onClick={() => void onComplete()} variant="ghost">{t('onboarding.actions.skip')}</Button>
+          <Button onClick={complete} variant="ghost">{t('onboarding.actions.skip')}</Button>
           <Button
             ref={primaryActionRef}
             onClick={() => {
-              if (lastStep) void onComplete();
+              if (lastStep) complete();
               else setStepIndex((current) => current + 1);
             }}
           >

@@ -173,4 +173,92 @@ describe('hydrateState', () => {
 
     expect(hydrated.notifications).toEqual([]);
   });
+
+  it('canonicalizes valid profile and subscription dates and defaults invalid singular dates', () => {
+    const state = createInitialState();
+    const valid = hydrateState(JSON.stringify({
+      ...state,
+      profile: { ...state.profile, registeredAt: '2026-08-12' },
+      subscription: { ...state.subscription, expiresAt: '2026-09-05' },
+    }), null);
+    const invalid = hydrateState(JSON.stringify({
+      ...state,
+      profile: { ...state.profile, registeredAt: 'not-a-date' },
+      subscription: { ...state.subscription, expiresAt: 'not-a-date' },
+    }), null);
+
+    expect(valid.profile.registeredAt).toBe('2026-08-12T00:00:00.000Z');
+    expect(valid.subscription?.expiresAt).toBe('2026-09-05T00:00:00.000Z');
+    expect(invalid.profile.registeredAt).toBe(state.profile.registeredAt);
+    expect(invalid.subscription?.expiresAt).toBe(state.subscription?.expiresAt);
+  });
+
+  it('canonicalizes valid collection dates and drops malformed members at the narrowest boundary', () => {
+    const state = createInitialState();
+    const hydrated = hydrateState(JSON.stringify({
+      ...state,
+      wallet: {
+        ...state.wallet,
+        transactions: [
+          { ...state.wallet.transactions[0], id: 'valid-transaction', date: '2026-08-12' },
+          { ...state.wallet.transactions[0], id: 'invalid-transaction', date: 'not-a-date' },
+        ],
+      },
+      tickets: [
+        {
+          ...state.tickets[0],
+          id: 'valid-ticket',
+          createdAt: '2026-08-11',
+          messages: [
+            { ...state.tickets[0].messages[0], id: 'valid-message', date: '2026-08-11T01:00:00Z' },
+            { ...state.tickets[0].messages[0], id: 'invalid-message', date: 'not-a-date' },
+          ],
+        },
+        { ...state.tickets[0], id: 'invalid-ticket', createdAt: 'not-a-date' },
+      ],
+      notifications: [
+        {
+          id: 'valid-notification',
+          type: 'ticket-created',
+          ticketId: 'valid-ticket',
+          read: true,
+          readAt: '2026-08-11T02:00:00Z',
+          createdAt: '2026-08-11',
+        },
+        {
+          id: 'invalid-created-at',
+          type: 'ticket-created',
+          ticketId: 'valid-ticket',
+          read: false,
+          readAt: null,
+          createdAt: 'not-a-date',
+        },
+        {
+          id: 'invalid-read-at',
+          type: 'ticket-created',
+          ticketId: 'valid-ticket',
+          read: true,
+          readAt: 'not-a-date',
+          createdAt: '2026-08-11',
+        },
+      ],
+    }), null);
+
+    expect(hydrated.wallet.transactions).toHaveLength(1);
+    expect(hydrated.wallet.transactions[0].date).toBe('2026-08-12T00:00:00.000Z');
+    expect(hydrated.tickets).toEqual([{
+      ...state.tickets[0],
+      id: 'valid-ticket',
+      createdAt: '2026-08-11T00:00:00.000Z',
+      messages: [{ ...state.tickets[0].messages[0], id: 'valid-message', date: '2026-08-11T01:00:00.000Z' }],
+    }]);
+    expect(hydrated.notifications).toEqual([{
+      id: 'valid-notification',
+      type: 'ticket-created',
+      ticketId: 'valid-ticket',
+      read: true,
+      readAt: '2026-08-11T02:00:00.000Z',
+      createdAt: '2026-08-11T00:00:00.000Z',
+    }]);
+  });
 });

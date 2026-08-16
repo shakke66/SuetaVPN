@@ -16,8 +16,8 @@ export function createInitialState(): AppStateV2 {
     wallet: {
       balance: 790,
       transactions: [
-        { id: 'transaction-subscription', type: 'purchase', amount: -250, description: 'Подписка База', date: '2026-08-01T09:30:00.000Z', status: 'completed' },
-        { id: 'transaction-deposit', type: 'deposit', amount: 1000, description: 'Пополнение через СБП', date: '2026-07-31T18:10:00.000Z', status: 'completed' },
+        { id: 'transaction-subscription', type: 'purchase', amount: -250, tariffId: 'base', months: 1, date: '2026-08-01T09:30:00.000Z', status: 'completed' },
+        { id: 'transaction-deposit', type: 'deposit', amount: 1000, paymentMethod: 'sbp', date: '2026-07-31T18:10:00.000Z', status: 'completed' },
       ],
     },
     subscription: {

@@ -1,16 +1,16 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from '../app/App';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
 import { STORAGE_KEY } from '../domain/migrations';
 import { createInitialState } from '../domain/state';
 
-function openInfo() {
+function openInfo(hash = '#/info') {
   const state = createInitialState();
   state.session.active = true;
   state.preferences.onboardingCompleted = true;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  window.location.hash = '#/info';
+  window.location.hash = hash;
   return render(<App adapters={createLocalAdapters({ delayMs: 0 })} />);
 }
 
@@ -46,4 +46,32 @@ it('keeps only FAQ, agreement and privacy tabs with equal smooth FAQ headers', a
   expect(screen.getByText('Текст соглашения будет опубликован здесь.')).toBeInTheDocument();
   await user.click(within(tabList).getByRole('tab', { name: 'Политика конфиденциальности' }));
   expect(screen.getByText('Текст политики будет опубликован здесь.')).toBeInTheDocument();
+});
+
+it.each([
+  ['agreement', 'Пользовательское соглашение', 'Текст соглашения будет опубликован здесь.'],
+  ['privacy', 'Политика конфиденциальности', 'Текст политики будет опубликован здесь.'],
+] as const)('opens the requested %s document tab from the hash query', async (tab, label, content) => {
+  openInfo(`#/info?tab=${tab}`);
+
+  expect(await screen.findByRole('tab', { name: label })).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByText(content)).toBeInTheDocument();
+});
+
+it('falls back to FAQ for an invalid tab query', async () => {
+  openInfo('#/info?tab=unsupported');
+
+  expect(await screen.findByRole('tab', { name: 'Вопросы и ответы' })).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByRole('heading', { name: 'Вопросы и ответы' })).toBeInTheDocument();
+});
+
+it('keeps the hash query synchronized with user tab changes', async () => {
+  const user = userEvent.setup();
+  openInfo('#/info?tab=agreement');
+  const privacy = await screen.findByRole('tab', { name: 'Политика конфиденциальности' });
+
+  await user.click(privacy);
+
+  await waitFor(() => expect(window.location.hash).toBe('#/info?tab=privacy'));
+  expect(privacy).toHaveAttribute('aria-selected', 'true');
 });

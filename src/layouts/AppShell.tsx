@@ -67,6 +67,7 @@ export function AppShell(): JSX.Element {
   const notificationsWereOpenRef = useRef(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [onboardingReady, setOnboardingReady] = useState(false);
   const unreadCount = state.notifications.filter(
     ({ read, type }) => !read && (type === 'ticket-created' || type === 'ticket-replied'),
   ).length;
@@ -80,6 +81,8 @@ export function AppShell(): JSX.Element {
     : 'shell.language.switchToEnglish';
   const notificationsModal = notificationsOpen
     && notificationOpenerRef.current?.dataset.notificationOpener === 'drawer';
+  const onboardingOpen = !state.preferences.onboardingCompleted;
+  const backgroundInert = notificationsModal || (onboardingOpen && onboardingReady);
   const profileRoute = location.pathname === '/profile';
 
   useLayoutEffect(() => {
@@ -101,10 +104,10 @@ export function AppShell(): JSX.Element {
   return (
     <div className="app-shell">
       <header
-        aria-hidden={notificationsModal ? 'true' : undefined}
+        aria-hidden={backgroundInert ? 'true' : undefined}
         className="app-header"
         data-testid="app-shell-header"
-        inert={notificationsModal}
+        inert={backgroundInert}
       >
         <div className="app-header__inner">
           <Brand compact />
@@ -189,29 +192,30 @@ export function AppShell(): JSX.Element {
 
       {telegramMiniApp ? (
         <p
-          aria-hidden={notificationsModal ? 'true' : undefined}
+          aria-hidden={backgroundInert ? 'true' : undefined}
           className="mini-app-notice"
-          inert={notificationsModal}
+          inert={backgroundInert}
         >
           {t('auth.telegram.backendValidation')}
         </p>
       ) : null}
 
       <main
-        aria-hidden={notificationsModal ? 'true' : undefined}
+        aria-hidden={backgroundInert ? 'true' : undefined}
         className="route-viewport"
         id="main-content"
-        inert={notificationsModal}
+        inert={backgroundInert}
       >
         <RouteTransition>{outlet}</RouteTransition>
       </main>
 
       <Onboarding
         onComplete={completeOnboarding}
+        onReady={setOnboardingReady}
         open={!state.preferences.onboardingCompleted}
       />
 
-      <BottomNavigation inert={notificationsModal} items={BOTTOM_NAV_ITEMS} />
+      <BottomNavigation inert={backgroundInert} items={BOTTOM_NAV_ITEMS} />
 
       <Drawer
         active={!notificationsOpen}

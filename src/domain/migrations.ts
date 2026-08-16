@@ -26,6 +26,16 @@ function string(value: unknown, fallback: string, allowEmpty = false): string {
   return typeof value === 'string' && (allowEmpty || value.trim() !== '') ? value : fallback;
 }
 
+function canonicalDate(value: unknown): string | null {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function date(value: unknown, fallback: string): string {
+  return canonicalDate(value) ?? canonicalDate(fallback) ?? new Date(0).toISOString();
+}
+
 function number(value: unknown, fallback: number, min = 0, integer = false): number {
   return typeof value === 'number' && Number.isFinite(value) && value >= min && (!integer || Number.isInteger(value))
     ? value
@@ -44,24 +54,37 @@ function normalizeTransaction(value: unknown): Transaction | null {
   if (!isRecord(value) || typeof value.id !== 'string' || !value.id.trim() ||
     (value.type !== 'deposit' && value.type !== 'promo' && value.type !== 'purchase') ||
     typeof value.amount !== 'number' || !Number.isFinite(value.amount) ||
-    typeof value.description !== 'string' || !value.description.trim() ||
-    typeof value.date !== 'string' || !value.date.trim()) return null;
-  return { id: value.id, type: value.type, amount: value.amount, description: value.description, date: value.date, status: 'completed' };
+    (value.description !== undefined && (typeof value.description !== 'string' || !value.description.trim()))) return null;
+  const normalizedDate = canonicalDate(value.date);
+  if (!normalizedDate) return null;
+  return {
+    id: value.id,
+    type: value.type,
+    amount: value.amount,
+    ...(value.description === undefined ? {} : { description: value.description }),
+    ...(value.paymentMethod === 'sbp' || value.paymentMethod === 'card' ? { paymentMethod: value.paymentMethod } : {}),
+    ...(value.tariffId === 'base' || value.tariffId === 'elite' ? { tariffId: value.tariffId } : {}),
+    ...(value.months === 1 || value.months === 3 || value.months === 6 || value.months === 12 ? { months: value.months } : {}),
+    date: normalizedDate,
+    status: 'completed',
+  };
 }
 
 function normalizeMessage(value: unknown): TicketMessage | null {
   if (!isRecord(value) || typeof value.id !== 'string' || !value.id.trim() ||
-    (value.author !== 'user' && value.author !== 'support') || typeof value.text !== 'string' || !value.text.trim() ||
-    typeof value.date !== 'string' || !value.date.trim()) return null;
-  return { id: value.id, author: value.author, text: value.text, date: value.date };
+    (value.author !== 'user' && value.author !== 'support') || typeof value.text !== 'string' || !value.text.trim()) return null;
+  const normalizedDate = canonicalDate(value.date);
+  if (!normalizedDate) return null;
+  return { id: value.id, author: value.author, text: value.text, date: normalizedDate };
 }
 
 function normalizeTicket(value: unknown): Ticket | null {
   if (!isRecord(value) || typeof value.id !== 'string' || !value.id.trim() || typeof value.subject !== 'string' || !value.subject.trim() ||
-    (value.status !== 'open' && value.status !== 'answered') ||
-    typeof value.createdAt !== 'string' || !value.createdAt.trim() || !Array.isArray(value.messages)) return null;
+    (value.status !== 'open' && value.status !== 'answered') || !Array.isArray(value.messages)) return null;
+  const createdAt = canonicalDate(value.createdAt);
+  if (!createdAt) return null;
   return {
-    id: value.id, subject: value.subject, status: value.status, createdAt: value.createdAt,
+    id: value.id, subject: value.subject, status: value.status, createdAt,
     attachmentName: string(value.attachmentName, '', true), messages: value.messages.map(normalizeMessage).filter((message): message is TicketMessage => message !== null),
   };
 }
@@ -69,16 +92,18 @@ function normalizeTicket(value: unknown): Ticket | null {
 function normalizeNotification(value: unknown): TicketNotification | null {
   if (!isRecord(value) || typeof value.id !== 'string' || !value.id.trim() ||
     (value.type !== 'ticket-created' && value.type !== 'ticket-replied') || typeof value.ticketId !== 'string' || !value.ticketId.trim() ||
-    typeof value.read !== 'boolean' || typeof value.createdAt !== 'string' || !value.createdAt.trim()) return null;
+    typeof value.read !== 'boolean') return null;
+  const createdAt = canonicalDate(value.createdAt);
+  if (!createdAt) return null;
   const explicitReadAt = value.readAt;
-  if (explicitReadAt !== undefined && explicitReadAt !== null && (
-    typeof explicitReadAt !== 'string' || !explicitReadAt.trim() || Number.isNaN(Date.parse(explicitReadAt))
-  )) return null;
-  if (value.read && typeof explicitReadAt !== 'string' && Number.isNaN(Date.parse(value.createdAt))) return null;
-  const readAt = typeof explicitReadAt === 'string'
-    ? new Date(explicitReadAt).toISOString()
+  const normalizedReadAt = explicitReadAt === undefined || explicitReadAt === null
+    ? null
+    : canonicalDate(explicitReadAt);
+  if (explicitReadAt !== undefined && explicitReadAt !== null && normalizedReadAt === null) return null;
+  const readAt = normalizedReadAt
+    ? normalizedReadAt
     : value.read
-      ? new Date(value.createdAt).toISOString()
+      ? createdAt
       : null;
   return {
     id: value.id,
@@ -86,7 +111,7 @@ function normalizeNotification(value: unknown): TicketNotification | null {
     ticketId: value.ticketId,
     read: readAt !== null,
     readAt,
-    createdAt: value.createdAt,
+    createdAt,
   };
 }
 
@@ -105,7 +130,7 @@ function normalizeSubscription(value: unknown, fallback: Subscription | null): S
     tariffId: selectedTariff,
     status: value.status === 'expired' ? 'expired' : 'active',
     daysLeft: number(value.daysLeft, fallback?.daysLeft ?? 0, 0, true),
-    expiresAt: string(value.expiresAt, fallback?.expiresAt ?? '2026-09-04T00:00:00.000Z'),
+    expiresAt: date(value.expiresAt, fallback?.expiresAt ?? '2026-09-04T00:00:00.000Z'),
     trafficUsed: number(value.trafficUsed, fallback?.trafficUsed ?? 0),
     trafficLimit: tariff.traffic.kind === 'bypass' ? tariff.traffic.bypassGb : 0,
     devicesUsed: number(value.devicesUsed, fallback?.devicesUsed ?? 0, 0, true),
@@ -131,7 +156,7 @@ function hydrateFromV2(raw: RecordValue, defaults: AppStateV2): AppStateV2 | nul
     session: { active: session.active === true },
     profile: {
       name: string(profile.name, defaults.profile.name), username: string(profile.username, defaults.profile.username), role: string(profile.role, defaults.profile.role),
-      email: string(profile.email, defaults.profile.email, true), emailVerified: profile.emailVerified === true, registeredAt: string(profile.registeredAt, defaults.profile.registeredAt),
+      email: string(profile.email, defaults.profile.email, true), emailVerified: profile.emailVerified === true, registeredAt: date(profile.registeredAt, defaults.profile.registeredAt),
     },
     wallet: { balance: number(wallet.balance, defaults.wallet.balance), transactions: normalizeCollection(wallet.transactions, defaults.wallet.transactions, normalizeTransaction) },
     subscription: raw.subscription === null ? null : normalizeSubscription(raw.subscription, defaults.subscription),
@@ -158,7 +183,7 @@ function migrateV1(raw: RecordValue, defaults: AppStateV2): AppStateV2 | null {
     session: { active: raw.sessionActive === true },
     profile: {
       name: string(profile.name, defaults.profile.name), username: string(profile.username, defaults.profile.username), role: string(profile.role, defaults.profile.role),
-      email: string(profile.email, defaults.profile.email, true), emailVerified: profile.emailVerified === true, registeredAt: string(profile.registeredAt, defaults.profile.registeredAt),
+      email: string(profile.email, defaults.profile.email, true), emailVerified: profile.emailVerified === true, registeredAt: date(profile.registeredAt, defaults.profile.registeredAt),
     },
     wallet: { balance: number(raw.balance, defaults.wallet.balance), transactions: normalizeCollection(raw.transactions, defaults.wallet.transactions, normalizeTransaction) },
     subscription: normalizeSubscription(subscription, defaults.subscription),

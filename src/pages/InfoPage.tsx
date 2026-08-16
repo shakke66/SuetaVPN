@@ -1,10 +1,15 @@
-import { useId, useState, type JSX, type KeyboardEvent } from 'react';
+import { useId, type JSX, type KeyboardEvent } from 'react';
+import { useSearchParams } from 'react-router';
 import { Accordion } from '../components/Accordion';
 import { Button } from '../components/Button';
 import { useI18n } from '../i18n/I18nProvider';
 
 const TABS = ['faq', 'agreement', 'privacy'] as const;
 type InfoTab = typeof TABS[number];
+
+function requestedTab(value: string | null): InfoTab {
+  return TABS.includes(value as InfoTab) ? value as InfoTab : 'faq';
+}
 
 function moveTab(
   event: KeyboardEvent<HTMLButtonElement>,
@@ -24,8 +29,14 @@ function moveTab(
 
 export function InfoPage(): JSX.Element {
   const { t } = useI18n();
-  const [activeTab, setActiveTab] = useState<InfoTab>('faq');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = requestedTab(searchParams.get('tab'));
   const id = useId();
+  const selectTab = (tab: InfoTab) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', tab);
+    setSearchParams(next, { replace: true });
+  };
   const faqItems = [
     { id: 'connection', title: t('info.faq.connection'), content: <p>{t('info.faq.connectionAnswer')}</p> },
     { id: 'renewal', title: t('info.faq.renewal'), content: <p>{t('info.faq.renewalAnswer')}</p> },
@@ -41,8 +52,8 @@ export function InfoPage(): JSX.Element {
             aria-selected={activeTab === tab}
             id={`${id}-${tab}-tab`}
             key={tab}
-            onClick={() => setActiveTab(tab)}
-            onKeyDown={(event) => moveTab(event, index, setActiveTab)}
+            onClick={() => selectTab(tab)}
+            onKeyDown={(event) => moveTab(event, index, selectTab)}
             role="tab"
             tabIndex={activeTab === tab ? 0 : -1}
             variant="utility"

@@ -47,9 +47,11 @@ describe('topUp', () => {
       id: 'transaction-fixed',
       type: 'deposit',
       amount,
+      paymentMethod: method,
       date: NOW,
       status: 'completed',
     });
+    expect(result.state.wallet.transactions[0]).not.toHaveProperty('description');
     expect(state).toEqual(before);
     expect(result.state).not.toBe(state);
   });
@@ -107,6 +109,7 @@ describe('applyPromo', () => {
       date: NOW,
       status: 'completed',
     });
+    expect(first.state.wallet.transactions[0]).not.toHaveProperty('description');
     expect(state).toEqual(before);
 
     const second = applyPromo(first.state, 'SUETA10', NOW, fixedId);
@@ -184,9 +187,12 @@ describe('purchaseSubscription', () => {
       id: 'transaction-fixed',
       type: 'purchase',
       amount: -690,
+      tariffId: 'elite',
+      months: 3,
       date: NOW,
       status: 'completed',
     });
+    expect(result.state.wallet.transactions[0]).not.toHaveProperty('description');
     expect(state).toEqual(before);
   });
 

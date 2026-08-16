@@ -60,7 +60,7 @@ export function RouteTransition({ children }: RouteTransitionProps): JSX.Element
   const location = useLocation();
   const { pathname } = location;
   const reducedMotion = useReducedMotion();
-  const snapshotKey = `${location.key}:${pathname}`;
+  const snapshotKey = pathname;
   const [transition, setTransition] = useState<TransitionState>(() => ({
     current: { key: snapshotKey, node: children, pathname },
     direction: 'neutral',

@@ -30,6 +30,7 @@ export const ru = {
     loading: 'Загрузка',
     empty: 'Пока ничего нет',
     commandPending: 'Действие уже выполняется',
+    persistenceWarning: 'Не удалось сохранить данные в браузере. Изменения доступны до закрытия страницы.',
     rubles: '{amount} ₽',
     months: '{amount} мес.',
     days: '{amount} дн.',
@@ -199,7 +200,7 @@ export const ru = {
       amountTooHigh: 'Максимальная сумма — 50 000 ₽',
       paymentMethodInvalid: 'Выберите способ оплаты',
     },
-    history: { title: 'История операций', show: 'Показать историю', hide: 'Скрыть историю', empty: 'Операций пока нет', deposit: 'Пополнение', promo: 'Бонус', purchase: 'Покупка' },
+    history: { title: 'История операций', show: 'Показать историю', hide: 'Скрыть историю', empty: 'Операций пока нет', deposit: 'Пополнение', promo: 'Бонус', purchase: 'Покупка', depositSbp: 'Пополнение через СБП', depositCard: 'Пополнение банковской картой', depositGeneric: 'Пополнение баланса', promoDescription: 'Бонус по промокоду', purchasePlan: 'Подписка {name} · {period}', purchaseGeneric: 'Покупка подписки' },
     validation: { range: 'Введите сумму от 100 до 50 000 ₽' },
     accessibility: { amountRange: 'Выбрать сумму ползунком', historyToggle: 'Показать или скрыть историю операций' },
   },
@@ -272,7 +273,7 @@ export const en = {
   common: {
     actions: { save: 'Save', cancel: 'Cancel', close: 'Close', continue: 'Continue', back: 'Back', open: 'Open', copy: 'Copy', share: 'Share', retry: 'Try again', submit: 'Submit' },
     status: { active: 'Active', expired: 'Expired', open: 'Open', answered: 'Answered', completed: 'Completed', unread: 'Unread' },
-    loading: 'Loading', empty: 'Nothing here yet', commandPending: 'This action is already in progress', rubles: 'RUB {amount}', months: '{amount} mo.', days: '{amount} days',
+    loading: 'Loading', empty: 'Nothing here yet', commandPending: 'This action is already in progress', persistenceWarning: 'Could not save data in this browser. Changes remain available until this page is closed.', rubles: 'RUB {amount}', months: '{amount} mo.', days: '{amount} days',
   },
   accessibility: { skipToContent: 'Skip to content', closeDialog: 'Close dialog', openMenu: 'Open menu', closeMenu: 'Close menu', loading: 'Loading', currentPage: 'Current page', externalLink: 'Opens in a new tab' },
   auth: {
@@ -325,7 +326,7 @@ export const en = {
     title: 'Balance', current: 'Current balance',
     promo: { title: 'Promo code', label: 'Enter promo code', placeholder: 'Promo code', apply: 'Apply', success: 'Promo applied: +{amount}', notFound: 'Promo code not found', alreadyUsed: 'Promo code already used' },
     topUp: { title: 'Top up balance', amountLabel: 'Top-up amount', methodLabel: 'Payment method', sbp: 'SBP', card: 'Bank card', submit: 'Top up by {amount}', success: 'Balance topped up by {amount}', amountInvalid: 'Enter a valid amount', amountTooLow: 'Minimum amount is RUB 100', amountTooHigh: 'Maximum amount is RUB 50,000', paymentMethodInvalid: 'Choose a payment method' },
-    history: { title: 'Transaction history', show: 'Show history', hide: 'Hide history', empty: 'No transactions yet', deposit: 'Top-up', promo: 'Bonus', purchase: 'Purchase' }, validation: { range: 'Enter an amount from RUB 100 to RUB 50,000' }, accessibility: { amountRange: 'Choose an amount with a slider', historyToggle: 'Show or hide transaction history' },
+    history: { title: 'Transaction history', show: 'Show history', hide: 'Hide history', empty: 'No transactions yet', deposit: 'Top-up', promo: 'Bonus', purchase: 'Purchase', depositSbp: 'Top-up via SBP', depositCard: 'Top-up by bank card', depositGeneric: 'Balance top-up', promoDescription: 'Promo code bonus', purchasePlan: '{name} subscription · {period}', purchaseGeneric: 'Subscription purchase' }, validation: { range: 'Enter an amount from RUB 100 to RUB 50,000' }, accessibility: { amountRange: 'Choose an amount with a slider', historyToggle: 'Show or hide transaction history' },
   },
   billing: {
     topUp: { success: 'Balance topped up by {amount}', amountInvalid: 'Invalid amount', amountTooLow: 'Minimum amount is RUB 100', amountTooHigh: 'Maximum amount is RUB 50,000', paymentMethodInvalid: 'Choose a payment method' },

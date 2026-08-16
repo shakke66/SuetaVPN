@@ -1,4 +1,4 @@
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { useEffect } from 'react';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
 import { LEGACY_STORAGE_KEY, STORAGE_KEY } from '../domain/migrations';
@@ -50,7 +50,22 @@ beforeEach(() => {
   document.documentElement.removeAttribute('data-theme');
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('AppProvider hydration and preferences', () => {
+  it('falls back to safe in-memory state and renders when persisted reads throw', async () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('Blocked storage', 'SecurityError');
+    });
+
+    const view = renderProvider();
+
+    expect(view.app().state).toEqual(createInitialState());
+    expect(await screen.findByRole('alert')).toHaveTextContent('Не удалось сохранить данные в браузере');
+  });
+
   it('hydrates v2 and applies persisted language and theme on initial mount', async () => {
     const stored = createInitialState();
     stored.preferences = { ...stored.preferences, locale: 'en', theme: 'light' };
@@ -100,6 +115,24 @@ describe('AppProvider hydration and preferences', () => {
 });
 
 describe('AppProvider commands', () => {
+  it('keeps a successful in-memory transition when persisted writes throw', async () => {
+    const view = renderProvider();
+    const before = view.app().state.wallet.balance;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('Quota exceeded', 'QuotaExceededError');
+    });
+
+    let result: Result<AppStateV2> | undefined;
+    await act(async () => {
+      result = await view.app().topUp({ amount: 200, method: 'sbp' });
+    });
+
+    expect(result?.ok).toBe(true);
+    expect(view.app().state.wallet.balance).toBe(before + 200);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Не удалось сохранить данные в браузере');
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+  });
+
   it('consumes a successful email challenge so its one-time code cannot be reused', async () => {
     const view = renderProvider();
 

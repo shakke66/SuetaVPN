@@ -16,7 +16,10 @@ export interface Transaction {
   id: string;
   type: 'deposit' | 'promo' | 'purchase';
   amount: number;
-  description: string;
+  description?: string;
+  paymentMethod?: 'sbp' | 'card';
+  tariffId?: TariffId;
+  months?: Period;
   date: string;
   status: 'completed';
 }

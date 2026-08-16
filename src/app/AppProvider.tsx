@@ -15,6 +15,7 @@ import type {
   TelegramUser,
 } from '../adapters/contracts';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
+import { ToastRegion } from '../components/ToastRegion';
 import { LEGACY_STORAGE_KEY, STORAGE_KEY, hydrateState } from '../domain/migrations';
 import type { CreateTicketRequest, TopUpRequest } from '../domain/operations';
 import type {
@@ -25,7 +26,7 @@ import type {
   TariffId,
   Theme,
 } from '../domain/types';
-import { I18nProvider } from '../i18n/I18nProvider';
+import { I18nProvider, useI18n } from '../i18n/I18nProvider';
 
 export type CommandName =
   | 'startEmail'
@@ -75,10 +76,35 @@ type Transition = (state: AppStateV2) => Promise<Result<AppStateV2>>;
 const AppContext = createContext<AppContextValue | null>(null);
 const defaultAdapters = createLocalAdapters();
 
-function hydrateStoredState(): AppStateV2 {
-  return hydrateState(
-    localStorage.getItem(STORAGE_KEY),
-    localStorage.getItem(LEGACY_STORAGE_KEY),
+interface HydratedStorage {
+  persistenceWarning: boolean;
+  state: AppStateV2;
+}
+
+function hydrateStoredState(): HydratedStorage {
+  try {
+    return {
+      persistenceWarning: false,
+      state: hydrateState(
+        localStorage.getItem(STORAGE_KEY),
+        localStorage.getItem(LEGACY_STORAGE_KEY),
+      ),
+    };
+  } catch {
+    return { persistenceWarning: true, state: hydrateState(null, null) };
+  }
+}
+
+function PersistenceWarning({ onDismiss, visible }: {
+  onDismiss: () => void;
+  visible: boolean;
+}) {
+  const { t } = useI18n();
+  return (
+    <ToastRegion
+      messages={visible ? [{ id: 'persistence-warning', kind: 'error', text: t('common.persistenceWarning') }] : []}
+      onDismiss={onDismiss}
+    />
   );
 }
 
@@ -94,7 +120,9 @@ function pendingResult(
 }
 
 export function AppProvider({ children, adapters = defaultAdapters }: AppProviderProps) {
-  const [state, setRenderedState] = useState(hydrateStoredState);
+  const [hydrated] = useState(hydrateStoredState);
+  const [state, setRenderedState] = useState(hydrated.state);
+  const [persistenceWarning, setPersistenceWarning] = useState(hydrated.persistenceWarning);
   const [emailChallenge, setEmailChallenge] = useState<EmailChallenge | null>(null);
   const [returnPath, setReturnPath] = useState<string | null>(null);
   const telegramUser = useMemo(() => adapters.auth.detectTelegramUser(), [adapters]);
@@ -107,7 +135,11 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
   const commit = useCallback((nextState: AppStateV2) => {
     stateRef.current = nextState;
     setRenderedState(nextState);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+    } catch {
+      setPersistenceWarning(true);
+    }
   }, []);
 
   const enqueueStateUpdate = useCallback((
@@ -292,6 +324,10 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
     <AppContext.Provider value={value}>
       <I18nProvider locale={state.preferences.locale} setLocale={setLocale}>
         {children}
+        <PersistenceWarning
+          onDismiss={() => setPersistenceWarning(false)}
+          visible={persistenceWarning}
+        />
       </I18nProvider>
     </AppContext.Provider>
   );

@@ -90,7 +90,7 @@ export function topUp(
     id: idSource('transaction', normalizedNow),
     type: 'deposit',
     amount,
-    description: request.method === 'sbp' ? 'Пополнение через СБП' : 'Пополнение банковской картой',
+    paymentMethod: request.method,
     date: normalizedNow,
     status: 'completed',
   };
@@ -120,7 +120,6 @@ export function applyPromo(
     id: idSource('transaction', normalizedNow),
     type: 'promo',
     amount: 100,
-    description: 'Бонус по промокоду SUETA10',
     date: normalizedNow,
     status: 'completed',
   };
@@ -176,7 +175,8 @@ export function purchaseSubscription(
     id: idSource('transaction', normalizedNow),
     type: 'purchase',
     amount: -total,
-    description: `Подписка ${tariffId} · ${months} мес.`,
+    tariffId,
+    months,
     date: normalizedNow,
     status: 'completed',
   };
