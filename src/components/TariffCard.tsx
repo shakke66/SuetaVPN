@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, KeyboardEventHandler } from 'react';
 import type { Tariff } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
 
@@ -6,9 +6,11 @@ interface TariffCardProps {
   tariff: Tariff;
   selected: boolean;
   onSelect: (tariff: Tariff) => void;
+  onKeyDown: KeyboardEventHandler<HTMLButtonElement>;
+  tabIndex: number;
 }
 
-export function TariffCard({ tariff, selected, onSelect }: TariffCardProps): JSX.Element {
+export function TariffCard({ tariff, selected, onSelect, onKeyDown, tabIndex }: TariffCardProps): JSX.Element {
   const { formatMoney, t } = useI18n();
   const copy = tariff.id === 'base' ? 'base' : 'elite';
   const traffic = tariff.traffic.kind === 'unlimited'
@@ -21,8 +23,10 @@ export function TariffCard({ tariff, selected, onSelect }: TariffCardProps): JSX
       aria-label={t(`tariffs.${copy}.name`)}
       className="tariff-card"
       data-selected={selected}
+      onKeyDown={onKeyDown}
       onClick={() => onSelect(tariff)}
       role="radio"
+      tabIndex={tabIndex}
       type="button"
     >
       <span className="tariff-card__topline">

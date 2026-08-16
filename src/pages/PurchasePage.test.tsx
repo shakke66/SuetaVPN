@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from '../app/App';
 import type { LocalAdapters } from '../adapters/contracts';
@@ -114,8 +114,36 @@ describe('purchase flow', () => {
     await waitFor(() => expect(storedState().purchaseDraft).toEqual({ tariffId: 'elite', months: 12 }));
   });
 
-  it('disables duplicate submission and atomically debits the exact total on success', async () => {
+  it('uses roving focus and arrow keys for tariff and period radio groups', async () => {
     const user = userEvent.setup();
+    openProtectedRoute('/purchase', (state) => {
+      state.wallet.balance = 5_000;
+      state.purchaseDraft = { tariffId: 'base', months: 1 };
+    });
+
+    const planGroup = await screen.findByRole('radiogroup', { name: 'Выбор тарифа' });
+    const base = within(planGroup).getByRole('radio', { name: /БАЗА/ });
+    const elite = within(planGroup).getByRole('radio', { name: /ЭЛИТА/ });
+    expect(base).toHaveAttribute('tabindex', '0');
+    expect(elite).toHaveAttribute('tabindex', '-1');
+
+    base.focus();
+    await user.keyboard('{ArrowRight}');
+    expect(elite).toHaveFocus();
+    expect(elite).toHaveAttribute('aria-checked', 'true');
+    expect(base).toHaveAttribute('tabindex', '-1');
+
+    const periodGroup = screen.getByRole('radiogroup', { name: 'Выбор периода' });
+    const oneMonth = within(periodGroup).getByRole('radio', { name: '1 месяц' });
+    const threeMonths = within(periodGroup).getByRole('radio', { name: '3 месяца' });
+    oneMonth.focus();
+    await user.keyboard('{ArrowDown}');
+    expect(threeMonths).toHaveFocus();
+    expect(threeMonths).toHaveAttribute('aria-checked', 'true');
+    await waitFor(() => expect(storedState().purchaseDraft).toEqual({ tariffId: 'elite', months: 3 }));
+  });
+
+  it('disables duplicate submission and atomically debits the exact total on success', async () => {
     const localAdapters = createLocalAdapters({
       delayMs: 0,
       now: () => NOW,
@@ -125,10 +153,12 @@ describe('purchase flow', () => {
     const purchaseGate = new Promise<void>((resolve) => {
       releasePurchase = resolve;
     });
+    let purchaseCalls = 0;
     const adapters: LocalAdapters = {
       ...localAdapters,
       subscriptions: {
         purchase: async (...args) => {
+          purchaseCalls += 1;
           await purchaseGate;
           return localAdapters.subscriptions.purchase(...args);
         },
@@ -141,8 +171,10 @@ describe('purchase flow', () => {
     }, adapters);
     const submit = await screen.findByRole('button', { name: 'Оформить подписку' });
 
-    await user.click(submit);
-    await waitFor(() => expect(submit).toBeDisabled());
+    fireEvent.click(submit);
+    expect(submit).toBeDisabled();
+    fireEvent.click(submit);
+    await waitFor(() => expect(purchaseCalls).toBe(1));
     releasePurchase();
     expect(await screen.findByRole('status')).toHaveTextContent('Подписка успешно оформлена');
 
@@ -150,6 +182,7 @@ describe('purchase flow', () => {
       expect(storedState().wallet.balance).toBe(1_310);
       expect(storedState().subscription).toMatchObject({ tariffId: 'elite', daysLeft: 90 });
       expect(storedState().wallet.transactions[0]).toMatchObject({ type: 'purchase', amount: -690 });
+      expect(storedState().wallet.transactions.filter(({ id }) => id === 'transaction-page-test')).toHaveLength(1);
     });
   });
 

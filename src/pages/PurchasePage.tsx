@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type JSX } from 'react';
+import { useEffect, useMemo, useRef, useState, type JSX, type KeyboardEvent } from 'react';
 import { Link } from 'react-router';
 import { useApp } from '../app/AppProvider';
 import { Button } from '../components/Button';
@@ -16,14 +16,43 @@ function periodKey(period: Period): 'one' | 'three' | 'six' | 'twelve' {
   return 'twelve';
 }
 
+function moveRadioSelection<T>(
+  event: KeyboardEvent<HTMLButtonElement>,
+  values: readonly T[],
+  currentIndex: number,
+  select: (value: T) => void,
+): void {
+  let nextIndex: number | null = null;
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    nextIndex = (currentIndex + 1) % values.length;
+  } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    nextIndex = (currentIndex - 1 + values.length) % values.length;
+  } else if (event.key === 'Home') {
+    nextIndex = 0;
+  } else if (event.key === 'End') {
+    nextIndex = values.length - 1;
+  }
+  if (nextIndex === null) return;
+
+  event.preventDefault();
+  select(values[nextIndex]);
+  event.currentTarget
+    .closest('[role="radiogroup"]')
+    ?.querySelectorAll<HTMLElement>('[role="radio"]')
+    .item(nextIndex)
+    .focus();
+}
+
 export function PurchasePage(): JSX.Element {
   const { pending, purchase, setPurchaseDraft, state } = useApp();
   const { formatMoney, t } = useI18n();
   const [tariffId, setTariffId] = useState<TariffId>(state.purchaseDraft.tariffId);
   const [months, setMonths] = useState<Period>(state.purchaseDraft.months);
   const [feedback, setFeedback] = useState<'generic' | 'insufficient' | 'success' | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const submitInFlightRef = useRef(false);
   const errorRef = useRef<HTMLHeadingElement>(null);
-  const isPending = pending.includes('purchase');
+  const isPending = submitting || pending.includes('purchase');
   const tariff = getTariff(tariffId);
   const total = useMemo(() => getPrice(tariffId, months) ?? 0, [months, tariffId]);
   const shortfall = Math.max(total - state.wallet.balance, 0);
@@ -50,14 +79,22 @@ export function PurchasePage(): JSX.Element {
   };
 
   const submit = async () => {
+    if (submitInFlightRef.current) return;
+    submitInFlightRef.current = true;
+    setSubmitting(true);
     setFeedback(null);
-    await setPurchaseDraft(tariffId, months);
-    const result = await purchase(tariffId, months);
-    if (result.ok) {
-      setFeedback('success');
-      return;
+    try {
+      await setPurchaseDraft(tariffId, months);
+      const result = await purchase(tariffId, months);
+      if (result.ok) {
+        setFeedback('success');
+        return;
+      }
+      setFeedback(result.code === 'INSUFFICIENT_BALANCE' ? 'insufficient' : 'generic');
+    } finally {
+      submitInFlightRef.current = false;
+      setSubmitting(false);
     }
-    setFeedback(result.code === 'INSUFFICIENT_BALANCE' ? 'insufficient' : 'generic');
   };
 
   const tariffCopy = tariffId === 'base' ? 'base' : 'elite';
@@ -71,21 +108,30 @@ export function PurchasePage(): JSX.Element {
           <section aria-labelledby="purchase-plan-title" className="purchase-section">
             <h2 id="purchase-plan-title">{t('purchase.plan.title')}</h2>
             <div aria-label={t('purchase.accessibility.planGroup')} className="tariff-choice-grid" role="radiogroup">
-              {TARIFFS.map((item) => (
-                <TariffCard key={item.id} onSelect={(selected) => chooseTariff(selected.id)} selected={item.id === tariffId} tariff={item} />
+              {TARIFFS.map((item, index) => (
+                <TariffCard
+                  key={item.id}
+                  onKeyDown={(event) => moveRadioSelection(event, TARIFFS, index, (selected) => chooseTariff(selected.id))}
+                  onSelect={(selected) => chooseTariff(selected.id)}
+                  selected={item.id === tariffId}
+                  tabIndex={item.id === tariffId ? 0 : -1}
+                  tariff={item}
+                />
               ))}
             </div>
           </section>
           <section aria-labelledby="purchase-period-title" className="purchase-section">
             <h2 id="purchase-period-title">{t('purchase.period.title')}</h2>
             <div aria-label={t('purchase.accessibility.periodGroup')} className="period-choice-grid" role="radiogroup">
-              {PERIODS.map((period) => (
+              {PERIODS.map((period, index) => (
                 <Button
                   aria-checked={period === months}
                   className="period-choice"
                   key={period}
+                  onKeyDown={(event) => moveRadioSelection(event, PERIODS, index, choosePeriod)}
                   onClick={() => choosePeriod(period)}
                   role="radio"
+                  tabIndex={period === months ? 0 : -1}
                   variant="utility"
                 >
                   {t(`tariffs.period.${periodKey(period)}`)}

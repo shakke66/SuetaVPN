@@ -318,6 +318,10 @@
 }
 
 @media (max-width: 767px) {
+  .purchase-layout {
+    grid-template-columns: 1fr;
+  }
+
   .subscription-card,
   .purchase-section,
   .purchase-summary,
