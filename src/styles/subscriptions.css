@@ -1,0 +1,344 @@
+.page-heading > p {
+  margin-bottom: var(--space-6);
+  color: var(--color-text-muted);
+}
+
+.dashboard-page,
+.subscriptions-page,
+.purchase-page {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.subscription-card,
+.dashboard-summary-card,
+.purchase-section,
+.purchase-summary {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.subscription-card {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+}
+
+.subscription-card h2,
+.purchase-section h2,
+.purchase-summary h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.subscription-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.subscription-card__heading p,
+.subscription-card__empty {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-positive) 15%, transparent);
+  color: var(--color-positive);
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.subscription-card__details,
+.purchase-summary dl {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.subscription-card__details {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.subscription-card__details div,
+.purchase-summary dl div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.subscription-card__details dt,
+.purchase-summary dt {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+}
+
+.subscription-card__details dd,
+.purchase-summary dd {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  font-weight: 700;
+}
+
+.subscription-card__actions,
+.dashboard-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.dashboard-summary-card {
+  display: flex;
+  min-height: 132px;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-6);
+}
+
+.dashboard-summary-card p {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.dashboard-summary-card strong {
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+.purchase-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.8fr);
+  align-items: stretch;
+  gap: var(--space-6);
+}
+
+.purchase-choices {
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+}
+
+.purchase-section,
+.purchase-summary {
+  padding: var(--space-6);
+}
+
+.purchase-section {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.tariff-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.tariff-card {
+  display: grid;
+  min-height: 232px;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.tariff-card[data-selected='true'] {
+  border-color: var(--color-focus);
+  box-shadow: inset 0 0 0 1px var(--color-focus);
+}
+
+.tariff-card__topline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.tariff-card__topline strong {
+  font-size: 1.1rem;
+}
+
+.tariff-card__topline span {
+  font-weight: 800;
+}
+
+.tariff-card__description {
+  color: var(--color-text-muted);
+}
+
+.tariff-card__facts {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: auto;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.period-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.period-choice[aria-checked='true'] {
+  border-color: var(--color-focus);
+  box-shadow: inset 0 0 0 1px var(--color-focus);
+}
+
+.purchase-summary {
+  display: flex;
+  align-self: stretch;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.purchase-summary dl div:last-child {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.purchase-summary dl div:nth-child(3) dd {
+  font-size: 1.5rem;
+}
+
+.purchase-summary__action {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+
+.purchase-summary__action > .button {
+  width: 100%;
+}
+
+.purchase-summary__action [role='status'] {
+  margin: 0;
+  color: var(--color-positive);
+  font-weight: 700;
+}
+
+.purchase-error {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-control);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.purchase-error h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.purchase-error .button {
+  justify-self: start;
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: var(--color-backdrop);
+}
+
+.modal {
+  width: min(520px, 100%);
+  max-height: min(680px, calc(100vh - (var(--space-8) * 2)));
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-overlay);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal__header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.modal__body {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+
+.modal__body p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.connect-dialog__platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.connect-dialog__selection {
+  color: var(--color-text) !important;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .purchase-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .subscription-card,
+  .purchase-section,
+  .purchase-summary,
+  .dashboard-summary-card {
+    padding: var(--space-5);
+  }
+
+  .dashboard-summary-grid,
+  .tariff-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-summary-card {
+    min-height: 116px;
+  }
+
+  .subscription-card__details {
+    grid-template-columns: 1fr;
+  }
+
+  .period-choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

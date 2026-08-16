@@ -149,6 +149,7 @@ export const ru = {
     empty: 'Подписка ещё не оформлена',
     choose: 'Выбрать подписку',
     renew: 'Продлить',
+    changeTariff: 'Сменить тариф',
     expiresAt: 'Действует до {amount}',
     devices: 'Устройства: {amount}',
     traffic: 'Трафик: {amount}',
@@ -169,6 +170,7 @@ export const ru = {
     router: 'Роутер',
     download: 'Скачать приложение',
     instruction: 'Открыть инструкцию',
+    selected: 'Выбрана платформа: {platform}',
     accessibility: { platformList: 'Выбор платформы' },
   },
   purchase: {
@@ -177,7 +179,7 @@ export const ru = {
     period: { title: 'Выберите период' },
     summary: { title: 'Итого', tariff: 'Тариф', period: 'Период', total: 'К оплате', balance: 'Баланс после покупки', submit: 'Оформить подписку' },
     success: 'Подписка успешно оформлена',
-    errors: { insufficientBalance: 'На балансе недостаточно средств', topUp: 'Пополнить баланс', generic: 'Не удалось оформить подписку' },
+    errors: { insufficientBalance: 'На балансе недостаточно средств', shortfall: 'Не хватает {amount}', topUp: 'Пополнить баланс', generic: 'Не удалось оформить подписку' },
     accessibility: { planGroup: 'Выбор тарифа', periodGroup: 'Выбор периода', error: 'Ошибка оформления подписки' },
   },
   balance: {
@@ -310,14 +312,14 @@ export const en = {
     referral: { title: 'Referral program', earned: '{amount} earned', open: 'Open referrals' }, connect: 'Connect a device',
   },
   subscriptions: {
-    title: 'Subscriptions', current: 'Current subscription', empty: 'No subscription yet', choose: 'Choose a subscription', renew: 'Renew', expiresAt: 'Valid until {amount}', devices: 'Devices: {amount}', traffic: 'Traffic: {amount}',
+    title: 'Subscriptions', current: 'Current subscription', empty: 'No subscription yet', choose: 'Choose a subscription', renew: 'Renew', changeTariff: 'Change plan', expiresAt: 'Valid until {amount}', devices: 'Devices: {amount}', traffic: 'Traffic: {amount}',
     purchase: { success: 'Subscription purchased', tariffNotFound: 'Plan not found', periodNotSupported: 'Period is not supported', insufficientBalance: 'Insufficient balance' },
   },
-  connectDialog: { title: 'Connect a device', description: 'Choose a platform and follow the instructions.', windows: 'Windows', macos: 'macOS', ios: 'iPhone and iPad', android: 'Android', router: 'Router', download: 'Download app', instruction: 'Open instructions', accessibility: { platformList: 'Platform selection' } },
+  connectDialog: { title: 'Connect a device', description: 'Choose a platform and follow the instructions.', windows: 'Windows', macos: 'macOS', ios: 'iPhone and iPad', android: 'Android', router: 'Router', download: 'Download app', instruction: 'Open instructions', selected: 'Selected platform: {platform}', accessibility: { platformList: 'Platform selection' } },
   purchase: {
     title: 'Purchase subscription', plan: { title: 'Choose a plan', selected: '{name} selected' }, period: { title: 'Choose a period' },
     summary: { title: 'Summary', tariff: 'Plan', period: 'Period', total: 'Total', balance: 'Balance after purchase', submit: 'Purchase subscription' },
-    success: 'Subscription purchased successfully', errors: { insufficientBalance: 'Insufficient balance', topUp: 'Top up balance', generic: 'Could not purchase subscription' }, accessibility: { planGroup: 'Plan selection', periodGroup: 'Period selection', error: 'Subscription purchase error' },
+    success: 'Subscription purchased successfully', errors: { insufficientBalance: 'Insufficient balance', shortfall: 'Short by {amount}', topUp: 'Top up balance', generic: 'Could not purchase subscription' }, accessibility: { planGroup: 'Plan selection', periodGroup: 'Period selection', error: 'Subscription purchase error' },
   },
   balance: {
     title: 'Balance', current: 'Current balance',

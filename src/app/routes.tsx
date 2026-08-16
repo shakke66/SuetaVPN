@@ -2,7 +2,10 @@ import { Navigate, Route, Routes } from 'react-router';
 import { AppShell } from '../layouts/AppShell';
 import { PublicLayout } from '../layouts/PublicLayout';
 import { AuthPage } from '../pages/AuthPage';
+import { DashboardPage } from '../pages/DashboardPage';
 import { LandingPage } from '../pages/LandingPage';
+import { PurchasePage } from '../pages/PurchasePage';
+import { SubscriptionsPage } from '../pages/SubscriptionsPage';
 import { useI18n } from '../i18n/I18nProvider';
 import type { MessageKey } from '../i18n/messages';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -43,7 +46,10 @@ export function AppRoutes() {
       <Route path="welcome" element={<Navigate to="/" replace />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
-          {PROTECTED_ROUTES.map(({ path, titleKey }) => (
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/subscriptions" element={<SubscriptionsPage />} />
+          <Route path="/purchase" element={<PurchasePage />} />
+          {PROTECTED_ROUTES.filter(({ path }) => !['/dashboard', '/subscriptions', '/purchase'].includes(path)).map(({ path, titleKey }) => (
             <Route key={path} path={path} element={<CabinetPage titleKey={titleKey} />} />
           ))}
         </Route>
