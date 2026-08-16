@@ -5,6 +5,8 @@ import { AuthPage } from '../pages/AuthPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { LandingPage } from '../pages/LandingPage';
 import { PurchasePage } from '../pages/PurchasePage';
+import { BalancePage } from '../pages/BalancePage';
+import { ReferralPage } from '../pages/ReferralPage';
 import { SubscriptionsPage } from '../pages/SubscriptionsPage';
 import { useI18n } from '../i18n/I18nProvider';
 import type { MessageKey } from '../i18n/messages';
@@ -49,7 +51,9 @@ export function AppRoutes() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/subscriptions" element={<SubscriptionsPage />} />
           <Route path="/purchase" element={<PurchasePage />} />
-          {PROTECTED_ROUTES.filter(({ path }) => !['/dashboard', '/subscriptions', '/purchase'].includes(path)).map(({ path, titleKey }) => (
+          <Route path="/balance" element={<BalancePage />} />
+          <Route path="/referral" element={<ReferralPage />} />
+          {PROTECTED_ROUTES.filter(({ path }) => !['/dashboard', '/subscriptions', '/purchase', '/balance', '/referral'].includes(path)).map(({ path, titleKey }) => (
             <Route key={path} path={path} element={<CabinetPage titleKey={titleKey} />} />
           ))}
         </Route>

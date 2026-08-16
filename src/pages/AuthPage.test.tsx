@@ -69,7 +69,7 @@ describe('protected hash routing', () => {
     ['/subscriptions', 'Подписки'],
     ['/purchase', 'Оформление подписки'],
     ['/balance', 'Баланс'],
-    ['/referral', 'Рефералы'],
+    ['/referral', 'Реферальная программа'],
     ['/support', 'Поддержка'],
     ['/info', 'Информация'],
     ['/profile', 'Профиль'],

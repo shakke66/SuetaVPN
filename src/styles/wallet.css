@@ -1,0 +1,213 @@
+.wallet-page {
+  display: grid;
+  gap: clamp(var(--space-4), 3vw, var(--space-8));
+  width: 100%;
+}
+
+.page-heading p {
+  max-width: 620px;
+  margin-bottom: 0;
+  color: var(--color-text-muted);
+}
+
+.wallet-card {
+  padding: clamp(var(--space-5), 4vw, var(--space-8));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.wallet-card h2 {
+  margin-bottom: var(--space-4);
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+}
+
+.wallet-balance-card {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.wallet-balance-card span,
+.referral-stats dt {
+  color: var(--color-text-muted);
+}
+
+.wallet-balance-card p,
+.referral-stats dd {
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.wallet-balance-card h2 {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+.wallet-balance-card p {
+  margin: 0;
+}
+
+.wallet-inline-form,
+.wallet-top-up-action,
+.referral-link__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.wallet-inline-form input,
+.wallet-amount-controls input[type='number'] {
+  min-width: min(100%, 240px);
+  min-height: var(--control-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-field);
+}
+
+.wallet-inline-form input {
+  flex: 1 1 220px;
+}
+
+.wallet-amount-controls {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.wallet-amount-controls label {
+  font-weight: 700;
+}
+
+.wallet-amount-controls input[type='range'] {
+  width: min(100%, 480px);
+  accent-color: var(--color-accent);
+}
+
+.wallet-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.wallet-methods [role='radio'][aria-checked='true'] {
+  border-color: var(--color-text);
+  background: var(--color-surface-raised);
+}
+
+.wallet-top-up-action {
+  justify-content: space-between;
+  margin-top: var(--space-5);
+}
+
+.wallet-top-up-action p,
+.wallet-card > p[role],
+.referral-link > p[role] {
+  margin: 0;
+}
+
+.wallet-card [role='alert'] {
+  color: var(--color-danger);
+}
+
+.wallet-card [role='status'],
+.wallet-amount--positive {
+  color: var(--color-positive);
+}
+
+.wallet-history__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wallet-history__item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.wallet-history__item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.wallet-history__item div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.wallet-history__item div:last-child {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.wallet-history__item span,
+.wallet-history__item time,
+.wallet-history__empty {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.referral-stats {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.referral-stats__item {
+  min-width: 0;
+}
+
+.referral-stats dd {
+  margin-top: var(--space-3);
+  font-size: clamp(1.65rem, 4vw, 2.5rem);
+}
+
+.referral-link__value {
+  overflow-wrap: anywhere;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 767px) {
+  .wallet-inline-form,
+  .wallet-top-up-action,
+  .referral-link__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wallet-inline-form .button,
+  .wallet-top-up-action .button,
+  .referral-link__actions .button {
+    width: 100%;
+  }
+
+  .referral-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
