@@ -1,4 +1,4 @@
-import { useRef, useState, type JSX } from 'react';
+import { useRef, useState, type JSX, type KeyboardEvent } from 'react';
 import { useApp } from '../app/AppProvider';
 import { Button } from '../components/Button';
 import { TransactionHistory } from '../components/TransactionHistory';
@@ -7,11 +7,38 @@ import { useI18n } from '../i18n/I18nProvider';
 
 const MIN_AMOUNT = 100;
 const MAX_AMOUNT = 50_000;
+const PAYMENT_METHODS = ['sbp', 'card'] as const satisfies readonly PaymentMethod[];
 
 type Feedback = { kind: 'error' | 'success'; message: string } | null;
 
 function isValidAmount(value: number): boolean {
   return Number.isFinite(value) && value >= MIN_AMOUNT && value <= MAX_AMOUNT;
+}
+
+function movePaymentMethodSelection(
+  event: KeyboardEvent<HTMLButtonElement>,
+  currentIndex: number,
+  select: (method: PaymentMethod) => void,
+): void {
+  let nextIndex: number | null = null;
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    nextIndex = (currentIndex + 1) % PAYMENT_METHODS.length;
+  } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    nextIndex = (currentIndex - 1 + PAYMENT_METHODS.length) % PAYMENT_METHODS.length;
+  } else if (event.key === 'Home') {
+    nextIndex = 0;
+  } else if (event.key === 'End') {
+    nextIndex = PAYMENT_METHODS.length - 1;
+  }
+  if (nextIndex === null) return;
+
+  event.preventDefault();
+  select(PAYMENT_METHODS[nextIndex]);
+  event.currentTarget
+    .closest('[role="radiogroup"]')
+    ?.querySelectorAll<HTMLElement>('[role="radio"]')
+    .item(nextIndex)
+    .focus();
 }
 
 export function BalancePage(): JSX.Element {
@@ -120,10 +147,11 @@ export function BalancePage(): JSX.Element {
           />
         </div>
         <div aria-label={t('balance.topUp.methodLabel')} className="wallet-methods" role="radiogroup">
-          {(['sbp', 'card'] as const).map((item) => (
+          {PAYMENT_METHODS.map((item, index) => (
             <Button
               aria-checked={method === item}
               key={item}
+              onKeyDown={(event) => movePaymentMethodSelection(event, index, setMethod)}
               onClick={() => setMethod(item)}
               role="radio"
               tabIndex={method === item ? 0 : -1}

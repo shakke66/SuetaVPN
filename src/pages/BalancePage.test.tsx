@@ -83,6 +83,28 @@ describe('balance flow', () => {
     expect(screen.queryByLabelText(/номер карты|card number/i)).not.toBeInTheDocument();
   });
 
+  it('moves keyboard selection between both payment methods', async () => {
+    const user = userEvent.setup();
+    openBalance();
+
+    const methodGroup = await screen.findByRole('radiogroup', { name: 'Способ оплаты' });
+    const sbp = within(methodGroup).getByRole('radio', { name: 'СБП' });
+    const card = within(methodGroup).getByRole('radio', { name: 'Банковская карта' });
+
+    sbp.focus();
+    await user.keyboard('{ArrowRight}');
+    expect(card).toHaveFocus();
+    expect(card).toHaveAttribute('aria-checked', 'true');
+
+    await user.keyboard('{Home}');
+    expect(sbp).toHaveFocus();
+    expect(sbp).toHaveAttribute('aria-checked', 'true');
+
+    await user.keyboard('{End}');
+    expect(card).toHaveFocus();
+    expect(card).toHaveAttribute('aria-checked', 'true');
+  });
+
   it('locks duplicate top-up submission and atomically updates balance and history', async () => {
     const localAdapters = createLocalAdapters({
       delayMs: 0,
