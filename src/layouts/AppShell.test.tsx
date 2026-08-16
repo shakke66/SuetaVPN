@@ -19,6 +19,7 @@ interface TelegramWindow extends Window {
 function activeState(): AppStateV2 {
   const state = createInitialState();
   state.session = { active: true };
+  state.preferences.onboardingCompleted = true;
   state.wallet.transactions = [
     ...state.wallet.transactions,
     {

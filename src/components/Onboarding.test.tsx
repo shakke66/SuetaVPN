@@ -51,6 +51,26 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+it('isolates the shell while onboarding geometry is not yet measurable', async () => {
+  const state = createInitialState();
+  state.session.active = true;
+  state.preferences.onboardingCompleted = false;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  window.location.hash = '#/dashboard';
+
+  render(<App adapters={createLocalAdapters({ delayMs: 0 })} />);
+
+  expect(await screen.findByTestId('onboarding-overlay')).toHaveAttribute('data-ready', 'false');
+  for (const region of [
+    screen.getByTestId('app-shell-header'),
+    document.getElementById('main-content'),
+    document.querySelector('.bottom-navigation'),
+  ]) {
+    expect(region).toHaveAttribute('aria-hidden', 'true');
+    expect(region).toHaveAttribute('inert');
+  }
+});
+
 it('keeps one hidden portal overlay until geometry exists and persists completion without a 0,0 flash', async () => {
   const user = userEvent.setup();
   const state = createInitialState();

@@ -48,6 +48,11 @@ function renderApp({
   strictMode?: boolean;
 } = {}) {
   setHash(path);
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    const stored = createInitialState();
+    stored.preferences.onboardingCompleted = true;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  }
   const adapters = createLocalAdapters({
     delayMs,
     now,
@@ -76,6 +81,7 @@ describe('protected hash routing', () => {
   ])('declares the protected %s child route', async (path, heading) => {
     const stored = createInitialState();
     stored.session = { active: true };
+    stored.preferences.onboardingCompleted = true;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 
     renderApp({ path });
@@ -92,6 +98,7 @@ describe('protected hash routing', () => {
     async (active, heading, expectedHash) => {
       const stored = createInitialState();
       stored.session = { active };
+      stored.preferences.onboardingCompleted = true;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 
       renderApp({ path: '/unknown' });
@@ -249,6 +256,7 @@ describe('Telegram Mini App authorization', () => {
   it('auto-authorizes on the public route without forcing navigation', async () => {
     const stored = createInitialState();
     stored.session = { active: false };
+    stored.preferences.onboardingCompleted = true;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     (window as TelegramWindow).Telegram = {
       WebApp: {

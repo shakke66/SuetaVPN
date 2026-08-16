@@ -82,7 +82,7 @@ export function AppShell(): JSX.Element {
   const notificationsModal = notificationsOpen
     && notificationOpenerRef.current?.dataset.notificationOpener === 'drawer';
   const onboardingOpen = !state.preferences.onboardingCompleted;
-  const backgroundInert = notificationsModal || (onboardingOpen && onboardingReady);
+  const backgroundInert = notificationsModal || onboardingOpen;
   const profileRoute = location.pathname === '/profile';
 
   useLayoutEffect(() => {

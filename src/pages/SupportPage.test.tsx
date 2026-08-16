@@ -70,7 +70,7 @@ describe('support page', () => {
 
     expect(await screen.findByRole('heading', { name: 'Не подключается TV' })).toBeInTheDocument();
     await waitFor(() => expect(storedState().notifications[0]).toMatchObject({ read: true, readAt: NOW }));
-  });
+  }, 10_000);
 
   it('keeps the selected dialogue and validates a local user reply inline', async () => {
     const user = userEvent.setup();

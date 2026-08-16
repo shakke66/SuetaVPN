@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
 import { STORAGE_KEY } from '../domain/migrations';
+import { createInitialState } from '../domain/state';
 import type { AppStateV2 } from '../domain/types';
 import { App } from './App';
 
@@ -15,6 +16,11 @@ function persistedState(): AppStateV2 {
 }
 
 function renderApplication() {
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    const stored = createInitialState();
+    stored.preferences.onboardingCompleted = true;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  }
   return render(
     <App adapters={createLocalAdapters({
       delayMs: 0,
