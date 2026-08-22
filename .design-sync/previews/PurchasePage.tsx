@@ -1,0 +1,4 @@
+import { PurchasePage } from 'suetavpn';
+
+/** Экран целиком, как он выглядит в приложении. */
+export const Screen = () => <PurchasePage />;

@@ -60,7 +60,7 @@ describe('dashboard and subscriptions', () => {
         trafficUsed: 7,
         trafficLimit: 40,
         devicesUsed: 1,
-        devicesLimit: 6,
+        devicesLimit: 6, autoRenew: true,
       };
     });
 
@@ -176,7 +176,7 @@ describe('purchase flow', () => {
     fireEvent.click(submit);
     await waitFor(() => expect(purchaseCalls).toBe(1));
     releasePurchase();
-    expect(await screen.findByRole('status')).toHaveTextContent('Подписка успешно оформлена');
+    expect(await screen.findByText('Подписка успешно оформлена')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(storedState().wallet.balance).toBe(1_310);
@@ -217,12 +217,12 @@ describe('purchase flow', () => {
         trafficUsed: 18,
         trafficLimit: 0,
         devicesUsed: 2,
-        devicesLimit: 4,
+        devicesLimit: 4, autoRenew: true,
       };
     });
 
     await user.click(await screen.findByRole('button', { name: 'Оформить подписку' }));
-    expect(await screen.findByRole('status')).toHaveTextContent('Подписка успешно оформлена');
+    expect(await screen.findByText('Подписка успешно оформлена')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(storedState().subscription).toMatchObject({

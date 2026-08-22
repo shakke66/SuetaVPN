@@ -1,0 +1,24 @@
+/* Единая длительность наведения для кнопок лендинга.
+   Кнопка первого экрана поднимается на hover через transform, но transform не входил
+   в список анимируемых свойств — подъём срабатывал мгновенно. Цвета не переопределяются. */
+
+.landing-page button,
+.landing-page .button,
+.landing-page .profile-control {
+  transition-property: color, border-color, background-color, box-shadow, opacity, transform;
+  transition-duration: 320ms;
+  transition-timing-function: var(--motion-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-page button,
+  .landing-page .button,
+  .landing-page .profile-control {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* Кнопки первого экрана выравниваются по левому краю текста. */
+@media (min-width: 1024px) {
+  .landing-page .landing-hero__actions { justify-content: flex-start; }
+}

@@ -38,39 +38,38 @@ beforeEach(() => {
 });
 
 describe('balance flow', () => {
-  it('renders the vertical balance, promo, top-up and history order with history collapsed', async () => {
+  it('puts the top-up form first and keeps balance, promo and open history beside it', async () => {
     openBalance();
 
-    const current = await screen.findByRole('heading', { name: 'Текущий баланс' });
+    const topUp = await screen.findByRole('heading', { name: 'Пополнить баланс' });
+    const current = screen.getByRole('heading', { name: 'Текущий баланс' });
     const promo = screen.getByRole('heading', { name: 'Промокод' });
-    const topUp = screen.getByRole('heading', { name: 'Пополнить баланс' });
     const history = screen.getByRole('button', { name: 'История операций' });
 
+    expect(topUp.compareDocumentPosition(current) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(current.compareDocumentPosition(promo) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(promo.compareDocumentPosition(topUp) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(topUp.compareDocumentPosition(history) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(history).toHaveAttribute('aria-expanded', 'false');
+    expect(promo.compareDocumentPosition(history) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(history).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('validates the 100–50000 range and synchronizes number and range amount inputs', async () => {
+  it('validates the 100–50000 range and drives the amount from presets and steppers', async () => {
     const user = userEvent.setup();
     openBalance();
 
     const number = await screen.findByLabelText('Сумма пополнения');
-    const range = screen.getByLabelText('Выбрать сумму ползунком');
-    expect(number).toHaveValue(100);
-    expect(range).toHaveValue('100');
+    expect(number).toHaveValue(1000);
 
-    fireEvent.change(range, { target: { value: '420' } });
-    expect(number).toHaveValue(420);
-    await user.clear(number);
-    await user.type(number, '760');
-    expect(range).toHaveValue('760');
+    await user.click(screen.getByRole('button', { name: /^500\s₽$/ }));
+    expect(number).toHaveValue(500);
+    await user.click(screen.getByRole('button', { name: /^Увеличить на 500\s₽$/ }));
+    expect(number).toHaveValue(1000);
+    await user.click(screen.getByRole('button', { name: /^Уменьшить на 500\s₽$/ }));
+    expect(number).toHaveValue(500);
 
     await user.clear(number);
     await user.type(number, '99');
     await user.click(screen.getByRole('button', { name: /Пополнить на/ }));
-    expect(screen.getByRole('alert')).toHaveTextContent('Введите сумму от 100 до 50 000 ₽');
+    expect(await screen.findByText('Введите сумму от 100 до 50 000 ₽')).toBeInTheDocument();
   });
 
   it('offers only SBP and bank card methods without payment credential fields', async () => {
@@ -127,15 +126,16 @@ describe('balance flow', () => {
     };
     openBalance((state) => { state.wallet.balance = 790; }, adapters);
 
-    const submit = await screen.findByRole('button', { name: /Пополнить на 100/ });
+    fireEvent.change(await screen.findByLabelText('Сумма пополнения'), { target: { value: '100' } });
+    const submit = screen.getByRole('button', { name: /Пополнить на 100/ });
     fireEvent.click(submit);
     expect(submit).toBeDisabled();
     fireEvent.click(submit);
     await waitFor(() => expect(topUpCalls).toBe(1));
     releaseTopUp();
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Баланс пополнен на 100 ₽');
-    expect(screen.getByText('890 ₽')).toBeInTheDocument();
+    expect(await screen.findByText('Баланс пополнен на 100 ₽')).toBeInTheDocument();
+    expect(within(screen.getByRole('main')).getByText('890 ₽')).toBeInTheDocument();
     await userEvent.setup().click(screen.getByRole('button', { name: 'История операций' }));
     expect(await screen.findAllByText('Пополнение через СБП')).toHaveLength(2);
     await waitFor(() => {
@@ -155,26 +155,27 @@ describe('balance flow', () => {
 
     await user.type(promo, 'unknown');
     await user.click(screen.getByRole('button', { name: 'Применить' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Промокод не найден');
+    expect(await screen.findByText('Промокод не найден')).toBeInTheDocument();
 
     await user.clear(promo);
     await user.type(promo, 'sueta10');
     await user.click(screen.getByRole('button', { name: 'Применить' }));
-    expect(await screen.findByRole('status')).toHaveTextContent('Промокод применён: +100 ₽');
+    expect(await screen.findByText('Промокод применён: +100 ₽')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Применить' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Промокод уже использован');
+    expect(await screen.findByText('Промокод уже использован')).toBeInTheDocument();
   });
 
   it('renders persisted balance and transactions after reload', async () => {
     const user = userEvent.setup();
     const first = openBalance();
-    await user.click(await screen.findByRole('button', { name: /Пополнить на 100/ }));
-    await screen.findByRole('status');
+    fireEvent.change(await screen.findByLabelText('Сумма пополнения'), { target: { value: '100' } });
+    await user.click(screen.getByRole('button', { name: /Пополнить на 100/ }));
+    await screen.findByText('Баланс пополнен на 100 ₽');
     first.unmount();
 
     render(<App adapters={createLocalAdapters({ delayMs: 0, now: () => NOW })} />);
-    expect(await screen.findByText('890 ₽')).toBeInTheDocument();
+    expect(within(await screen.findByRole('main')).getByText('890 ₽')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'История операций' }));
     expect(await screen.findAllByText('Пополнение через СБП')).toHaveLength(2);
   });

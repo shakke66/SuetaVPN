@@ -1,0 +1,107 @@
+{
+  "projectId": "e7964b06-9b20-408f-8fed-133ce58c6dea",
+  "shape": "package",
+  "pkg": "suetavpn",
+  "globalName": "SuetaVPN",
+  "buildCmd": "npm run build",
+  "srcDir": "src",
+  "tsconfig": "tsconfig.app.json",
+  "tokensGlob": "src/styles/tokens.css",
+  "provider": {
+    "component": "PreviewProvider"
+  },
+  "componentSrcMap": {
+    "App": null,
+    "AppRoutes": null,
+    "ProtectedRoute": null,
+    "RouteTransition": null,
+    "PublicLayout": null
+  },
+  "overrides": {
+    "LandingPage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "DashboardPage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "PurchasePage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "BalancePage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "SubscriptionsPage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "SupportPage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "InfoPage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "ReferralPage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "ProfilePage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "AuthPage": {
+      "cardMode": "single",
+      "primaryStory": "Screen",
+      "viewport": "1440x900"
+    },
+    "Modal": {
+      "cardMode": "single",
+      "viewport": "1100x760"
+    },
+    "Drawer": {
+      "cardMode": "single",
+      "viewport": "1100x820"
+    },
+    "ConnectDeviceDialog": {
+      "cardMode": "single",
+      "viewport": "1100x700"
+    },
+    "Onboarding": {
+      "cardMode": "single",
+      "viewport": "1100x620"
+    },
+    "NotificationPopover": {
+      "cardMode": "single",
+      "viewport": "1100x620",
+      "primaryStory": "WithNotifications"
+    },
+    "AppShell": {
+      "cardMode": "single",
+      "viewport": "1440x760"
+    },
+    "ToastRegion": {
+      "cardMode": "single",
+      "primaryStory": "Stacked",
+      "viewport": "900x420"
+    },
+    "BottomNavigation": {
+      "cardMode": "single",
+      "viewport": "430x520"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}

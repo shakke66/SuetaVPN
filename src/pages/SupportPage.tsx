@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type JSX } from 'react';
 import { useLocation } from 'react-router';
 import { useApp } from '../app/AppProvider';
+import { useToast } from '../app/ToastProvider';
 import { Button } from '../components/Button';
 import { Modal } from '../components/Modal';
-import { ToastRegion, type ToastMessage } from '../components/ToastRegion';
 import type { Ticket } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
 
@@ -39,6 +39,7 @@ function TicketConversation({ ticket }: { ticket: Ticket }): JSX.Element {
 
 export function SupportPage(): JSX.Element {
   const { createTicket, pending, replyTicket, state } = useApp();
+  const { showToast } = useToast();
   const { formatDate, t } = useI18n();
   const location = useLocation();
   const createTriggerRef = useRef<HTMLButtonElement>(null);
@@ -50,7 +51,6 @@ export function SupportPage(): JSX.Element {
   const [ticketErrors, setTicketErrors] = useState<TicketErrors>({});
   const [reply, setReply] = useState('');
   const [replyError, setReplyError] = useState('');
-  const [toast, setToast] = useState<ToastMessage | null>(null);
   const selectedTicket = useMemo(
     () => state.tickets.find(({ id }) => id === selectedTicketId) ?? null,
     [selectedTicketId, state.tickets],
@@ -82,7 +82,7 @@ export function SupportPage(): JSX.Element {
     setMessage('');
     setAttachmentName('');
     setCreateOpen(false);
-    setToast({ id: 'ticket-created', kind: 'success', text: t('support.create.success') });
+    showToast({ kind: 'success', text: t('support.create.success') });
   };
 
   const submitReply = async (event: FormEvent<HTMLFormElement>) => {
@@ -99,7 +99,7 @@ export function SupportPage(): JSX.Element {
       return;
     }
     setReply('');
-    setToast({ id: 'ticket-replied', kind: 'success', text: t('support.reply.success') });
+    showToast({ kind: 'success', text: t('support.reply.success') });
   };
 
   return (
@@ -162,7 +162,14 @@ export function SupportPage(): JSX.Element {
               </form>
             </>
           ) : (
-            <div className="ticket-detail__empty" />
+            <div className="ticket-detail__empty">
+              <span aria-hidden="true" className="ticket-detail__empty-icon">?</span>
+              <h2>{t('support.tickets.emptyDetail')}</h2>
+              <p>{t('support.create.messagePlaceholder')}</p>
+              <Button onClick={() => setCreateOpen(true)} variant="primary">
+                {t('support.tickets.open')}
+              </Button>
+            </div>
           )}
         </article>
       </div>
@@ -181,7 +188,6 @@ export function SupportPage(): JSX.Element {
         </form>
       </Modal>
 
-      <ToastRegion messages={toast ? [toast] : []} onDismiss={() => setToast(null)} />
     </section>
   );
 }

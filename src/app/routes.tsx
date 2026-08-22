@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router';
+import { Navigate, Outlet, Route, Routes } from 'react-router';
 import { AppShell } from '../layouts/AppShell';
 import { PublicLayout } from '../layouts/PublicLayout';
 import { AuthPage } from '../pages/AuthPage';
@@ -26,6 +26,16 @@ export const PROTECTED_ROUTES = [
   { path: '/profile', titleKey: 'navigation.profile' },
 ] as const satisfies ReadonlyArray<Readonly<{ path: string; titleKey: MessageKey }>>;
 
+/**
+ * Legal information is reachable from the public landing footer. Keep the
+ * cabinet shell for an active session, while allowing signed-out visitors to
+ * read the same document without being redirected to authentication.
+ */
+function InfoRouteLayout() {
+  const { state } = useApp();
+  return state.session.active ? <AppShell /> : <Outlet />;
+}
+
 function UnknownRoute() {
   const { state } = useApp();
   return <Navigate to={state.session.active ? '/dashboard' : '/'} replace />;
@@ -36,6 +46,9 @@ export function AppRoutes() {
     <Routes>
       <Route element={<PublicLayout />}>
         <Route index element={<LandingPage />} />
+        <Route element={<InfoRouteLayout />}>
+          <Route path="/info" element={<InfoPage />} />
+        </Route>
       </Route>
       <Route path="auth" element={<AuthPage />} />
       <Route path="welcome" element={<Navigate to="/" replace />} />
@@ -47,7 +60,6 @@ export function AppRoutes() {
           <Route path="/balance" element={<BalancePage />} />
           <Route path="/referral" element={<ReferralPage />} />
           <Route path="/support" element={<SupportPage />} />
-          <Route path="/info" element={<InfoPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>

@@ -52,7 +52,6 @@ const representativeKeys = [
   'support.create.subjectLabel',
   'support.reply.messageLabel',
   'ticketNotifications.ticketCreated',
-  'info.tabs.faq',
   'info.tabs.agreement',
   'info.tabs.privacy',
   'profile.title',

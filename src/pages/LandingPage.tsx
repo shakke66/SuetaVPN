@@ -5,11 +5,19 @@ import { Accordion, type AccordionItem } from '../components/Accordion';
 import { Brand } from '../components/Brand';
 import { Button } from '../components/Button';
 import { Icon, type IconName } from '../components/Icon';
+import { LanguageMenu } from '../components/LanguageMenu';
+import { HeroScene } from '../components/HeroScene';
+import { LocationsSection } from '../components/LocationsSection';
+import { ScrollReveal } from '../components/ScrollReveal';
+import logo from '../assets/suetavpn-logo.png';
 import { TARIFFS } from '../domain/tariffs';
 import type { Tariff, TariffId } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
 import type { MessageKey } from '../i18n/messages';
 import '../styles/landing.css';
+import '../styles/landing-motion.css';
+import '../styles/hero-scene.css';
+import '../styles/locations.css';
 
 const TARIFF_COPY = {
   base: {
@@ -48,20 +56,17 @@ const FEATURE_ITEMS = [
   ['subscriptions', 'landing.features.speed'],
   ['globe', 'landing.features.locations'],
   ['dashboard', 'landing.features.simplicity'],
-  ['info', 'landing.features.traffic'],
 ] as const satisfies ReadonlyArray<readonly [IconName, MessageKey]>;
-
-const REVIEW_KEYS = [
-  'landing.reviews.first',
-  'landing.reviews.second',
-  'landing.reviews.third',
-] as const satisfies readonly MessageKey[];
 
 function focusSection(event: MouseEvent<HTMLAnchorElement>, sectionId: string) {
   event.preventDefault();
   const section = document.getElementById(sectionId);
   if (!section) return;
-  section.scrollIntoView?.({ block: 'start' });
+  // Anchor navigation must never land on a still-hidden reveal block.
+  section.dataset.revealState = 'visible';
+  section.classList.add('is-visible');
+  const heading = section.querySelector<HTMLElement>('.landing-section__heading');
+  (heading ?? section).scrollIntoView?.({ block: 'start' });
   section.focus({ preventScroll: true });
 }
 
@@ -73,26 +78,63 @@ function tariffTraffic(tariff: Tariff, t: ReturnType<typeof useI18n>['t']): stri
 export function LandingPage(): JSX.Element {
   const navigate = useNavigate();
   const { state, setPurchaseDraft, setTheme } = useApp();
-  const { formatMoney, locale, setLocale, t } = useI18n();
+  const { formatDate, formatMoney, t } = useI18n();
   const [selectingTariff, setSelectingTariff] = useState<TariffId | null>(null);
+  const heroTitleWords = t('landing.hero.title').split(/\s+/);
+  const heroTitleSplit = Math.max(1, Math.ceil(heroTitleWords.length / 2));
+  const heroTitleLead = heroTitleWords.slice(0, heroTitleSplit).join(' ');
+  const heroTitleAccent = heroTitleWords.slice(heroTitleSplit).join(' ');
   const nextTheme = state.preferences.theme === 'dark' ? 'light' : 'dark';
   const themeLabel = state.preferences.theme === 'dark'
     ? t('shell.theme.switchToLight')
     : t('shell.theme.switchToDark');
-  const localeLabel = locale === 'ru'
-    ? t('shell.language.switchToEnglish')
-    : t('shell.language.switchToRussian');
+  const subscription = state.subscription;
+  const currentTariff = TARIFFS.find((item) => item.id === subscription?.tariffId) ?? TARIFFS[0];
+  const currentTariffCopy = TARIFF_COPY[currentTariff.id];
+  const trafficUsed = subscription?.trafficUsed ?? 0;
+  const trafficLimit = subscription?.trafficLimit ?? 0;
+  const trafficPercent = trafficLimit > 0
+    ? Math.min(100, Math.round((trafficUsed / trafficLimit) * 100))
+    : Math.min(100, Math.round(trafficUsed));
+  const trafficLabel = currentTariff.traffic.kind === 'unlimited'
+    ? t(currentTariffCopy.traffic)
+    : t(currentTariffCopy.traffic, { amount: currentTariff.traffic.bypassGb });
+  const subscriptionStatus = subscription
+    ? (subscription.status === 'active' ? t('common.status.active') : t('common.status.expired'))
+    : t('common.empty');
+  const devicesLabel = t('subscriptions.devices', { amount: '' }).replace(/[:：]\s*$/, '');
+  const trafficTitle = t('subscriptions.traffic', { amount: '' }).replace(/[:：]\s*$/, '');
 
   const faqItems: readonly AccordionItem[] = [
     {
-      id: 'connection',
-      title: t('landing.faq.connectQuestion'),
-      content: <p>{t('landing.faq.connectAnswer')}</p>,
+      id: 'service',
+      title: t('landing.faq.serviceQuestion'),
+      content: <p>{t('landing.faq.serviceAnswer')}</p>,
     },
     {
-      id: 'payment',
-      title: t('landing.faq.paymentQuestion'),
-      content: <p>{t('landing.faq.paymentAnswer')}</p>,
+      id: 'getting-started',
+      title: t('landing.faq.startQuestion'),
+      content: <p>{t('landing.faq.startAnswer')}</p>,
+    },
+    {
+      id: 'devices',
+      title: t('landing.faq.devicesQuestion'),
+      content: <p>{t('landing.faq.devicesAnswer')}</p>,
+    },
+    {
+      id: 'protocol',
+      title: t('landing.faq.protocolQuestion'),
+      content: <p>{t('landing.faq.protocolAnswer')}</p>,
+    },
+    {
+      id: 'refund',
+      title: t('landing.faq.refundQuestion'),
+      content: <p>{t('landing.faq.refundAnswer')}</p>,
+    },
+    {
+      id: 'logs',
+      title: t('landing.faq.logsQuestion'),
+      content: <p>{t('landing.faq.logsAnswer')}</p>,
     },
   ];
 
@@ -115,9 +157,7 @@ export function LandingPage(): JSX.Element {
             <Button aria-label={themeLabel} iconOnly onClick={() => void setTheme(nextTheme)} variant="utility">
               <Icon name={nextTheme === 'light' ? 'sun' : 'moon'} />
             </Button>
-            <Button aria-label={localeLabel} className="locale-control" onClick={() => setLocale(locale === 'ru' ? 'en' : 'ru')} variant="utility">
-              {locale === 'ru' ? 'EN' : 'RU'}
-            </Button>
+            <LanguageMenu />
             <Link className="button button--ghost landing-header__sign-in" to="/auth">{t('landing.header.signIn')}</Link>
             <Link className="button button--primary landing-header__cta" to="/auth">
               {t('landing.header.getStarted')}
@@ -128,20 +168,45 @@ export function LandingPage(): JSX.Element {
 
       <main>
         <section aria-labelledby="landing-hero-title" className="landing-hero">
-          <p className="landing-eyebrow">{t('landing.hero.eyebrow')}</p>
-          <h1 id="landing-hero-title">{t('landing.hero.title')}</h1>
-          <p className="landing-hero__description">{t('landing.hero.description')}</p>
-          <div className="landing-hero__actions">
-            <a className="button button--primary" href="#tariffs" onClick={(event) => focusSection(event, 'tariffs')}>
-              {t('landing.hero.primaryAction')}
-            </a>
-            <a className="button button--ghost" href="#steps" onClick={(event) => focusSection(event, 'steps')}>
-              {t('landing.hero.secondaryAction')}
-            </a>
+          <div className="landing-hero__grid">
+            <div className="landing-hero__content">
+              <div className="landing-hero__intro">
+                <p className="landing-eyebrow">{t('landing.hero.eyebrow')}</p>
+                <h1 id="landing-hero-title">
+                  <span className="landing-hero__title-lead">{heroTitleLead}</span>{' '}
+                  <span className="landing-hero__title-accent">{heroTitleAccent}</span>
+                </h1>
+                <p className="landing-hero__description">{t('landing.hero.description')}</p>
+              </div>
+              <div className="landing-hero__actions">
+                <a className="button button--primary" href="#tariffs" onClick={(event) => focusSection(event, 'tariffs')}>
+                  {t('landing.hero.primaryAction')}
+                </a>
+                <a className="button button--ghost" href="#steps" onClick={(event) => focusSection(event, 'steps')}>
+                  {t('landing.hero.secondaryAction')}
+                </a>
+              </div>
+              <div aria-label={t('landing.trust.title')} className="landing-hero__meta">
+                <span><Icon name="dashboard" size={16} />{t('landing.trust.secure')}</span>
+                <span><Icon name="subscriptions" size={16} />{t('landing.trust.devices')}</span>
+                <span><Icon name="support" size={16} />{t('landing.trust.support')}</span>
+              </div>
+            </div>
+
+            <div className="landing-cabinet-preview" data-testid="landing-cabinet-preview">
+              <aside
+                aria-label={t('landing.accessibility.heroArtwork')}
+                className="hero-preview"
+                data-testid="landing-hero-preview"
+              >
+                <span aria-hidden="true" className="hero-preview__orb" />
+                <HeroScene />
+              </aside>
+            </div>
           </div>
         </section>
 
-        <section aria-labelledby="landing-trust-title" className="landing-section landing-trust">
+        <ScrollReveal as="section" aria-labelledby="landing-trust-title" className="landing-section landing-trust" delay={0}>
           <div className="landing-section__heading">
             <h2 id="landing-trust-title">{t('landing.trust.title')}</h2>
           </div>
@@ -150,25 +215,17 @@ export function LandingPage(): JSX.Element {
               <li key={key}><Icon name={icon} /><span>{t(key)}</span></li>
             ))}
           </ul>
-        </section>
+        </ScrollReveal>
 
-        <section aria-labelledby="landing-features-title" className="landing-section">
-          <div className="landing-section__heading">
-            <h2 id="landing-features-title">{t('landing.features.title')}</h2>
-          </div>
-          <div className="landing-feature-grid">
-            {FEATURE_ITEMS.map(([icon, key]) => (
-              <article className="landing-feature-card" key={key}>
-                <span className="landing-icon"><Icon name={icon} size={24} /></span>
-                <h3>{t(key)}</h3>
-              </article>
-            ))}
-          </div>
-        </section>
+        <ScrollReveal as="section" aria-labelledby="landing-features-title" className="landing-section" delay={40}>
+          <LocationsSection />
+        </ScrollReveal>
 
-        <section
+        <ScrollReveal
+          as="section"
           aria-labelledby="landing-tariffs-title"
           className="landing-section"
+          delay={80}
           id="tariffs"
           role="region"
           tabIndex={-1}
@@ -201,22 +258,25 @@ export function LandingPage(): JSX.Element {
                     </ul>
                     <Button
                       aria-busy={selectingTariff === tariff.id}
+                      aria-label={`${t('landing.tariffs.select')} ${tariffName}`}
                       disabled={selectingTariff !== null}
                       onClick={() => void selectTariff(tariff.id)}
                       variant="primary"
                     >
-                      {t('landing.tariffs.select', { name: tariffName })}
+                      {t('landing.tariffs.select')}
                     </Button>
                   </article>
                 </li>
               );
             })}
           </ul>
-        </section>
+        </ScrollReveal>
 
-        <section
+        <ScrollReveal
+          as="section"
           aria-labelledby="landing-steps-title"
           className="landing-section"
+          delay={120}
           id="steps"
           role="region"
           tabIndex={-1}
@@ -232,29 +292,13 @@ export function LandingPage(): JSX.Element {
               </li>
             ))}
           </ol>
-        </section>
+        </ScrollReveal>
 
-        <section aria-labelledby="landing-value-title" className="landing-section landing-value">
-          <div>
-            <p className="landing-eyebrow">{t('landing.trust.support')}</p>
-            <h2 id="landing-value-title">{t('landing.value.title')}</h2>
-            <p>{t('landing.value.description')}</p>
-          </div>
-          <Link className="button button--primary" to="/support">{t('landing.value.action')}</Link>
-        </section>
-
-        <section aria-labelledby="landing-reviews-title" className="landing-section">
-          <div className="landing-section__heading">
-            <h2 id="landing-reviews-title">{t('landing.reviews.title')}</h2>
-          </div>
-          <div className="landing-review-grid">
-            {REVIEW_KEYS.map((key) => <blockquote key={key}>“{t(key)}”</blockquote>)}
-          </div>
-        </section>
-
-        <section
+        <ScrollReveal
+          as="section"
           aria-labelledby="landing-faq-title"
           className="landing-section landing-faq"
+          delay={160}
           id="faq"
           role="region"
           tabIndex={-1}
@@ -264,10 +308,9 @@ export function LandingPage(): JSX.Element {
           </div>
           <Accordion
             ariaLabel={t('landing.accessibility.faqList')}
-            defaultOpenIds={['connection']}
             items={faqItems}
           />
-        </section>
+        </ScrollReveal>
       </main>
 
       <footer className="landing-footer">
@@ -279,7 +322,6 @@ export function LandingPage(): JSX.Element {
           <nav aria-label={t('landing.header.navigation')}>
             <Link to="/info?tab=agreement">{t('landing.footer.agreement')}</Link>
             <Link to="/info?tab=privacy">{t('landing.footer.privacy')}</Link>
-            <Link to="/support">{t('landing.footer.support')}</Link>
           </nav>
           <small>{t('landing.footer.copyright')}</small>
         </div>

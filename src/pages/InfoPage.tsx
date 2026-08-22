@@ -1,14 +1,16 @@
 import { useId, type JSX, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router';
-import { Accordion } from '../components/Accordion';
 import { Button } from '../components/Button';
+import { Markdown } from '../components/Markdown';
+import privacyDocument from '../content/privacy.md?raw';
+import termsDocument from '../content/terms.md?raw';
 import { useI18n } from '../i18n/I18nProvider';
 
-const TABS = ['faq', 'agreement', 'privacy'] as const;
+const TABS = ['agreement', 'privacy'] as const;
 type InfoTab = typeof TABS[number];
 
 function requestedTab(value: string | null): InfoTab {
-  return TABS.includes(value as InfoTab) ? value as InfoTab : 'faq';
+  return TABS.includes(value as InfoTab) ? value as InfoTab : 'agreement';
 }
 
 function moveTab(
@@ -37,11 +39,6 @@ export function InfoPage(): JSX.Element {
     next.set('tab', tab);
     setSearchParams(next, { replace: true });
   };
-  const faqItems = [
-    { id: 'connection', title: t('info.faq.connection'), content: <p>{t('info.faq.connectionAnswer')}</p> },
-    { id: 'renewal', title: t('info.faq.renewal'), content: <p>{t('info.faq.renewalAnswer')}</p> },
-  ];
-
   return (
     <section className="info-page">
       <div className="page-heading"><h1>{t('info.title')}</h1></div>
@@ -68,17 +65,9 @@ export function InfoPage(): JSX.Element {
         id={`${id}-${activeTab}-panel`}
         role="tabpanel"
       >
-        {activeTab === 'faq' ? (
-          <div className="info-faq">
-            <h2>{t('info.faq.title')}</h2>
-            <Accordion ariaLabel={t('info.faq.title')} items={faqItems} />
-          </div>
-        ) : (
-          <div className="document-placeholder">
-            <h2>{t(`info.${activeTab}.title`)}</h2>
-            <p>{t(`info.${activeTab}.placeholder`)}</p>
-          </div>
-        )}
+        <article className="info-document">
+          <Markdown source={activeTab === 'agreement' ? termsDocument : privacyDocument} />
+        </article>
       </section>
     </section>
   );

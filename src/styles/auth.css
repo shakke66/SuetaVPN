@@ -1,110 +1,273 @@
+/* Экран входа: шапка с возвратом на сайт, слева описание, справа карточка со способами. */
+
 .auth-page {
-  width: min(calc(100% - (var(--space-6) * 2)), 560px);
-  margin: clamp(var(--space-6), 8vh, var(--space-12)) auto;
-  padding: clamp(var(--space-6), 6vw, var(--space-10));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-5);
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--space-5) clamp(20px, 4vw, 56px);
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.auth-page__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.auth-page__back {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.auth-page__back-short { display: none; }
+
+.auth-page__layout {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 4vw, 72px);
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-bottom: var(--space-4);
+}
+
+/* --- левая колонка --- */
+
+.auth-intro {
+  display: grid;
+  flex: 1 1 300px;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.auth-intro__heading {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.auth-intro h1 {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: clamp(1.85rem, 3.4vw, 2.9rem);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  text-wrap: pretty;
+}
+
+.auth-intro p {
+  margin: 0;
+  max-width: 42ch;
+  color: var(--color-text-muted);
+  font-size: 1.02rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.auth-intro__features {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.auth-intro__label {
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.auth-intro__features ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-intro__features li {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+/* --- карточка входа --- */
+
+.auth-card {
+  box-sizing: border-box;
+  display: grid;
+  flex: 1 1 320px;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 480px;
+  padding: clamp(18px, 2.4vw, 28px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
 }
 
-.auth-page > p {
-  margin-bottom: var(--space-6);
-  color: var(--color-text-muted);
-}
-
-.auth-tabs {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-1);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-control);
-  background: var(--color-surface-raised);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.auth-tabs button,
-.auth-method button,
-.auth-form button {
-  min-height: var(--control-min);
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-control);
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.auth-tabs button[aria-selected='true'] {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-accent-text);
-}
-
-.auth-method,
-.auth-form {
+.auth-method {
   display: grid;
   gap: var(--space-3);
-  margin-top: var(--space-6);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
 }
 
-.auth-method h2,
-.auth-form h2 {
+.auth-method__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.auth-method__head h2 {
   margin: 0;
+  color: var(--color-text-strong);
   font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
 }
 
-.auth-form input {
+.auth-method__mark {
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-method__mark[data-kind='primary'] { color: var(--color-brand); }
+
+.auth-method__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.auth-method input {
+  box-sizing: border-box;
   width: 100%;
   min-height: var(--control-min);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border-strong);
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
   background: var(--color-surface-raised);
   color: var(--color-text);
+  font-size: 1rem;
 }
 
-.auth-method button,
-.auth-form button {
-  width: 100%;
-  border-color: transparent;
-  background: var(--color-accent);
-  color: var(--color-accent-text);
+.auth-verification {
+  display: grid;
+  gap: var(--space-3);
 }
 
-.auth-page button:disabled {
-  cursor: not-allowed;
-  opacity: 0.58;
-}
-
-.auth-form [role='region'] {
-  padding: var(--space-4);
+.auth-code {
+  display: block;
+  padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-panel);
+  border-radius: var(--radius-control);
   background: var(--color-surface-raised);
+  color: var(--color-text-strong);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
 }
 
-.auth-form [role='region'] > :last-child,
-.auth-form [role='alert'] {
-  margin-bottom: 0;
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
 }
 
-.auth-form [role='alert'] {
-  color: var(--color-danger);
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--color-border);
 }
 
-@media (max-width: 479px) {
+/* --- телефон: без карточки и боковой колонки, крупные кнопки --- */
+
+@media (max-width: 767px) {
   .auth-page {
-    width: calc(100% - (var(--space-4) * 2));
-    margin-block: var(--space-4);
-    padding: var(--space-5);
-    border-radius: var(--radius-panel);
+    gap: var(--space-8);
+    padding: var(--space-4) var(--space-4) var(--space-5);
   }
 
-  .auth-tabs {
-    grid-template-columns: minmax(0, 1fr);
+  .auth-page__back-full { display: none; }
+  .auth-page__back-short { display: inline; }
+
+  .auth-page__layout {
+    /* Содержимое прижимается к верху: растянутая по высоте колонка
+       разрывала заголовок, описание и кнопку пустотами. */
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: var(--space-8);
+    padding-bottom: 0;
   }
+
+  .auth-intro {
+    flex: 0 0 auto;
+    align-content: start;
+    gap: var(--space-3);
+    justify-items: center;
+    padding: 0 var(--space-2);
+    text-align: center;
+  }
+
+  .auth-card { flex: 0 0 auto; }
+
+  .auth-intro h1 { font-size: 2rem; }
+
+  .auth-intro p {
+    max-width: 30ch;
+    font-size: 0.95rem;
+  }
+
+  /* Список разделов на телефоне не нужен: он отвлекает от единственного действия. */
+  .auth-intro__features { display: none; }
+
+  .auth-card {
+    gap: var(--space-6);
+    max-width: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .auth-method { gap: var(--space-4); }
+
+  /* Метки «основной» и «запасной» имеют смысл, только когда способы рядом.
+     Заголовок блока с кодом при этом остаётся: он единственный на экране. */
+  .auth-card > .auth-method > .auth-method__head { display: none; }
+
+  .auth-method .button,
+  .auth-method input {
+    min-height: 56px;
+    font-size: 1rem;
+  }
+
+  .auth-method__hint { text-align: center; }
 }

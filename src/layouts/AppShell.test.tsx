@@ -172,7 +172,13 @@ describe('persistent application shell', () => {
 
     const trigger = await screen.findByRole('button', { name: 'Открыть меню' });
     await user.click(trigger);
-    expect(screen.getByRole('dialog', { name: 'Меню' })).toBeInTheDocument();
+    const drawer = screen.getByRole('dialog', { name: 'Меню' });
+    expect(drawer).toBeInTheDocument();
+
+    const account = within(drawer).getByRole('link', { name: /Алексей/ });
+    expect(account).toHaveAttribute('href', '#/profile');
+    expect(within(drawer).queryByRole('link', { name: 'Главная' })).not.toBeInTheDocument();
+    expect(within(drawer).getByRole('link', { name: 'Информация' })).toHaveAttribute('href', '#/info');
 
     await user.keyboard('{Escape}');
 

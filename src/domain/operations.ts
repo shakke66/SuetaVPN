@@ -170,6 +170,7 @@ export function purchaseSubscription(
     trafficLimit: tariff.traffic.kind === 'bypass' ? tariff.traffic.bypassGb : 0,
     devicesUsed: sameActivePlan ? current.devicesUsed : 0,
     devicesLimit: tariff.devices,
+    autoRenew: current?.autoRenew ?? true,
   };
   const transaction: Transaction = {
     id: idSource('transaction', normalizedNow),

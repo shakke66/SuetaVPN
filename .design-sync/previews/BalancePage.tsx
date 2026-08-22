@@ -1,0 +1,4 @@
+import { BalancePage } from 'suetavpn';
+
+/** Экран целиком, как он выглядит в приложении. */
+export const Screen = () => <BalancePage />;

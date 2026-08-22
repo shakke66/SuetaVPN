@@ -1,0 +1,199 @@
+/* Сцена первого экрана: телефон с экраном кабинета выезжает снизу лаймовой панели.
+   Один прогон при загрузке, повторов нет. */
+
+.hj {
+  --k: 1;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  padding: 26px 22px 0;
+}
+
+/* --- корпус --- */
+
+.hj-phone {
+  position: relative;
+  align-self: end;
+  width: min(94%, 364px);
+  height: 100%;
+  perspective: 1500px;
+  animation: hj-phone-in calc(1.2s * var(--k)) calc(0.15s * var(--k)) cubic-bezier(0.16, 0.84, 0.24, 1) both;
+}
+
+.hj-phone__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 10px 10px 0;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-bottom: 0;
+  border-radius: 46px 46px 0 0;
+  background: linear-gradient(155deg, #2b2d27, #111211 44%, #0a0a0a);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transform-style: preserve-3d;
+}
+
+.hj-phone__body::before {
+  content: "";
+  position: absolute;
+  inset: 2px -1px -1px;
+  z-index: -1;
+  border-radius: 42px 42px 0 0;
+  background: linear-gradient(120deg, #3a3d33, #0d0d0d 58%);
+  transform: translateZ(-14px);
+}
+
+.hj-phone__screen {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px 13px 4px;
+  border-radius: 36px 36px 0 0;
+  background: var(--color-surface-raised);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.hj-phone__notch {
+  width: 70px;
+  height: 5px;
+  margin: 0 auto 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.hj-phone__glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(148deg, rgba(255, 255, 255, 0.12), transparent 46%);
+}
+
+/* --- содержимое экрана --- */
+
+.hj-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 2px 10px;
+  animation: hj-in calc(0.5s * var(--k)) calc(0.85s * var(--k)) ease-out both;
+}
+
+.hj-brand img {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.hj-brand strong {
+  color: var(--color-text-strong, var(--color-text));
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.hj-brand span {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hj-phone .preview-welcome { margin-bottom: var(--space-2); }
+.hj-phone .preview-subscription { padding: 13px; }
+.hj-phone .preview-subscription h2 { font-size: 1.2rem; }
+.hj-phone .preview-avatar { width: 32px; height: 32px; }
+
+.hj-screen-item {
+  animation: hj-in calc(0.5s * var(--k)) calc(1s * var(--k)) ease-out both;
+}
+
+.hj-screen-item + .hj-screen-item { animation-delay: calc(1.16s * var(--k)); }
+.hj-screen-item + .hj-screen-item + .hj-screen-item { animation-delay: calc(1.32s * var(--k)); }
+.hj-screen-item + .hj-screen-item + .hj-screen-item + .hj-screen-item { animation-delay: calc(1.46s * var(--k)); }
+
+.hj-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.hj-fact {
+  padding: 5px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: 0.64rem;
+  letter-spacing: -0.01em;
+}
+
+.hj-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: auto;
+  padding: 10px 0 12px;
+  border-top: 1px solid var(--color-border);
+  animation: hj-in calc(0.55s * var(--k)) calc(1.62s * var(--k)) ease-out both;
+}
+
+.hj-tab {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+}
+
+.hj-tab em {
+  font-size: 0.55rem;
+  font-style: normal;
+  letter-spacing: 0.01em;
+}
+
+.hj-tab[data-active='true'] { color: var(--color-brand); }
+
+@keyframes hj-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hj-phone-in {
+  from { opacity: 0; transform: translateY(46%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hj-phone,
+  .hj-screen-item,
+  .hj-brand,
+  .hj-tabs {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .hj { padding: 18px 16px 0; }
+
+  .hj-phone {
+    width: min(88%, 300px);
+    animation: none;
+  }
+
+  .hj .preview-stats { display: none; }
+
+  .hj-screen-item,
+  .hj-brand,
+  .hj-tabs {
+    animation: none;
+  }
+}

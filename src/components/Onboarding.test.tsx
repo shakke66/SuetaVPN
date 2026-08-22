@@ -139,7 +139,7 @@ it('traps Tab and Shift+Tab within onboarding controls', async () => {
   expect(next).toHaveFocus();
 });
 
-it('falls back to the visible route viewport when a responsive target is hidden', async () => {
+it('keeps the tour hidden when every responsive target is unavailable', async () => {
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {
     if (this.matches('[data-onboarding-target]')) return rect(0, 0, 0, 0);
     if (this.id === 'main-content') return rect(12, 72, 336, 240);
@@ -155,7 +155,6 @@ it('falls back to the visible route viewport when a responsive target is hidden'
   render(<StrictMode><App adapters={createLocalAdapters({ delayMs: 0 })} /></StrictMode>);
 
   const overlay = await screen.findByTestId('onboarding-overlay');
-  await waitFor(() => expect(overlay).toHaveAttribute('data-ready', 'true'));
-  expect(within(overlay).getByRole('dialog', { name: 'Короткое знакомство' })).toBeVisible();
-  expect(within(overlay).getByRole('button', { name: 'Далее' })).toHaveFocus();
+  await waitFor(() => expect(overlay).toHaveAttribute('data-ready', 'false'));
+  expect(within(overlay).getByRole('dialog', { hidden: true })).not.toBeVisible();
 });

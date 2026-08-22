@@ -15,7 +15,8 @@ export type IconName =
   | 'referral'
   | 'subscriptions'
   | 'sun'
-  | 'support';
+  | 'support'
+  | 'telegram';
 
 interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children' | 'name'> {
   name: IconName;
@@ -46,6 +47,8 @@ function IconPath({ name }: { name: IconName }): JSX.Element {
       return <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></>;
     case 'menu':
       return <path d="M4 7h16M4 12h16M4 17h16" />;
+    case 'telegram':
+      return <path d="M3 11.5 21 4l-3 16-6.2-4.6L9 19l-.4-4.2L18 7 7.8 13.2 3 11.5Z" fill="currentColor" stroke="none" />;
     case 'close':
       return <path d="m6 6 12 12M18 6 6 18" />;
     case 'logout':

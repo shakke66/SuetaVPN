@@ -52,22 +52,24 @@ it('keeps the protected shell through the core journey and rehydrates persisted 
   await user.click(within(shellHeader).getByRole('link', { name: 'Баланс' }));
   expect(await screen.findByRole('heading', { name: 'Баланс' })).toBeInTheDocument();
   expect(screen.getByTestId('app-shell-header')).toBe(shellHeader);
+  await user.clear(screen.getByLabelText('Сумма пополнения'));
+  await user.type(screen.getByLabelText('Сумма пополнения'), '100');
   await user.click(screen.getByRole('button', { name: /Пополнить на 100\s₽/ }));
-  expect(await screen.findByRole('status')).toHaveTextContent(/Баланс пополнен на 100\s₽/);
+  expect(await screen.findByText(/Баланс пополнен на 100\s₽/)).toBeInTheDocument();
 
   await user.click(within(shellHeader).getByRole('link', { name: 'Подписки' }));
   await user.click(await screen.findByRole('link', { name: 'Продлить' }));
   expect(await screen.findByRole('heading', { name: 'Оформление подписки' })).toBeInTheDocument();
   expect(screen.getByTestId('app-shell-header')).toBe(shellHeader);
   await user.click(screen.getByRole('button', { name: 'Оформить подписку' }));
-  expect(await screen.findByRole('status')).toHaveTextContent('Подписка успешно оформлена');
+  expect(await screen.findByText('Подписка успешно оформлена')).toBeInTheDocument();
 
   await user.click(within(shellHeader).getByRole('link', { name: 'Поддержка' }));
   await user.click(await screen.findByRole('button', { name: 'Новое обращение' }));
   await user.type(screen.getByRole('textbox', { name: 'Тема' }), 'Проверка smoke flow');
   await user.type(screen.getByRole('textbox', { name: 'Сообщение' }), 'Пожалуйста, проверьте полный маршрут.');
   await user.click(screen.getByRole('button', { name: 'Создать обращение' }));
-  expect(await screen.findByRole('status')).toHaveTextContent('Обращение создано');
+  expect(await screen.findByText('Обращение создано')).toBeInTheDocument();
 
   await user.click(screen.getByRole('button', { name: 'Открыть уведомления' }));
   expect(await screen.findByRole('dialog', { name: 'Уведомления о тикетах' })).toHaveTextContent(
@@ -85,7 +87,9 @@ it('keeps the protected shell through the core journey and rehydrates persisted 
   expect(screen.getByRole('button', { name: 'Проверка smoke flow' })).toHaveAttribute('aria-pressed', 'true');
   expect(persistedState().wallet.balance).toBe(640);
 
-  await user.click(screen.getByRole('button', { name: 'Выйти' }));
+  const remountedHeader = within(screen.getByTestId('app-shell-header'));
+  await user.click(remountedHeader.getByRole('button', { name: 'Профиль' }));
+  await user.click(remountedHeader.getByRole('menuitem', { name: 'Выйти' }));
   expect(await screen.findByRole('heading', { name: 'Интернет на вашей стороне' })).toBeInTheDocument();
   await waitFor(() => expect(persistedState().session.active).toBe(false));
 }, 15_000);

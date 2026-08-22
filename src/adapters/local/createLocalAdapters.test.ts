@@ -18,6 +18,21 @@ function emptyState(): AppStateV2 {
 }
 
 describe('createLocalAdapters', () => {
+  it('takes the Telegram photo only when the profile has no avatar yet', async () => {
+    const adapters = createLocalAdapters({ delayMs: 0, now: () => NOW });
+    const user = { id: 42, first_name: 'Мира', photo_url: 'https://t.me/i/userpic/320/mira.jpg', username: 'mira' };
+
+    const fresh = await adapters.auth.loginTelegram(emptyState(), user);
+    expect(fresh.state.profile.avatar).toBe(user.photo_url);
+
+    const own = { ...emptyState(), profile: { ...emptyState().profile, avatar: 'data:image/jpeg;base64,AAAA' } };
+    const kept = await adapters.auth.loginTelegram(own, user);
+    expect(kept.state.profile.avatar).toBe('data:image/jpeg;base64,AAAA');
+
+    const withoutPhoto = await adapters.auth.loginTelegram(emptyState(), { id: 42, first_name: 'Мира' });
+    expect(withoutPhoto.state.profile.avatar).toBeNull();
+  });
+
   const adapters = createLocalAdapters({
     delayMs: 0,
     now: () => NOW,

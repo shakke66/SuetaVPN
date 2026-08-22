@@ -16,7 +16,6 @@ export function DashboardPage(): JSX.Element {
     <section className="dashboard-page">
       <div className="page-heading">
         <h1>{t('dashboard.title')}</h1>
-        <p>{t('dashboard.greeting', { name: state.profile.name })}</p>
       </div>
 
       <SubscriptionCard
@@ -38,7 +37,7 @@ export function DashboardPage(): JSX.Element {
         <article className="dashboard-summary-card" data-layout="horizontal" data-testid="dashboard-referral-card">
           <div>
             <p>{t('dashboard.referral.title')}</p>
-            <strong>{t('dashboard.referral.earned', { amount: formatMoney(state.referral.earned) })}</strong>
+            <strong>{formatMoney(state.referral.earned)}</strong>
           </div>
           <Link className="button button--ghost" to="/referral">{t('dashboard.referral.open')}</Link>
         </article>

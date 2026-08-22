@@ -136,7 +136,8 @@ describe('protected hash routing', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Продолжить с Telegram' }));
     expect(await screen.findByRole('heading', { name: 'Главная' })).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: 'Выйти' }));
+    await user.click(screen.getByRole('button', { name: 'Профиль' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Выйти' }));
 
     expect(await screen.findByRole('heading', { name: 'Интернет на вашей стороне' })).toBeInTheDocument();
     expect(window.location.hash).toBe('#/');
@@ -148,48 +149,27 @@ describe('protected hash routing', () => {
 });
 
 describe('email authorization', () => {
-  it('moves focus and selection through auth tabs with keyboard navigation', async () => {
-    const user = userEvent.setup();
+  it('offers both sign-in methods without fake tabs and keeps a way back to the site', async () => {
     renderApp();
 
-    const loginTab = screen.getByRole('tab', { name: 'Войти' });
-    const registerTab = screen.getByRole('tab', { name: 'Создать аккаунт' });
-    loginTab.focus();
+    // Вкладки «Войти» и «Создать аккаунт» убраны: путь один и тот же,
+    // выбора между ними не существует.
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
 
-    await user.keyboard('{ArrowRight}');
-    expect(registerTab).toHaveFocus();
-    expect(registerTab).toHaveAttribute('aria-selected', 'true');
-
-    await user.keyboard('{Home}');
-    expect(loginTab).toHaveFocus();
-    expect(loginTab).toHaveAttribute('aria-selected', 'true');
-
-    await user.keyboard('{End}');
-    expect(registerTab).toHaveFocus();
-    expect(registerTab).toHaveAttribute('aria-selected', 'true');
-
-    await user.keyboard('{ArrowLeft}');
-    expect(loginTab).toHaveFocus();
-    expect(loginTab).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('button', { name: 'Продолжить с Telegram' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Электронная почта' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Вернуться на сайт|На сайт/ })).toHaveAttribute('href', '#/');
   });
 
-  it('offers login and registration tabs and reports an invalid email next to the field', async () => {
+  it('reports an invalid email next to the field', async () => {
     const user = userEvent.setup();
     renderApp();
-
-    const loginTab = screen.getByRole('tab', { name: 'Войти' });
-    const registerTab = screen.getByRole('tab', { name: 'Создать аккаунт' });
-    expect(loginTab).toHaveAttribute('aria-selected', 'true');
-
-    await user.click(registerTab);
-    expect(registerTab).toHaveAttribute('aria-selected', 'true');
-    expect(loginTab).toHaveAttribute('aria-selected', 'false');
 
     await user.type(screen.getByRole('textbox', { name: 'Электронная почта' }), 'invalid@');
     await user.click(screen.getByRole('button', { name: 'Получить код' }));
 
     expect(await screen.findByText('Введите корректный адрес')).toBeInTheDocument();
-    expect(screen.queryByRole('region', { name: 'Локальная проверка' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Код подтверждения' })).not.toBeInTheDocument();
   });
 
   it('shows an honest local challenge and validates code shape and value', async () => {
@@ -199,8 +179,8 @@ describe('email authorization', () => {
     await user.type(screen.getByRole('textbox', { name: 'Электронная почта' }), 'mira@example.com');
     await user.click(screen.getByRole('button', { name: 'Получить код' }));
 
-    const panel = await screen.findByRole('region', { name: 'Локальная проверка' });
-    expect(panel).toHaveTextContent('Используйте этот код для входа в текущем браузере');
+    const panel = await screen.findByRole('region', { name: 'Код подтверждения' });
+    expect(panel).toHaveTextContent('Введите этот код, чтобы завершить вход');
     expect(panel).toHaveTextContent(`Код: ${VERIFICATION_CODE}`);
     expect(document.body).not.toHaveTextContent(/письм|отправлен/i);
 
@@ -223,7 +203,7 @@ describe('email authorization', () => {
 
     await user.type(screen.getByRole('textbox', { name: 'Электронная почта' }), 'mira@example.com');
     await user.click(screen.getByRole('button', { name: 'Получить код' }));
-    await screen.findByRole('region', { name: 'Локальная проверка' });
+    await screen.findByRole('region', { name: 'Код подтверждения' });
 
     currentTime += 11 * 60 * 1000;
     await user.type(screen.getByRole('textbox', { name: 'Код подтверждения' }), VERIFICATION_CODE);
@@ -273,7 +253,7 @@ describe('Telegram Mini App authorization', () => {
     expect(window.location.hash).toBe('#/');
   });
 
-  it('auto-authorizes only initDataUnsafe.user, explains backend validation and omits logout', async () => {
+  it('auto-authorizes only initDataUnsafe.user and keeps browser-only controls out of Mini App', async () => {
     (window as TelegramWindow).Telegram = {
       WebApp: {
         initDataUnsafe: {
@@ -284,8 +264,8 @@ describe('Telegram Mini App authorization', () => {
     renderApp({ path: '/profile' });
 
     expect(await screen.findByRole('heading', { name: 'Профиль' })).toBeInTheDocument();
-    expect(screen.getByText(/будущий backend должен проверить данные Telegram/i)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Выйти' })).not.toBeInTheDocument();
+    expect(screen.queryByText(/будущий backend должен проверить данные Telegram/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Выйти' })).not.toBeInTheDocument();
     expect(persistedState()).toMatchObject({
       session: { active: true },
       profile: { name: 'Mira K', username: '@mira' },

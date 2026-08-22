@@ -17,16 +17,25 @@ beforeEach(() => {
 });
 
 describe('public landing', () => {
+  it('renders the static cabinet preview alongside the hero copy', async () => {
+    render(<App />);
+
+    const preview = await screen.findByTestId('landing-cabinet-preview');
+    expect(preview).toBeInTheDocument();
+
+    const avatar = preview.querySelector('.preview-avatar');
+    expect(avatar).toBeInstanceOf(HTMLImageElement);
+    expect((avatar as HTMLImageElement).src).toContain('suetavpn-logo');
+  });
+
   it('renders the complete Russian composition with exactly the current catalog plans', async () => {
     render(<App />);
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Интернет на вашей стороне' })).toBeInTheDocument();
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Соединение, которому можно доверять' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Всё необходимое' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Стабильный доступ в любой ситуации' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Подключение за три шага' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Помощь в нужный момент' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Нас выбирают за простоту' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Частые вопросы' })).toBeInTheDocument();
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
 
@@ -42,15 +51,31 @@ describe('public landing', () => {
     expect(document.body).not.toHaveTextContent(/СТАРТ|СЕМЬЯ|DEMO|демо|демонстрацион/i);
   });
 
-  it('starts with the first FAQ answer open and supports multiple open answers', async () => {
+  it('renders an accessible static cabinet preview with the current local state', async () => {
+    render(<App />);
+
+    const preview = await screen.findByTestId('landing-hero-preview');
+    expect(preview).toHaveAttribute('aria-label', 'Защищённое соединение SuetaVPN');
+    expect(within(preview).getByText('БАЗА')).toBeInTheDocument();
+    expect(within(preview).getByText(/790\s₽/)).toBeInTheDocument();
+    expect(within(preview).getByText('2 / 4')).toBeInTheDocument();
+    expect(within(preview).getByRole('progressbar', { name: 'Трафик' })).toHaveAttribute(
+      'aria-valuenow',
+      '38.4',
+    );
+    expect(preview).not.toHaveTextContent('{amount}');
+  });
+
+  it('keeps FAQ answers closed until the user opens them and supports multiple open answers', async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const first = await screen.findByRole('button', { name: 'Как подключить устройство?' });
-    const second = screen.getByRole('button', { name: 'Какие способы оплаты доступны?' });
-    expect(first).toHaveAttribute('aria-expanded', 'true');
+    const first = await screen.findByRole('button', { name: 'Что такое SuetaVPN и зачем он нужен?' });
+    const second = screen.getByRole('button', { name: 'Как начать пользоваться сервисом?' });
     expect(second).toHaveAttribute('aria-expanded', 'false');
+    expect(first).toHaveAttribute('aria-expanded', 'false');
 
+    await user.click(first);
     await user.click(second);
     expect(first).toHaveAttribute('aria-expanded', 'true');
     expect(second).toHaveAttribute('aria-expanded', 'true');
@@ -105,16 +130,20 @@ describe('public landing', () => {
     expect(tariffsLink).toHaveAttribute('href', '#tariffs');
     expect(screen.getByRole('link', { name: 'Вопросы' })).toHaveAttribute('href', '#faq');
     expect(screen.getByRole('link', { name: 'Войти' })).toHaveAttribute('href', '#/auth');
-    expect(within(screen.getByRole('contentinfo')).getByRole('link', { name: 'Поддержка' })).toHaveAttribute('href', '#/support');
+    const footer = within(screen.getByRole('contentinfo'));
+    expect(footer.getByRole('link', { name: 'Соглашение' })).toHaveAttribute('href', '#/info?tab=agreement');
+    expect(footer.queryByRole('link', { name: 'Поддержка' })).not.toBeInTheDocument();
 
     await user.click(tariffsLink);
     expect(screen.getByRole('region', { name: 'Выберите свой тариф' })).toHaveFocus();
+    expect(screen.getByRole('region', { name: 'Выберите свой тариф' })).toHaveAttribute('data-reveal-state', 'visible');
     expect(window.location.hash).toBe('#/');
 
     await user.click(screen.getByRole('button', { name: 'Включить светлую тему' }));
     await waitFor(() => expect(document.documentElement).toHaveAttribute('data-theme', 'light'));
 
-    await user.click(screen.getByRole('button', { name: 'Переключить на английский' }));
+    await user.click(screen.getByRole('button', { name: 'Выбрать язык' }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'English' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'The internet on your side' })).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute('lang', 'en');
     expect(window.location.hash).toBe('#/');

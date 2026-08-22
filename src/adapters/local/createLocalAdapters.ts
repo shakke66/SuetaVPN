@@ -54,7 +54,8 @@ function isTelegramUser(value: unknown): value is TelegramUser {
   return typeof user.id === 'number' && Number.isFinite(user.id)
     && (user.first_name === undefined || typeof user.first_name === 'string')
     && (user.last_name === undefined || typeof user.last_name === 'string')
-    && (user.username === undefined || typeof user.username === 'string');
+    && (user.username === undefined || typeof user.username === 'string')
+    && (user.photo_url === undefined || typeof user.photo_url === 'string');
 }
 
 function detectTelegramUser(): TelegramUser | null {
@@ -71,8 +72,11 @@ function telegramProfile(state: AppStateV2, user: TelegramUser | null): AppState
     .filter((part): part is string => typeof part === 'string' && part.trim() !== '')
     .join(' ');
   const username = user.username?.trim();
+  const photo = user.photo_url?.trim();
   return {
     ...state.profile,
+    // Фото из Telegram подставляем только на пустое место: своё пользователь ставил сам.
+    avatar: state.profile.avatar ?? (photo && /^https:\/\//.test(photo) ? photo : null),
     name: name || username || state.profile.name,
     username: username ? `@${username.replace(/^@/, '')}` : state.profile.username,
   };

@@ -112,6 +112,18 @@ describe('AppProvider hydration and preferences', () => {
     expect(document.documentElement.dataset.theme).toBe('light');
     expect(view.mountCount()).toBe(1);
   });
+
+  it('sets the theme when matchMedia is unavailable', async () => {
+    Reflect.deleteProperty(window, 'matchMedia');
+    const view = renderProvider();
+
+    await act(async () => {
+      await view.app().setTheme('light');
+    });
+
+    expect(view.app().state.preferences.theme).toBe('light');
+    expect(document.documentElement.dataset.theme).toBe('light');
+  });
 });
 
 describe('AppProvider commands', () => {

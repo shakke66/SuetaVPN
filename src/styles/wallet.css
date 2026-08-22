@@ -4,6 +4,15 @@
   width: 100%;
 }
 
+@media (min-width: 768px) {
+  .wallet-page {
+    width: min(calc(100% - (var(--space-6) * 2)), var(--content-max));
+    gap: var(--space-6);
+    margin-inline: auto;
+  }
+
+}
+
 .page-heading p {
   max-width: 620px;
   margin-bottom: 0;
@@ -23,8 +32,36 @@
   font-size: clamp(1.1rem, 2.5vw, 1.35rem);
 }
 
+@media (min-width: 768px) {
+  .wallet-top-up-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+    align-items: end;
+    column-gap: clamp(var(--space-6), 5vw, var(--space-10));
+    row-gap: var(--space-5);
+  }
+
+  .wallet-top-up-card > h2 {
+    grid-column: 1 / -1;
+  }
+
+  .wallet-top-up-card > .wallet-methods {
+    align-self: end;
+    justify-content: flex-start;
+    margin-top: 0;
+  }
+
+  .wallet-top-up-card > .wallet-top-up-action {
+    grid-column: 2;
+    justify-content: flex-end;
+    margin-top: 0;
+  }
+}
+
 .wallet-balance-card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: var(--space-2);
 }
 
@@ -102,7 +139,7 @@
 
 .wallet-top-up-action {
   justify-content: space-between;
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
 }
 
 .wallet-top-up-action p,
@@ -165,6 +202,12 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+@media (min-width: 768px) {
+  .referral-stats {
+    gap: var(--space-4);
+  }
+}
+
 .referral-stats__item {
   min-width: 0;
 }
@@ -194,11 +237,49 @@
 }
 
 @media (max-width: 767px) {
+  .wallet-page {
+    gap: var(--space-4);
+  }
+
+  .wallet-card {
+    padding: 18px;
+    border-radius: var(--radius-panel);
+  }
+
+  .wallet-top-up-card {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 0;
+    padding: 14px;
+  }
+
+  .wallet-top-up-card > .wallet-top-up-action {
+    grid-column: 1;
+    justify-content: space-between;
+    margin-top: 0;
+  }
+
+  .wallet-balance-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
   .wallet-inline-form,
   .wallet-top-up-action,
   .referral-link__actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .wallet-inline-form input,
+  .wallet-amount-controls input[type='number'] {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+  }
+
+  .wallet-inline-form input {
+    flex: 0 0 auto;
   }
 
   .wallet-inline-form .button,
@@ -207,7 +288,536 @@
     width: 100%;
   }
 
+  .wallet-amount-controls input[type='range'] {
+    width: 100%;
+  }
+
+  .wallet-methods {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .wallet-methods .button {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    line-height: 1.1;
+    padding-inline: var(--space-2);
+  }
+
+  .wallet-top-up-card .wallet-methods {
+    margin-top: 8px;
+  }
+
+  .wallet-history .accordion__trigger {
+    min-height: 58px;
+    padding-inline: var(--space-4);
+  }
+
+  .wallet-history .accordion__content {
+    padding-inline: var(--space-4);
+  }
+
+  .wallet-history__item {
+    gap: var(--space-3);
+  }
+
   .referral-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .referral-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- баланс: пополнение слева, сводка справа --- */
+
+.wallet-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-6);
+}
+
+.wallet-top-up {
+  display: grid;
+  flex: 1.45 1 520px;
+  gap: var(--space-6);
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+.wallet-top-up__heading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.wallet-top-up__heading h2 { margin: 0; }
+
+.wallet-top-up__heading p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.wallet-aside {
+  display: grid;
+  flex: 0.8 1 300px;
+  align-content: start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* Шаги пополнения пронумерованы, номер выделен фирменным цветом. */
+.wallet-step {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.wallet-step--confirm {
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.wallet-step__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wallet-step__label b { color: var(--color-brand); }
+
+.wallet-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.wallet-preset {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-min);
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wallet-preset[data-selected='true'] {
+  border-color: var(--color-brand);
+  background: var(--color-brand);
+  color: var(--color-brand-text);
+}
+
+/* Поле суммы: крупная цифра, валюта и шаг по 500. */
+.wallet-amount {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-2) 0 var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-field);
+}
+
+.wallet-amount input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 68px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-strong);
+  font-size: 2rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.wallet-amount input::-webkit-outer-spin-button,
+.wallet-amount input::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.wallet-amount input[type='number'] { appearance: textfield; }
+
+.wallet-amount__currency {
+  color: var(--color-text-muted);
+  font-size: 1.15rem;
+}
+
+.wallet-amount__steppers {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+  padding-left: var(--space-3);
+}
+
+.wallet-amount__steppers .button {
+  border-radius: var(--radius-pill);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.wallet-methods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.wallet-method {
+  display: grid;
+  gap: 4px;
+  min-height: 64px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.wallet-method[data-selected='true'] {
+  border-color: var(--color-brand);
+  box-shadow: inset 0 0 0 1px var(--color-brand);
+}
+
+.wallet-method strong {
+  color: var(--color-text-strong);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.wallet-method span {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+.wallet-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.wallet-confirm__summary {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.wallet-confirm .button {
+  flex: 1 1 240px;
+  min-width: 0;
+  max-width: 320px;
+}
+
+.wallet-current {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.wallet-current h2 {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.wallet-current p {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: 1.5rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.wallet-promo {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.wallet-promo h2 {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+/* --- телефон: баланс сверху, две вкладки, закреплённое действие --- */
+
+.wallet-mobile {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--space-4);
+}
+
+.wallet-mobile__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.wallet-mobile__head > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wallet-mobile__head span {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.wallet-mobile__head strong {
+  color: var(--color-text-strong);
+  font-size: 2rem;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.wallet-mobile__count {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.wallet-tabs {
+  /* Колонок столько, сколько вкладок: на балансе их две, на подписках три. */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-raised);
+}
+
+.wallet-tabs button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wallet-tabs button[aria-selected='true'] {
+  background: var(--color-brand);
+  color: var(--color-brand-text);
+}
+
+.wallet-mobile__body {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+}
+
+.wallet-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.wallet-field__label {
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 767px) {
+  .wallet-presets {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .wallet-preset {
+    justify-content: center;
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 0.84rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 389px) {
+    .wallet-preset {
+      padding: 0 2px;
+      font-size: 0.78rem;
+    }
+  }
+
+  .wallet-amount { padding-left: var(--space-4); }
+
+  .wallet-amount input {
+    min-height: 60px;
+    font-size: 1.6rem;
+  }
+
+  .wallet-methods { grid-template-columns: minmax(0, 1fr); }
+
+}
+
+/* Пополнение на телефоне — ритм отступов ровно из макета: 16px между
+   крупными строками экрана и секциями, 8px внутри секции между подписью и
+   её содержимым, 6px между пилюлями сумм. */
+@media (max-width: 767px) {
+  .wallet-mobile {
+    grid-template-rows: auto auto 1fr auto;
+    gap: var(--space-4);
+    /* Высота ограничена экраном: тогда строка 1fr сжимается и лишнее
+       прокручивается внутри содержимого, а кнопка остаётся на месте. */
+    height: 100%;
+    min-height: 0;
+  }
+
+  .wallet-mobile__body {
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .wallet-mobile__body::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wallet-mobile .wallet-field {
+    gap: var(--space-2);
+  }
+
+  .wallet-mobile .wallet-field__label {
+    color: var(--color-text-muted);
+    font-size: 0.76rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+  }
+
+  .wallet-mobile .wallet-presets {
+    display: flex;
+    gap: 6px;
+  }
+
+  .wallet-mobile .wallet-preset {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+    min-height: var(--control-min);
+    padding: 0 6px;
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+
+  .wallet-mobile .wallet-amount {
+    gap: var(--space-2);
+    padding: 0 8px 0 16px;
+  }
+
+  .wallet-mobile .wallet-amount input {
+    min-height: 60px;
+    font-size: 1.6rem;
+  }
+
+  /* Способ оплаты — строки во всю ширину с кружком-индикатором. */
+  .wallet-mobile .wallet-methods {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    margin-top: 0;
+  }
+
+  .wallet-mobile .wallet-method {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 56px;
+    padding: 0 var(--space-4);
+  }
+
+  .wallet-mobile .wallet-method__dot {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+  }
+
+  .wallet-mobile .wallet-method[data-selected='true'] .wallet-method__dot {
+    border-color: var(--color-brand);
+    background: var(--color-brand);
+  }
+
+  .wallet-mobile .wallet-method__hint {
+    display: none;
+  }
+
+  .wallet-mobile .wallet-inline-form {
+    flex-direction: row;
+    gap: var(--space-2);
+  }
+
+  .wallet-mobile .wallet-inline-form input {
+    /* Базис 0 обязателен: с базисом по содержимому поле распирало строку. */
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    min-height: var(--control-min);
+  }
+
+  .wallet-mobile .wallet-inline-form .button {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .wallet-mobile__action {
+    display: grid;
+    align-self: end;
+    gap: var(--space-2);
+  }
+
+  .wallet-mobile__action .button {
+    width: 100%;
+    min-height: 54px;
+    font-size: 1rem;
+  }
+
+  .wallet-mobile__hint {
+    margin: 0;
+    min-height: 20px;
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    text-align: center;
   }
 }

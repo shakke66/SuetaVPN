@@ -19,50 +19,38 @@ beforeEach(() => {
   window.location.hash = '#/';
 });
 
-it('keeps only FAQ, agreement and privacy tabs with equal smooth FAQ headers', async () => {
+it('keeps only the agreement and privacy documents and opens the agreement first', async () => {
   const user = userEvent.setup();
   openInfo();
 
   expect(await screen.findByRole('heading', { level: 1, name: 'Информация' })).toBeInTheDocument();
   const tabList = screen.getByRole('tablist');
   expect(within(tabList).getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
-    'Вопросы и ответы',
     'Пользовательское соглашение',
     'Политика конфиденциальности',
   ]);
-  expect(screen.queryByText('Правила')).not.toBeInTheDocument();
-  expect(screen.queryByText('Оферта')).not.toBeInTheDocument();
-  expect(screen.queryByText('Статусы')).not.toBeInTheDocument();
+  expect(screen.queryByRole('tab', { name: 'Вопросы и ответы' })).not.toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /публичная оферта/i })).toBeInTheDocument();
 
-  const connection = screen.getByRole('button', { name: 'Как подключиться?' });
-  const renewal = screen.getByRole('button', { name: 'Как продлить подписку?' });
-  expect(connection.closest('.accordion__header')?.className).toBe(renewal.closest('.accordion__header')?.className);
-  await user.click(connection);
-  await user.click(renewal);
-  expect(screen.getByText('Оформите подписку и выберите устройство.')).toBeVisible();
-  expect(screen.getByText('Откройте раздел подписок и выберите период.')).toBeVisible();
-
-  await user.click(within(tabList).getByRole('tab', { name: 'Пользовательское соглашение' }));
-  expect(screen.getByText('Текст соглашения будет опубликован здесь.')).toBeInTheDocument();
   await user.click(within(tabList).getByRole('tab', { name: 'Политика конфиденциальности' }));
-  expect(screen.getByText('Текст политики будет опубликован здесь.')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /Политика конфиденциальности SuetaVPN/ })).toBeInTheDocument();
 });
 
 it.each([
-  ['agreement', 'Пользовательское соглашение', 'Текст соглашения будет опубликован здесь.'],
-  ['privacy', 'Политика конфиденциальности', 'Текст политики будет опубликован здесь.'],
-] as const)('opens the requested %s document tab from the hash query', async (tab, label, content) => {
+  ['agreement', 'Пользовательское соглашение', /публичная оферта/i],
+  ['privacy', 'Политика конфиденциальности', /Политика конфиденциальности SuetaVPN/],
+] as const)('opens the requested %s document tab from the hash query', async (tab, label, heading) => {
   openInfo(`#/info?tab=${tab}`);
 
   expect(await screen.findByRole('tab', { name: label })).toHaveAttribute('aria-selected', 'true');
-  expect(screen.getByText(content)).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
 });
 
-it('falls back to FAQ for an invalid tab query', async () => {
+it('falls back to the agreement for an invalid tab query', async () => {
   openInfo('#/info?tab=unsupported');
 
-  expect(await screen.findByRole('tab', { name: 'Вопросы и ответы' })).toHaveAttribute('aria-selected', 'true');
-  expect(screen.getByRole('heading', { name: 'Вопросы и ответы' })).toBeInTheDocument();
+  expect(await screen.findByRole('tab', { name: 'Пользовательское соглашение' })).toHaveAttribute('aria-selected', 'true');
+  expect(screen.getByRole('heading', { name: /публичная оферта/i })).toBeInTheDocument();
 });
 
 it('keeps the hash query synchronized with user tab changes', async () => {

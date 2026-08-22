@@ -1,13 +1,40 @@
+button,
 .button,
 .profile-control,
 .shell-nav__link,
-.bottom-navigation::before,
 .bottom-navigation__item {
   transition:
-    color var(--motion-fast) var(--motion-ease),
-    border-color var(--motion-fast) var(--motion-ease),
-    background-color var(--motion-fast) var(--motion-ease),
+    color 220ms var(--motion-ease),
+    border-color 220ms var(--motion-ease),
+    background-color 220ms var(--motion-ease),
+    box-shadow 240ms var(--motion-ease),
+    opacity 220ms var(--motion-ease);
+}
+
+.bottom-navigation::before {
+  transition:
+    opacity var(--motion-fast) var(--motion-ease),
     transform var(--motion-route) var(--motion-ease);
+}
+
+/* One calm reveal for blocks entering the viewport; no looping page motion. */
+.scroll-reveal {
+  transition:
+    opacity 620ms var(--motion-ease),
+    transform 620ms var(--motion-ease);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.scroll-reveal[data-reveal-state='pending'] {
+  opacity: 0;
+  transform: translateY(22px);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal[data-reveal-state='visible'] {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
 }
 
 .drawer-backdrop[data-state='open'] {
@@ -36,30 +63,6 @@
   animation: popover-leave var(--motion-overlay) var(--motion-ease) both;
   pointer-events: none;
   transform-origin: top right;
-}
-
-.route-layer--incoming[data-route-layer='incoming'][data-direction='forward'] {
-  animation: route-enter-forward var(--motion-route) var(--motion-ease) both;
-}
-
-.route-layer--outgoing[data-direction='forward'] {
-  animation: route-leave-forward var(--motion-route) var(--motion-ease) both;
-}
-
-.route-layer--incoming[data-route-layer='incoming'][data-direction='backward'] {
-  animation: route-enter-backward var(--motion-route) var(--motion-ease) both;
-}
-
-.route-layer--outgoing[data-direction='backward'] {
-  animation: route-leave-backward var(--motion-route) var(--motion-ease) both;
-}
-
-.route-layer--incoming[data-route-layer='incoming'][data-direction='neutral'] {
-  animation: route-fade-in var(--motion-route) var(--motion-ease) both;
-}
-
-.route-layer--outgoing[data-direction='neutral'] {
-  animation: route-fade-out var(--motion-route) var(--motion-ease) both;
 }
 
 @keyframes overlay-fade-in {
@@ -92,36 +95,6 @@
   to { transform: translateY(-8px) scale(0.98); opacity: 0; }
 }
 
-@keyframes route-enter-forward {
-  from { transform: translateX(36px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes route-leave-forward {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(-24px); opacity: 0; }
-}
-
-@keyframes route-enter-backward {
-  from { transform: translateX(-36px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes route-leave-backward {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(24px); opacity: 0; }
-}
-
-@keyframes route-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes route-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -130,5 +103,13 @@
     transition-duration: 0.01ms;
     animation-duration: 0.01ms;
     animation-iteration-count: 1;
+  }
+
+  .scroll-reveal,
+  .scroll-reveal[data-reveal-state='pending'],
+  .scroll-reveal[data-reveal-state='visible'] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

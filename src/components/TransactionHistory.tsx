@@ -5,6 +5,10 @@ import { Accordion } from './Accordion';
 
 interface TransactionHistoryProps {
   readonly transactions: readonly Transaction[];
+  /** Раскрыть список сразу. По умолчанию история свёрнута. */
+  readonly defaultOpen?: boolean;
+  /** Только список, без сворачиваемого заголовка — так история выглядит на телефоне. */
+  readonly bare?: boolean;
 }
 
 const transactionTypeKeys = {
@@ -29,37 +33,49 @@ function description(transaction: Transaction, t: I18nValue['t']): string {
   return t('balance.history.purchaseGeneric');
 }
 
-export function TransactionHistory({ transactions }: TransactionHistoryProps): JSX.Element {
+export function TransactionHistory({ bare = false, defaultOpen = false, transactions }: TransactionHistoryProps): JSX.Element {
   const { formatDate, formatMoney, t } = useI18n();
+
+  const list = transactions.length === 0 ? (
+    <p className="wallet-history__empty">{t('balance.history.empty')}</p>
+  ) : (
+    <ul className="wallet-history__list">
+      {transactions.map((transaction) => (
+        <li className="wallet-history__item" key={transaction.id}>
+          <div>
+            <strong>{t(transactionTypeKeys[transaction.type])}</strong>
+            <span>{description(transaction, t)}</span>
+          </div>
+          <div>
+            <strong className={transaction.amount >= 0 ? 'wallet-amount--positive' : ''}>
+              {formatMoney(transaction.amount)}
+            </strong>
+            <time dateTime={transaction.date}>{formatDate(transaction.date)}</time>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+
+  if (bare) {
+    return (
+      <section aria-labelledby="transaction-history-title" className="wallet-history wallet-history--bare">
+        <h2 className="visually-hidden" id="transaction-history-title">{t('balance.history.title')}</h2>
+        {list}
+      </section>
+    );
+  }
 
   return (
     <section aria-labelledby="transaction-history-title" className="wallet-history">
       <h2 className="visually-hidden" id="transaction-history-title">{t('balance.history.title')}</h2>
       <Accordion
         ariaLabel={t('balance.accessibility.historyToggle')}
+        defaultOpenIds={defaultOpen ? ['transactions'] : []}
         items={[{
           id: 'transactions',
           title: t('balance.history.title'),
-          content: transactions.length === 0 ? (
-            <p className="wallet-history__empty">{t('balance.history.empty')}</p>
-          ) : (
-            <ul className="wallet-history__list">
-              {transactions.map((transaction) => (
-                <li className="wallet-history__item" key={transaction.id}>
-                  <div>
-                    <strong>{t(transactionTypeKeys[transaction.type])}</strong>
-                    <span>{description(transaction, t)}</span>
-                  </div>
-                  <div>
-                    <strong className={transaction.amount >= 0 ? 'wallet-amount--positive' : ''}>
-                      {formatMoney(transaction.amount)}
-                    </strong>
-                    <time dateTime={transaction.date}>{formatDate(transaction.date)}</time>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ),
+          content: list,
         }]}
       />
     </section>

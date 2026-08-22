@@ -6,6 +6,7 @@ export function createInitialState(): AppStateV2 {
     preferences: { theme: 'dark', locale: 'ru', onboardingCompleted: false },
     session: { active: false },
     profile: {
+      avatar: null,
       name: 'Алексей',
       username: '@sueta',
       role: 'Пользователь',
@@ -30,7 +31,12 @@ export function createInitialState(): AppStateV2 {
       trafficLimit: 0,
       devicesUsed: 2,
       devicesLimit: 4,
+      autoRenew: true,
     },
+    devices: [
+      { id: 'device-laptop', name: 'Ноутбук', platform: 'Windows', online: true, lastSeenAt: '2026-08-21T09:00:00.000Z' },
+      { id: 'device-phone', name: 'Телефон', platform: 'Android', online: false, lastSeenAt: '2026-08-20T21:40:00.000Z' },
+    ],
     purchaseDraft: { tariffId: 'base', months: 1 },
     referral: { rewardPercent: 20, invited: 8, active: 5, earned: 1480, telegramLink: 'https://t.me/suetavpn_bot' },
     tickets: [

@@ -24,7 +24,7 @@ interface Geometry {
 const STEPS = [
   {
     descriptionKey: 'onboarding.steps.navigation.description',
-    target: '[data-onboarding-target="navigation"]',
+    target: '[data-onboarding-target="navigation"], [data-onboarding-target="mobile-navigation"]',
     titleKey: 'onboarding.steps.navigation.title',
   },
   {
@@ -34,7 +34,7 @@ const STEPS = [
   },
   {
     descriptionKey: 'onboarding.steps.notifications.description',
-    target: '[data-onboarding-target="notifications"]',
+    target: '[data-onboarding-target="notifications"], [data-onboarding-target="mobile-menu"]',
     titleKey: 'onboarding.steps.notifications.title',
   },
 ] as const;
@@ -61,7 +61,7 @@ function selectTarget(selector: string): HTMLElement | null {
     const rectangle = candidate.getBoundingClientRect();
     return rectangle.width > 0 && rectangle.height > 0;
   });
-  return visible ?? document.getElementById('main-content');
+  return visible ?? null;
 }
 
 function sameGeometry(current: Geometry | null, next: Geometry): boolean {
@@ -108,11 +108,17 @@ export function Onboarding({ onComplete, onReady, open }: OnboardingProps): JSX.
     }
     setReady(false);
     onReady?.(false);
-    const target = selectTarget(step.target);
     const tooltip = tooltipRef.current;
-    if (!target || !tooltip) return;
+    const observerTarget = selectTarget(step.target) ?? document.getElementById('main-content');
+    if (!observerTarget || !tooltip) return;
 
     const measure = () => {
+      const target = selectTarget(step.target);
+      if (!target) {
+        setReady(false);
+        onReady?.(false);
+        return;
+      }
       const targetRect = target.getBoundingClientRect();
       const tooltipRect = tooltip.getBoundingClientRect();
       if (targetRect.width <= 0 || targetRect.height <= 0 || tooltipRect.width <= 0 || tooltipRect.height <= 0) {
@@ -146,7 +152,7 @@ export function Onboarding({ onComplete, onReady, open }: OnboardingProps): JSX.
 
     measure();
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
-    observer?.observe(target);
+    observer?.observe(observerTarget);
     observer?.observe(tooltip);
     window.addEventListener('resize', measure);
     window.addEventListener('scroll', measure, true);

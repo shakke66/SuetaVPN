@@ -57,7 +57,7 @@ describe('Telegram-only referral flow', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Копировать ссылку' }));
     expect(writeText).toHaveBeenCalledWith(TELEGRAM_LINK);
-    expect(await screen.findByRole('status')).toHaveTextContent('Ссылка скопирована');
+    expect(await screen.findByText('Ссылка скопирована')).toBeInTheDocument();
 
     setClipboard();
     const execCommand = vi.fn().mockReturnValue(true);

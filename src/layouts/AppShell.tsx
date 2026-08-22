@@ -1,14 +1,17 @@
 import { useLayoutEffect, useRef, useState, type JSX } from 'react';
-import { NavLink, useLocation, useNavigate, useOutlet } from 'react-router';
+import { Link, NavLink, useLocation, useNavigate, useOutlet } from 'react-router';
 import { RouteTransition } from '../app/RouteTransition';
 import { useApp } from '../app/AppProvider';
 import { BottomNavigation, type BottomNavigationItem } from '../components/BottomNavigation';
 import { Brand } from '../components/Brand';
 import { Button } from '../components/Button';
 import { Drawer } from '../components/Drawer';
+import { Avatar } from '../components/Avatar';
 import { Icon, type IconName } from '../components/Icon';
+import { LanguageMenu } from '../components/LanguageMenu';
 import { NotificationPopover } from '../components/NotificationPopover';
 import { Onboarding } from '../components/Onboarding';
+import { ProfileMenu } from '../components/ProfileMenu';
 import type { MessageKey } from '../i18n/messages';
 import { useI18n } from '../i18n/I18nProvider';
 
@@ -39,11 +42,18 @@ function ShellNavLink({
   titleKey: MessageKey;
 }): JSX.Element {
   const { t } = useI18n();
+  const { pathname } = useLocation();
+  const active = pathname === path || (path === '/subscriptions' && pathname === '/purchase');
   return (
-    <NavLink className="shell-nav__link" onClick={onNavigate} to={path}>
+    <Link
+      aria-current={active ? 'page' : undefined}
+      className={active ? 'shell-nav__link active' : 'shell-nav__link'}
+      onClick={onNavigate}
+      to={path}
+    >
       <Icon name={icon} />
       <span>{t(titleKey)}</span>
-    </NavLink>
+    </Link>
   );
 }
 
@@ -58,8 +68,7 @@ export function AppShell(): JSX.Element {
     state,
     telegramMiniApp,
   } = useApp();
-  const { locale, setLocale, t } = useI18n();
-  const location = useLocation();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const outlet = useOutlet();
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
@@ -75,15 +84,10 @@ export function AppShell(): JSX.Element {
   const themeLabelKey: MessageKey = nextTheme === 'light'
     ? 'shell.theme.switchToLight'
     : 'shell.theme.switchToDark';
-  const nextLocale = locale === 'ru' ? 'en' : 'ru';
-  const localeLabelKey: MessageKey = nextLocale === 'ru'
-    ? 'shell.language.switchToRussian'
-    : 'shell.language.switchToEnglish';
   const notificationsModal = notificationsOpen
     && notificationOpenerRef.current?.dataset.notificationOpener === 'drawer';
   const onboardingOpen = !state.preferences.onboardingCompleted;
   const backgroundInert = notificationsModal || onboardingOpen;
-  const profileRoute = location.pathname === '/profile';
 
   useLayoutEffect(() => {
     if (notificationsOpen) {
@@ -147,30 +151,15 @@ export function AppShell(): JSX.Element {
                 ) : null}
               </Button>
             </div>
-            <Button
-              aria-label={t(localeLabelKey)}
-              className="locale-control"
-              onClick={() => setLocale(nextLocale)}
-              variant="utility"
-            >
-              <Icon name="globe" />
-              <span>{locale.toUpperCase()}</span>
-            </Button>
-            <NavLink aria-label={t('navigation.profile')} className="profile-control" to="/profile">
-              <Icon name="profile" />
-            </NavLink>
-            {!telegramMiniApp && !profileRoute ? (
-              <Button onClick={() => void signOut()} variant="danger">
-                <Icon name="logout" />
-                <span>{t('auth.actions.logout')}</span>
-              </Button>
-            ) : null}
+            <LanguageMenu />
+            <ProfileMenu onSignOut={telegramMiniApp ? undefined : () => void signOut()} />
           </div>
           <Button
             ref={menuTriggerRef}
             aria-expanded={drawerOpen}
             aria-label={t('shell.drawer.open')}
             className="app-header__menu"
+            data-onboarding-target="mobile-menu"
             iconOnly
             onClick={() => setDrawerOpen(true)}
             variant="utility"
@@ -189,16 +178,6 @@ export function AppShell(): JSX.Element {
         tickets={state.tickets}
         triggerRef={notificationOpenerRef}
       />
-
-      {telegramMiniApp ? (
-        <p
-          aria-hidden={backgroundInert ? 'true' : undefined}
-          className="mini-app-notice"
-          inert={backgroundInert}
-        >
-          {t('auth.telegram.backendValidation')}
-        </p>
-      ) : null}
 
       <main
         aria-hidden={backgroundInert ? 'true' : undefined}
@@ -223,27 +202,30 @@ export function AppShell(): JSX.Element {
         open={drawerOpen}
         returnFocusRef={menuTriggerRef}
       >
-        <div className="drawer-account">
-          <span className="drawer-account__avatar" aria-hidden="true">
-            {state.profile.name.trim().slice(0, 1).toUpperCase()}
-          </span>
+        {/* Разделы кабинета есть в нижней панели, поэтому в меню остаются
+            только то, чего там нет: профиль, информация и настройки. */}
+        <Link
+          className="drawer-account"
+          data-tariff={state.subscription?.tariffId}
+          onClick={() => setDrawerOpen(false)}
+          to="/profile"
+        >
+          <Avatar avatar={state.profile.avatar} name={state.profile.name} tariffId={state.subscription?.tariffId} />
           <span>
             <strong>{state.profile.name}</strong>
             <small>{state.profile.username}</small>
           </span>
-        </div>
-        <nav aria-label={t('landing.header.navigation')} className="shell-nav shell-nav--drawer">
-          {NAV_ITEMS.map((item) => (
-            <ShellNavLink key={item.path} {...item} onNavigate={() => setDrawerOpen(false)} />
-          ))}
-          <ShellNavLink
-            icon="profile"
-            onNavigate={() => setDrawerOpen(false)}
-            path="/profile"
-            titleKey="navigation.profile"
-          />
-        </nav>
+          <Icon aria-hidden="true" className="drawer-account__chevron" name="chevron-right" size={18} />
+        </Link>
         <div className="drawer__utilities">
+          <Link
+            className="button button--utility"
+            onClick={() => setDrawerOpen(false)}
+            to="/info"
+          >
+            <Icon name="info" />
+            <span>{t('navigation.info')}</span>
+          </Link>
           <Button
             aria-expanded={notificationsOpen}
             data-notification-opener="drawer"
@@ -260,11 +242,8 @@ export function AppShell(): JSX.Element {
             <Icon name={nextTheme === 'light' ? 'sun' : 'moon'} />
             <span>{t(themeLabelKey)}</span>
           </Button>
-          <Button onClick={() => setLocale(nextLocale)} variant="utility">
-            <Icon name="globe" />
-            <span>{t(localeLabelKey)}</span>
-          </Button>
-          {!telegramMiniApp && !profileRoute ? (
+          <LanguageMenu drawer />
+          {!telegramMiniApp ? (
             <Button onClick={() => void signOut()} variant="danger">
               <Icon name="logout" />
               <span>{t('auth.actions.logout')}</span>

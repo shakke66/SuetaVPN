@@ -1,6 +1,6 @@
 import { getTariff } from './tariffs';
 import { createInitialState } from './state';
-import type { AppStateV2, Period, Subscription, TariffId, Ticket, TicketMessage, TicketNotification, Transaction } from './types';
+import type { AppStateV2, Device, Period, Subscription, TariffId, Ticket, TicketMessage, TicketNotification, Transaction } from './types';
 
 export const STORAGE_KEY = 'suetavpn_app_v2';
 export const LEGACY_STORAGE_KEY = 'suetavpn_mvp_v1';
@@ -119,6 +119,21 @@ function normalizeCollection<T>(value: unknown, fallback: T[], normalize: (item:
   return Array.isArray(value) ? value.map(normalize).filter((item): item is T => item !== null) : fallback;
 }
 
+/** Чужой origin в аватаре нам не нужен: принимаем только встроенную картинку или https-ссылку. */
+function avatar(value: unknown, fallback: string | null): string | null {
+  if (typeof value !== 'string' || !value.trim()) return value === null ? null : fallback;
+  return /^data:image\/(png|jpeg|webp);base64,/.test(value) || /^https:\/\//.test(value) ? value : fallback;
+}
+
+function normalizeDevice(value: unknown): Device | null {
+  if (!isRecord(value) || typeof value.id !== 'string' || !value.id.trim() ||
+    typeof value.name !== 'string' || !value.name.trim() ||
+    typeof value.platform !== 'string' || !value.platform.trim()) return null;
+  const lastSeenAt = canonicalDate(value.lastSeenAt);
+  if (!lastSeenAt) return null;
+  return { id: value.id, name: value.name, platform: value.platform, online: value.online === true, lastSeenAt };
+}
+
 function normalizeSubscription(value: unknown, fallback: Subscription | null): Subscription | null {
   if (!isRecord(value)) return fallback;
   const id = string(value.id, fallback?.id ?? 'subscription-current');
@@ -135,6 +150,7 @@ function normalizeSubscription(value: unknown, fallback: Subscription | null): S
     trafficLimit: tariff.traffic.kind === 'bypass' ? tariff.traffic.bypassGb : 0,
     devicesUsed: number(value.devicesUsed, fallback?.devicesUsed ?? 0, 0, true),
     devicesLimit: tariff.devices,
+    autoRenew: typeof value.autoRenew === 'boolean' ? value.autoRenew : fallback?.autoRenew ?? true,
   };
 }
 
@@ -155,11 +171,13 @@ function hydrateFromV2(raw: RecordValue, defaults: AppStateV2): AppStateV2 | nul
     },
     session: { active: session.active === true },
     profile: {
+      avatar: avatar(profile.avatar, defaults.profile.avatar),
       name: string(profile.name, defaults.profile.name), username: string(profile.username, defaults.profile.username), role: string(profile.role, defaults.profile.role),
       email: string(profile.email, defaults.profile.email, true), emailVerified: profile.emailVerified === true, registeredAt: date(profile.registeredAt, defaults.profile.registeredAt),
     },
     wallet: { balance: number(wallet.balance, defaults.wallet.balance), transactions: normalizeCollection(wallet.transactions, defaults.wallet.transactions, normalizeTransaction) },
     subscription: raw.subscription === null ? null : normalizeSubscription(raw.subscription, defaults.subscription),
+    devices: normalizeCollection(raw.devices, defaults.devices, normalizeDevice),
     purchaseDraft: { tariffId: tariffId(draft.tariffId, defaults.purchaseDraft.tariffId), months: period(draft.months, defaults.purchaseDraft.months) },
     referral: {
       rewardPercent: number(referral.rewardPercent, defaults.referral.rewardPercent), invited: number(referral.invited, defaults.referral.invited, 0, true),
@@ -182,6 +200,7 @@ function migrateV1(raw: RecordValue, defaults: AppStateV2): AppStateV2 | null {
     preferences: { theme: raw.theme === 'light' ? 'light' : defaults.preferences.theme, locale: raw.locale === 'en' ? 'en' : defaults.preferences.locale, onboardingCompleted: raw.onboardingCompleted === true },
     session: { active: raw.sessionActive === true },
     profile: {
+      avatar: avatar(profile.avatar, defaults.profile.avatar),
       name: string(profile.name, defaults.profile.name), username: string(profile.username, defaults.profile.username), role: string(profile.role, defaults.profile.role),
       email: string(profile.email, defaults.profile.email, true), emailVerified: profile.emailVerified === true, registeredAt: date(profile.registeredAt, defaults.profile.registeredAt),
     },

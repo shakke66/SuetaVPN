@@ -19,8 +19,8 @@ export function BottomNavigation({ inert = false, items }: BottomNavigationProps
   const { t } = useI18n();
   const { pathname } = useLocation();
   const normalizedPath = pathname === '/purchase' ? '/subscriptions' : pathname;
-  const activeIndex = Math.max(items.findIndex(({ path }) => path === normalizedPath), 0);
-  const style = { '--active-index': activeIndex } as CSSProperties;
+  const activeIndex = items.findIndex(({ path }) => path === normalizedPath);
+  const style = { '--active-index': Math.max(activeIndex, 0) } as CSSProperties;
 
   return (
     <nav
@@ -28,6 +28,7 @@ export function BottomNavigation({ inert = false, items }: BottomNavigationProps
       aria-label={t('shell.bottomNav.label')}
       className="bottom-navigation"
       data-active-index={activeIndex}
+      data-onboarding-target="mobile-navigation"
       inert={inert}
       style={style}
     >

@@ -1,0 +1,169 @@
+/* Секция локаций на лендинге: бегущая лента городов и панель про обход. */
+
+.hl {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.hl__heading {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 760px;
+}
+
+.hl__heading h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+}
+
+.hl__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+.hl-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+}
+
+.hl-card__stage {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  overflow: hidden;
+  height: 300px;
+  padding: var(--space-6) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+/* Мягкие края у бегущей ленты, чтобы плитки не обрывались резко. */
+.hl-card__stage:has(.hl-marquee)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--color-surface), transparent 14%, transparent 86%, var(--color-surface));
+}
+
+.hl-card__text {
+  display: grid;
+  gap: 8px;
+}
+
+.hl-card__text h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.hl-card__text p {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--color-text-muted);
+  font-size: 0.98rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.hl-marquee {
+  display: flex;
+  width: max-content;
+  gap: 12px;
+  animation: hl-scroll 30s linear infinite;
+}
+
+.hl-marquee--back {
+  animation-duration: 38s;
+  animation-direction: reverse;
+}
+
+.hl-tile {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.hl-tile svg { color: var(--color-text-muted); }
+
+.hl-tile[data-accent='true'] {
+  border-color: color-mix(in srgb, var(--color-brand) 55%, transparent);
+  background: color-mix(in srgb, var(--color-brand) 12%, var(--color-surface-raised));
+}
+
+.hl-tile[data-accent='true'] svg { color: var(--color-brand); }
+
+.hl-panel {
+  display: grid;
+  gap: 10px;
+  padding: 0 var(--space-6);
+}
+
+.hl-panel__title {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.hl-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.hl-row:first-of-type { border-top: 0; }
+
+.hl-row b {
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.hl-row span {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+}
+
+.hl-row__mark {
+  width: 9px;
+  height: 9px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--color-brand);
+}
+
+@keyframes hl-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hl-marquee { animation: none; }
+}
+
+@media (max-width: 900px) {
+  .hl__grid { grid-template-columns: 1fr; }
+
+  .hl-card__stage {
+    height: auto;
+    min-height: 236px;
+  }
+}

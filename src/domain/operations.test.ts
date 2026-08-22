@@ -180,7 +180,7 @@ describe('purchaseSubscription', () => {
       trafficUsed: 0,
       trafficLimit: 40,
       devicesUsed: 0,
-      devicesLimit: 6,
+      devicesLimit: 6, autoRenew: true,
     });
     expect(result.state.purchaseDraft).toEqual({ tariffId: 'elite', months: 3 });
     expect(result.state.wallet.transactions[0]).toMatchObject({
@@ -207,7 +207,7 @@ describe('purchaseSubscription', () => {
       trafficUsed: 18,
       trafficLimit: 0,
       devicesUsed: 2,
-      devicesLimit: 4,
+      devicesLimit: 4, autoRenew: true,
     };
 
     const result = purchaseSubscription(state, 'base', 3, NOW, fixedId);
@@ -232,7 +232,7 @@ describe('purchaseSubscription', () => {
       trafficUsed: 18,
       trafficLimit: 0,
       devicesUsed: 2,
-      devicesLimit: 4,
+      devicesLimit: 4, autoRenew: true,
     };
 
     const result = purchaseSubscription(state, 'elite', 1, NOW, fixedId);
@@ -247,7 +247,7 @@ describe('purchaseSubscription', () => {
       trafficUsed: 0,
       trafficLimit: 40,
       devicesUsed: 0,
-      devicesLimit: 6,
+      devicesLimit: 6, autoRenew: true,
     });
   });
 });

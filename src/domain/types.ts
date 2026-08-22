@@ -49,6 +49,15 @@ export interface TicketNotification {
   createdAt: string;
 }
 
+/** Устройство, подключённое к подписке. Имя и платформу присылает клиент, поэтому это данные, а не строки перевода. */
+export interface Device {
+  id: string;
+  name: string;
+  platform: string;
+  online: boolean;
+  lastSeenAt: string;
+}
+
 export interface Subscription {
   id: string;
   tariffId: TariffId;
@@ -59,6 +68,7 @@ export interface Subscription {
   trafficLimit: number;
   devicesUsed: number;
   devicesLimit: number;
+  autoRenew: boolean;
 }
 
 export interface AppStateV2 {
@@ -72,6 +82,8 @@ export interface AppStateV2 {
     active: boolean;
   };
   profile: {
+    /** Ссылка на картинку: data URL загруженного файла или photo_url из Telegram. */
+    avatar: string | null;
     name: string;
     username: string;
     role: string;
@@ -84,6 +96,7 @@ export interface AppStateV2 {
     transactions: Transaction[];
   };
   subscription: Subscription | null;
+  devices: Device[];
   purchaseDraft: {
     tariffId: TariffId;
     months: Period;

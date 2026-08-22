@@ -1,9 +1,8 @@
-import { useState, type JSX } from 'react';
+import type { JSX } from 'react';
 import { useApp } from '../app/AppProvider';
+import { useToast } from '../app/ToastProvider';
 import { Button } from '../components/Button';
 import { useI18n } from '../i18n/I18nProvider';
-
-type CopyStatus = 'copied' | 'failed' | null;
 
 type SharingNavigator = Navigator & {
   share?: (data: ShareData) => Promise<void>;
@@ -33,12 +32,16 @@ async function copyText(value: string): Promise<boolean> {
 
 export function ReferralPage(): JSX.Element {
   const { state } = useApp();
+  const { showToast } = useToast();
   const { formatMoney, t } = useI18n();
-  const [copyStatus, setCopyStatus] = useState<CopyStatus>(null);
   const { referral } = state;
 
   const copyLink = async () => {
-    setCopyStatus(await copyText(referral.telegramLink) ? 'copied' : 'failed');
+    const copied = await copyText(referral.telegramLink);
+    showToast({
+      kind: copied ? 'info' : 'error',
+      text: t(copied ? 'referrals.toasts.copied' : 'referrals.toasts.copyFailed'),
+    });
   };
 
   const shareLink = async () => {
@@ -84,7 +87,6 @@ export function ReferralPage(): JSX.Element {
           <Button onClick={() => void copyLink()} variant="utility">{t('referrals.telegram.copy')}</Button>
           <Button onClick={() => void shareLink()} variant="primary">{t('referrals.telegram.share')}</Button>
         </div>
-        {copyStatus ? <p role={copyStatus === 'copied' ? 'status' : 'alert'}>{t(`referrals.toasts.${copyStatus === 'copied' ? 'copied' : 'copyFailed'}`)}</p> : null}
       </section>
     </section>
   );

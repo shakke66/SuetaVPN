@@ -12,6 +12,7 @@ export interface TelegramUser {
   readonly first_name?: string;
   readonly last_name?: string;
   readonly username?: string;
+  readonly photo_url?: string;
 }
 
 type AuthFailure = Extract<Result<AppStateV2>, { ok: false }>;

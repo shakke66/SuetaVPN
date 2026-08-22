@@ -15,7 +15,6 @@ import type {
   TelegramUser,
 } from '../adapters/contracts';
 import { createLocalAdapters } from '../adapters/local/createLocalAdapters';
-import { ToastRegion } from '../components/ToastRegion';
 import { LEGACY_STORAGE_KEY, STORAGE_KEY, hydrateState } from '../domain/migrations';
 import type { CreateTicketRequest, TopUpRequest } from '../domain/operations';
 import type {
@@ -27,6 +26,7 @@ import type {
   Theme,
 } from '../domain/types';
 import { I18nProvider, useI18n } from '../i18n/I18nProvider';
+import { ToastRegion } from '../components/ToastRegion';
 
 export type CommandName =
   | 'startEmail'
@@ -40,6 +40,11 @@ export type CommandName =
   | 'replyTicket'
   | 'markNotificationRead'
   | 'markAllNotificationsRead';
+
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
 
 export interface AppContextValue {
   state: AppStateV2;
@@ -56,6 +61,8 @@ export interface AppContextValue {
   setTheme: (theme: Theme) => Promise<void>;
   setLocale: (locale: Locale) => Promise<void>;
   setPurchaseDraft: (tariffId: TariffId, months: Period) => Promise<void>;
+  setAutoRenew: (autoRenew: boolean) => Promise<void>;
+  setAvatar: (avatar: string | null) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   topUp: (request: TopUpRequest) => Promise<Result<AppStateV2>>;
   applyPromo: (code: string) => Promise<Result<AppStateV2>>;
@@ -95,6 +102,9 @@ function hydrateStoredState(): HydratedStorage {
   }
 }
 
+/* Провайдер уведомлений живёт ниже по дереву, поэтому предупреждение о
+   недоступном хранилище показываем собственной областью — и не гасим само:
+   без сохранения данные живут только до закрытия вкладки. */
 function PersistenceWarning({ onDismiss, visible }: {
   onDismiss: () => void;
   visible: boolean;
@@ -102,7 +112,7 @@ function PersistenceWarning({ onDismiss, visible }: {
   const { t } = useI18n();
   return (
     <ToastRegion
-      messages={visible ? [{ id: 'persistence-warning', kind: 'error', text: t('common.persistenceWarning') }] : []}
+      messages={visible ? [{ id: 'persistence-warning', kind: 'error', sticky: true, text: t('common.persistenceWarning') }] : []}
       onDismiss={onDismiss}
     />
   );
@@ -128,6 +138,7 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
   const telegramUser = useMemo(() => adapters.auth.detectTelegramUser(), [adapters]);
   const stateRef = useRef(state);
   const queueRef = useRef(Promise.resolve());
+  const themeTransitionTimeoutRef = useRef<number | null>(null);
   const pendingRef = useRef(new Set<CommandName>());
   const miniAppLoginStartedRef = useRef(false);
   const [pending, setPending] = useState<CommandName[]>([]);
@@ -153,12 +164,27 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
     return result;
   }, [commit]);
 
-  const setTheme = useCallback((theme: Theme) => (
-    enqueueStateUpdate((current) => ({
+  const setTheme = useCallback(async (theme: Theme) => {
+    const root = document.documentElement;
+    const animate = !prefersReducedMotion();
+    if (themeTransitionTimeoutRef.current !== null) {
+      window.clearTimeout(themeTransitionTimeoutRef.current);
+      themeTransitionTimeoutRef.current = null;
+    }
+    if (animate) root.dataset.themeTransition = 'active';
+
+    await enqueueStateUpdate((current) => ({
       ...current,
       preferences: { ...current.preferences, theme },
-    }))
-  ), [enqueueStateUpdate]);
+    }));
+
+    if (animate) {
+      themeTransitionTimeoutRef.current = window.setTimeout(() => {
+        delete root.dataset.themeTransition;
+        themeTransitionTimeoutRef.current = null;
+      }, 420);
+    }
+  }, [enqueueStateUpdate]);
 
   const setLocale = useCallback((locale: Locale) => (
     enqueueStateUpdate((current) => ({
@@ -174,6 +200,20 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
     }))
   ), [enqueueStateUpdate]);
 
+  const setAutoRenew = useCallback((autoRenew: boolean) => (
+    enqueueStateUpdate((current) => (current.subscription === null ? current : {
+      ...current,
+      subscription: { ...current.subscription, autoRenew },
+    }))
+  ), [enqueueStateUpdate]);
+
+  const setAvatar = useCallback((avatarValue: string | null) => (
+    enqueueStateUpdate((current) => ({
+      ...current,
+      profile: { ...current.profile, avatar: avatarValue },
+    }))
+  ), [enqueueStateUpdate]);
+
   const completeOnboarding = useCallback(() => (
     enqueueStateUpdate((current) => ({
       ...current,
@@ -184,6 +224,13 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
   useEffect(() => {
     document.documentElement.dataset.theme = state.preferences.theme;
   }, [state.preferences.theme]);
+
+  useEffect(() => () => {
+    if (themeTransitionTimeoutRef.current !== null) {
+      window.clearTimeout(themeTransitionTimeoutRef.current);
+    }
+    delete document.documentElement.dataset.themeTransition;
+  }, []);
 
   const run = useCallback((name: CommandName, transition: Transition) => {
     if (pendingRef.current.has(name)) {
@@ -273,6 +320,8 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
     setTheme,
     setLocale,
     setPurchaseDraft,
+    setAutoRenew,
+    setAvatar,
     completeOnboarding,
     topUp: (request) => run(
       'topUp',
@@ -312,6 +361,8 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
     returnPath,
     run,
     startEmail,
+    setAutoRenew,
+    setAvatar,
     setLocale,
     setPurchaseDraft,
     setTheme,
