@@ -131,11 +131,17 @@ function pendingResult(
 
 export function AppProvider({ children, adapters = defaultAdapters }: AppProviderProps) {
   const [hydrated] = useState(hydrateStoredState);
-  const [state, setRenderedState] = useState(hydrated.state);
+  const telegramUser = useMemo(() => adapters.auth.detectTelegramUser(), [adapters]);
+  // Внутри мини-аппа человек уже авторизован ботом. Ждать асинхронный
+  // loginTelegram нельзя: первый кадр успел бы увести его на экран входа.
+  const [state, setRenderedState] = useState(() => (
+    telegramUser
+      ? adapters.auth.applyTelegramSession(hydrated.state, telegramUser)
+      : hydrated.state
+  ));
   const [persistenceWarning, setPersistenceWarning] = useState(hydrated.persistenceWarning);
   const [emailChallenge, setEmailChallenge] = useState<EmailChallenge | null>(null);
   const [returnPath, setReturnPath] = useState<string | null>(null);
-  const telegramUser = useMemo(() => adapters.auth.detectTelegramUser(), [adapters]);
   const stateRef = useRef(state);
   const queueRef = useRef(Promise.resolve());
   const themeTransitionTimeoutRef = useRef<number | null>(null);
@@ -288,10 +294,12 @@ export function AppProvider({ children, adapters = defaultAdapters }: AppProvide
   ), [adapters, run, telegramUser]);
 
   useEffect(() => {
-    if (!telegramUser || state.session.active || miniAppLoginStartedRef.current) return;
+    if (!telegramUser || miniAppLoginStartedRef.current) return;
     miniAppLoginStartedRef.current = true;
+    // Сессию выше уже применили синхронно, ради мгновенного кабинета. Этот вызов
+    // прогоняет ту же операцию штатным путём, чтобы профиль лёг в хранилище.
     void loginTelegram();
-  }, [loginTelegram, state.session.active, telegramUser]);
+  }, [loginTelegram, telegramUser]);
 
   const logout = useCallback((): Promise<Result<AppStateV2>> => {
     if (telegramUser) {

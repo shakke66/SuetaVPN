@@ -36,6 +36,15 @@ function InfoRouteLayout() {
   return state.session.active ? <AppShell /> : <Outlet />;
 }
 
+/**
+ * В Telegram Mini App человек приходит из бота в свой кабинет, витрина ему
+ * не нужна. В обычном браузере корень по-прежнему отдаёт лендинг.
+ */
+function LandingRoute() {
+  const { telegramMiniApp } = useApp();
+  return telegramMiniApp ? <Navigate to="/dashboard" replace /> : <LandingPage />;
+}
+
 function UnknownRoute() {
   const { state } = useApp();
   return <Navigate to={state.session.active ? '/dashboard' : '/'} replace />;
@@ -45,7 +54,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route element={<PublicLayout />}>
-        <Route index element={<LandingPage />} />
+        <Route index element={<LandingRoute />} />
         <Route element={<InfoRouteLayout />}>
           <Route path="/info" element={<InfoPage />} />
         </Route>

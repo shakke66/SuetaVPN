@@ -233,7 +233,7 @@ describe('email authorization', () => {
 });
 
 describe('Telegram Mini App authorization', () => {
-  it('auto-authorizes on the public route without forcing navigation', async () => {
+  it('auto-authorizes and opens the cabinet instead of the landing page', async () => {
     const stored = createInitialState();
     stored.session = { active: false };
     stored.preferences.onboardingCompleted = true;
@@ -248,9 +248,10 @@ describe('Telegram Mini App authorization', () => {
 
     renderApp({ path: '/', strictMode: true });
 
-    expect(await screen.findByRole('heading', { name: 'Интернет на вашей стороне' })).toBeInTheDocument();
+    // Человек пришёл из бота в свой кабинет, витрина ему здесь не нужна.
+    await waitFor(() => expect(window.location.hash).toBe('#/dashboard'));
+    expect(screen.queryByRole('heading', { name: 'Интернет на вашей стороне' })).not.toBeInTheDocument();
     await waitFor(() => expect(persistedState().session.active).toBe(true));
-    expect(window.location.hash).toBe('#/');
   });
 
   it('auto-authorizes only initDataUnsafe.user and keeps browser-only controls out of Mini App', async () => {

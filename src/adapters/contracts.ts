@@ -37,6 +37,8 @@ export interface AuthAdapter {
   loginTelegram(state: AppStateV2, user: TelegramUser | null): Promise<Result<AppStateV2>>;
   logout(state: AppStateV2): Promise<Result<AppStateV2>>;
   detectTelegramUser(): TelegramUser | null;
+  /** Синхронный вариант loginTelegram: мини-апп должен быть авторизован уже в первом кадре. */
+  applyTelegramSession(state: AppStateV2, user: TelegramUser): AppStateV2;
 }
 
 export interface BillingAdapter {

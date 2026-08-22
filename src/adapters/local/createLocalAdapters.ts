@@ -82,6 +82,14 @@ function telegramProfile(state: AppStateV2, user: TelegramUser | null): AppState
   };
 }
 
+function telegramSession(state: AppStateV2, user: TelegramUser | null): AppStateV2 {
+  return {
+    ...state,
+    session: { active: true },
+    profile: telegramProfile(state, user),
+  };
+}
+
 export function createLocalAdapters(options: LocalAdapterOptions = {}): LocalAdapters {
   const delayMs = options.delayMs ?? DEFAULT_DELAY_MS;
   const now = options.now ?? (() => new Date().toISOString());
@@ -143,16 +151,16 @@ export function createLocalAdapters(options: LocalAdapterOptions = {}): LocalAda
           },
         }, 'auth.email.success');
       }),
-      loginTelegram: (state, user) => run(() => success({
-        ...state,
-        session: { active: true },
-        profile: telegramProfile(state, user),
-      }, 'auth.telegram.success')),
+      loginTelegram: (state, user) => run(() => success(
+        telegramSession(state, user),
+        'auth.telegram.success',
+      )),
       logout: (state) => run(() => success({
         ...state,
         session: { active: false },
       }, 'auth.actions.logout')),
       detectTelegramUser,
+      applyTelegramSession: telegramSession,
     },
     billing: {
       topUp: (state, request) => run(() => topUp(state, request, now(), options.idSource)),
