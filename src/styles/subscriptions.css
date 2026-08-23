@@ -925,29 +925,11 @@
   align-self: end;
 }
 
-/* В мастере кнопка шага прижимается над нижней навигацией и остаётся
-   доступной при любой длине списка. Панель занимает 64px плюс отступ 10px
-   от края и безопасную зону — на столько и поднимаем. */
+/* Мастер на телефоне: обычный поток со скроллом документа, кнопка шага —
+   sticky над нижней панелью (responsive.css). */
 @media (max-width: 767px) {
   .purchase-wizard {
-    height: 100%;
-    min-height: 0;
-  }
-
-  .purchase-wizard__body {
-    /* Тарифов может быть больше, чем помещается: прокручиваем список,
-       а кнопка шага остаётся на месте. */
-    min-height: 0;
-    overflow-y: auto;
-    scrollbar-width: none;
-  }
-
-  .purchase-wizard__body::-webkit-scrollbar {
-    display: none;
-  }
-
-  .purchase-wizard__action {
-    align-self: end;
+    grid-template-rows: none;
   }
 
   /* Карточка тарифа из макета: компактнее по отступам и шрифтам. */
@@ -1205,7 +1187,8 @@
   }
 
   .subscriptions-mobile {
-    grid-template-rows: auto auto 1fr auto;
+    /* Обычный поток со скроллом документа; кнопка — sticky (responsive.css). */
+    grid-template-rows: none;
     gap: var(--space-4);
   }
 
@@ -1225,14 +1208,6 @@
     display: grid;
     align-content: start;
     gap: var(--space-3);
-    /* Строка 1fr сжимается, иначе длинный список наезжает на кнопку. */
-    min-height: 0;
-    overflow-y: auto;
-    scrollbar-width: none;
-  }
-
-  .subscriptions-mobile__body::-webkit-scrollbar {
-    display: none;
   }
 
   .subscription-facts {
@@ -1270,7 +1245,6 @@
 
   .subscriptions-mobile__action {
     display: grid;
-    align-self: end;
     gap: var(--space-2);
   }
 
