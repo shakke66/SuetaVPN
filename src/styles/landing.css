@@ -1124,8 +1124,8 @@
     display: grid;
     width: 100%;
     grid-template-areas:
-      'copy'
-      'visual';
+      'visual'
+      'copy';
     grid-template-columns: minmax(0, 1fr);
     gap: 40px;
     position: static;
@@ -1552,8 +1552,8 @@
 
   .landing-hero__grid {
     grid-template-areas:
-      'copy'
-      'visual';
+      'visual'
+      'copy';
     gap: 36px;
   }
 
@@ -1855,8 +1855,8 @@
   .landing-hero__grid {
     display: grid;
     grid-template-areas:
-      'copy'
-      'visual';
+      'visual'
+      'copy';
     grid-template-columns: minmax(0, 1fr);
     gap: 28px;
   }

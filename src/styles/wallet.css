@@ -692,18 +692,25 @@
    её содержимым, 6px между пилюлями сумм. */
 @media (max-width: 767px) {
   .wallet-mobile {
-    /* Обычный поток: страница прокручивается документом, кнопка действия
-       поднята над нижней панелью через position: sticky (responsive.css).
-       Внутренний скролл со спрятанным скроллбаром выглядел как обрезанный
-       экран — способ оплаты «Банковская карта» было не найти. */
-    grid-template-rows: none;
+    grid-template-rows: auto auto 1fr auto;
     gap: var(--space-4);
+    /* Высота ограничена экраном: тогда строка 1fr сжимается и лишнее
+       прокручивается внутри содержимого, а кнопка остаётся на месте. */
+    height: 100%;
+    min-height: 0;
   }
 
   .wallet-mobile__body {
     display: grid;
     align-content: start;
     gap: var(--space-4);
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .wallet-mobile__body::-webkit-scrollbar {
+    display: none;
   }
 
   .wallet-mobile .wallet-field {
@@ -796,6 +803,7 @@
 
   .wallet-mobile__action {
     display: grid;
+    align-self: end;
     gap: var(--space-2);
   }
 

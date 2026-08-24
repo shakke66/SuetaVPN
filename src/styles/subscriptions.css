@@ -345,9 +345,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
   background: var(--color-text-strong);
-  /* Текст обязан быть инверсией фона пилюли: в светлой теме пилюля тёмная,
-     и прежний --color-brand-text (тёмный) сливался с ней в «чёрное на чёрном». */
-  color: var(--color-surface);
+  color: var(--color-brand-text);
   font-size: 0.8rem;
   font-weight: 750;
   letter-spacing: 0.04em;
@@ -357,7 +355,6 @@
 .tariff-card__plan[data-tariff='elite'],
 .subscription-card__plan[data-tariff='elite'] {
   background: var(--color-brand);
-  color: var(--color-brand-text);
 }
 
 .tariff-card__price {
@@ -928,11 +925,29 @@
   align-self: end;
 }
 
-/* Мастер на телефоне: обычный поток со скроллом документа, кнопка шага —
-   sticky над нижней панелью (responsive.css). */
+/* В мастере кнопка шага прижимается над нижней навигацией и остаётся
+   доступной при любой длине списка. Панель занимает 64px плюс отступ 10px
+   от края и безопасную зону — на столько и поднимаем. */
 @media (max-width: 767px) {
   .purchase-wizard {
-    grid-template-rows: none;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .purchase-wizard__body {
+    /* Тарифов может быть больше, чем помещается: прокручиваем список,
+       а кнопка шага остаётся на месте. */
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .purchase-wizard__body::-webkit-scrollbar {
+    display: none;
+  }
+
+  .purchase-wizard__action {
+    align-self: end;
   }
 
   /* Карточка тарифа из макета: компактнее по отступам и шрифтам. */
@@ -1190,8 +1205,7 @@
   }
 
   .subscriptions-mobile {
-    /* Обычный поток со скроллом документа; кнопка — sticky (responsive.css). */
-    grid-template-rows: none;
+    grid-template-rows: auto auto 1fr auto;
     gap: var(--space-4);
   }
 
@@ -1211,6 +1225,14 @@
     display: grid;
     align-content: start;
     gap: var(--space-3);
+    /* Строка 1fr сжимается, иначе длинный список наезжает на кнопку. */
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .subscriptions-mobile__body::-webkit-scrollbar {
+    display: none;
   }
 
   .subscription-facts {
@@ -1248,6 +1270,7 @@
 
   .subscriptions-mobile__action {
     display: grid;
+    align-self: end;
     gap: var(--space-2);
   }
 
