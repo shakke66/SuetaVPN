@@ -345,7 +345,9 @@
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
   background: var(--color-text-strong);
-  color: var(--color-brand-text);
+  /* Текст обязан быть инверсией фона пилюли: в светлой теме пилюля тёмная,
+     и прежний --color-brand-text (тёмный) сливался с ней в «чёрное на чёрном». */
+  color: var(--color-surface);
   font-size: 0.8rem;
   font-weight: 750;
   letter-spacing: 0.04em;
@@ -355,6 +357,7 @@
 .tariff-card__plan[data-tariff='elite'],
 .subscription-card__plan[data-tariff='elite'] {
   background: var(--color-brand);
+  color: var(--color-brand-text);
 }
 
 .tariff-card__price {
