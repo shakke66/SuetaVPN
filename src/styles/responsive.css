@@ -53,6 +53,18 @@
     --bottom-nav-clearance: calc(var(--bottom-nav-space) + 16px);
   }
 
+  /* Вебвью Windows рисует настоящий скроллбар поверх приложения — прячем,
+     как в нативных приложениях. Резину оверскролла глушим, чтобы страница
+     не «листалась в пустоту» за своими границами. */
+  html {
+    overscroll-behavior-y: none;
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
   .app-header {
     min-height: calc(var(--mobile-header-block) + var(--mobile-safe-top));
     overflow-x: clip;
@@ -166,6 +178,21 @@
 
   .page-heading p {
     margin-bottom: 0;
+  }
+
+  /* Две кнопки действий дашборда в одну строку: экономит ~50px высоты и
+     выглядит собраннее на любом телефоне. */
+  .app-shell .dashboard-quick-actions {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  }
+
+  .app-shell .dashboard-quick-actions .button {
+    min-height: 46px;
+    padding-inline: 8px;
+    font-size: 0.9rem;
+    white-space: nowrap;
   }
 
   .bottom-navigation {
@@ -318,18 +345,26 @@
   }
 }
 
-/* Низкий вьюпорт: мини-апп Telegram на ПК (~640px), iPhone внутри мини-аппа
-   (шапка Telegram съедает ~100px), альбомная ориентация. Ужимаем хром —
-   шапку, панель, заголовки — чтобы контенту осталось больше высоты. */
-@media (max-width: 899px) and (max-height: 700px) {
+/* Fit-тир: каждый экран кабинета (кроме поддержки и информации) обязан
+   влезать во вьюпорт целиком, без прокрутки. Это мини-апп Telegram на ПК
+   (~600px контента) и телефоны внутри Telegram (~650px). Заголовки-дубли
+   навигации прячутся визуально (для скринридера остаются), карточки и
+   контролы ужимаются. Селекторы с .app-shell — чтобы перебить равные по
+   специфичности правила из файлов страниц независимо от порядка бандла. */
+@media (max-width: 899px) and (max-height: 720px) {
   :root {
-    --mobile-header-block: 58px;
-    --bottom-nav-block: 56px;
-    --bottom-nav-gap: 8px;
+    --mobile-header-block: 50px;
+    --bottom-nav-block: 52px;
+    --bottom-nav-gap: 6px;
+    --bottom-nav-clearance: calc(var(--bottom-nav-space) + 10px);
   }
 
   .app-header .brand__logo {
-    flex: 0 0 34px;
+    flex: 0 0 30px;
+  }
+
+  .app-header .brand--compact span {
+    font-size: 0.92rem;
   }
 
   .app-header__inner {
@@ -338,7 +373,7 @@
   }
 
   .route-viewport {
-    padding-top: calc(var(--mobile-header-block) + var(--space-2) + var(--mobile-safe-top));
+    padding-top: calc(var(--mobile-header-block) + 10px + var(--mobile-safe-top));
   }
 
   .page-heading h1 {
@@ -346,11 +381,468 @@
   }
 
   .bottom-navigation__item {
-    min-height: 42px;
+    min-height: 38px;
   }
 
   .bottom-navigation__item svg {
-    width: 17px;
-    height: 17px;
+    width: 16px;
+    height: 16px;
+  }
+
+  /* «Главная» и «Реферальная программа» дублируют подпись активной вкладки —
+     на коротком экране это самые дешёвые 50-90px. */
+  .app-shell .dashboard-page > .page-heading,
+  .app-shell .referral-page > .page-heading {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .app-shell .dashboard-page,
+  .app-shell .subscriptions-page,
+  .app-shell .purchase-page {
+    gap: 10px;
+  }
+
+  .app-shell .wallet-tabs {
+    padding: 3px;
+  }
+
+  .app-shell .wallet-tabs button {
+    min-height: 38px;
+  }
+
+  /* Дашборд */
+  .app-shell .subscription-card {
+    gap: 10px;
+    min-height: 0;
+    padding: 14px;
+  }
+
+  .app-shell .subscription-card__days strong {
+    font-size: 1.9rem;
+  }
+
+  .app-shell .subscription-card .button {
+    min-height: 42px;
+  }
+
+  .app-shell .dashboard-summary-grid {
+    gap: 10px;
+  }
+
+  .app-shell .dashboard-summary-card {
+    min-height: 0;
+    padding: 12px 14px;
+  }
+
+  .app-shell .dashboard-quick-actions {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  }
+
+  .app-shell .dashboard-quick-actions .button {
+    min-height: 44px;
+    padding-inline: 8px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  /* Подписки */
+  .app-shell .subscriptions-mobile,
+  .app-shell .subscriptions-mobile__body {
+    gap: 10px;
+  }
+
+  .app-shell .subscriptions-mobile__term {
+    gap: 8px;
+  }
+
+  /* Дата под прогрессом дублируется в фактах вкладки «Подписка». */
+  .app-shell .subscriptions-mobile .subscription-card__progress > span:not(.subscription-card__track) {
+    display: none;
+  }
+
+  .app-shell .subscriptions-mobile .subscription-facts {
+    gap: 8px;
+  }
+
+  .app-shell .subscriptions-mobile .subscription-facts__row {
+    padding-bottom: 8px;
+  }
+
+  .app-shell .auto-renew {
+    padding: 10px 14px;
+  }
+
+  .app-shell .subscriptions-mobile__action .button,
+  .app-shell .wallet-mobile__action .button,
+  .app-shell .purchase-wizard__action .button {
+    min-height: 46px;
+  }
+
+  .app-shell .subscriptions-mobile__hint,
+  .app-shell .wallet-mobile__hint,
+  .app-shell .purchase-wizard__hint {
+    display: none;
+  }
+
+  .wallet-mobile__action,
+  .subscriptions-mobile__action,
+  .purchase-wizard__action {
+    padding-top: 10px;
+    padding-bottom: 6px;
+  }
+
+  /* Баланс */
+  .app-shell .wallet-mobile,
+  .app-shell .wallet-mobile__body {
+    gap: 10px;
+  }
+
+  .app-shell .wallet-mobile__head strong {
+    font-size: 1.55rem;
+  }
+
+  .app-shell .wallet-mobile .wallet-preset {
+    min-height: 38px;
+    font-size: 0.84rem;
+  }
+
+  .app-shell .wallet-mobile .wallet-amount input {
+    min-height: 44px;
+    font-size: 1.3rem;
+  }
+
+  .app-shell .wallet-mobile .wallet-method {
+    min-height: 46px;
+  }
+
+  .app-shell .wallet-mobile .wallet-inline-form input {
+    min-height: 40px;
+  }
+
+  /* Рефералка */
+  .app-shell .referral-stats {
+    gap: 10px;
+  }
+
+  .app-shell .referral-stats__item {
+    min-height: 64px;
+    padding: 10px 14px;
+  }
+
+  .app-shell .referral-stats dd {
+    font-size: 1.35rem;
+  }
+
+  .app-shell .referral-link {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .app-shell .referral-link__value {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .app-shell .referral-link__actions .button {
+    min-height: 42px;
+  }
+
+  /* Мастер покупки */
+  .app-shell .purchase-wizard {
+    gap: 10px;
+  }
+
+  .app-shell .purchase-wizard__head {
+    gap: 8px;
+  }
+
+  .app-shell .purchase-wizard__head h2 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .app-shell .tariff-card {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .app-shell .tariff-card__facts {
+    gap: 6px 12px;
+    padding-top: 6px;
+  }
+
+  .app-shell .tariff-card__fact-label {
+    font-size: 0.7rem;
+  }
+
+  .app-shell .tariff-card__fact-value {
+    font-size: 0.85rem;
+  }
+
+  .app-shell .purchase-wizard__periods {
+    gap: 8px;
+  }
+
+  /* Четыре периода столбиком не влезают — раскладываем 2×2. */
+  .app-shell .period-choice-grid {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-shell .period-card {
+    min-height: 80px;
+    gap: 2px;
+  }
+
+  .app-shell .period-card__price {
+    font-size: 1.15rem;
+  }
+
+  .app-shell .purchase-wizard__periods .purchase-section__note {
+    margin: 0;
+    font-size: 0.78rem;
+  }
+
+  /* Дожим общих блоков: часть экранов выше упирается в последние 10-20px. */
+  .app-shell .dashboard-page,
+  .app-shell .subscriptions-page,
+  .app-shell .purchase-page,
+  .app-shell .wallet-mobile,
+  .app-shell .wallet-mobile__body {
+    gap: 8px;
+  }
+
+  .app-shell .wallet-mobile__head strong {
+    font-size: 1.45rem;
+  }
+
+  .app-shell .wallet-mobile .wallet-preset {
+    min-height: 36px;
+  }
+
+  .app-shell .wallet-mobile .wallet-method {
+    min-height: 44px;
+  }
+
+  .app-shell .subscription-card__days strong {
+    font-size: 1.75rem;
+  }
+
+  .app-shell .dashboard-quick-actions .button {
+    min-height: 42px;
+  }
+
+  /* Кнопка «Пополнить баланс» ломалась на две строки и раздувала карточку.
+     flex-shrink: 0 обязателен, иначе карточка сжимает кнопку и текст режется. */
+  .app-shell .dashboard-summary-card .button {
+    flex: 0 0 auto;
+    min-height: 40px;
+    max-width: none;
+    padding-inline: 12px;
+    font-size: 0.84rem;
+    white-space: nowrap;
+  }
+
+  .app-shell .dashboard-summary-card > div {
+    min-width: 0;
+  }
+
+  /* База задаёт колонку кнопки жёстко в 120px — узкой кнопке текст не влезает. */
+  .app-shell .dashboard-summary-card[data-layout='horizontal'] {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .app-shell .dashboard-summary-card strong {
+    font-size: 1.2rem;
+  }
+
+  .app-shell .purchase-wizard__bar {
+    min-height: 0;
+  }
+
+  .app-shell .purchase-wizard__bar .button {
+    width: 36px;
+    min-height: 36px;
+  }
+
+  .app-shell .tariff-card {
+    gap: 6px;
+    padding: 8px 12px;
+  }
+
+  .app-shell .purchase-wizard__action {
+    padding-top: 8px;
+    padding-bottom: 4px;
+  }
+
+  /* Профиль: скролл на нём остаётся (контента больше экрана по определению),
+     но плотность приводим к остальным. */
+  .app-shell .profile-page > .page-heading {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .app-shell .profile-layout,
+  .app-shell .profile-column {
+    gap: 10px;
+  }
+
+  .app-shell .profile-page .subscription-card {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .app-shell .profile-facts {
+    gap: 8px;
+    padding-top: 10px;
+  }
+
+  .app-shell .profile-avatar--large {
+    width: 56px;
+    height: 56px;
   }
 }
+
+/* Ультра-тир: совсем короткие вьюпорты (маленький Android внутри Telegram,
+   альбомная ориентация узких окон). Последняя ступень плотности перед
+   штатным откатом в прокрутку. */
+@media (max-width: 899px) and (max-height: 580px) {
+  :root {
+    --mobile-header-block: 44px;
+    --bottom-nav-block: 48px;
+  }
+
+  .route-viewport {
+    padding-top: calc(var(--mobile-header-block) + 8px + var(--mobile-safe-top));
+  }
+
+  .bottom-navigation__item {
+    min-height: 34px;
+  }
+
+  .app-shell .dashboard-page,
+  .app-shell .subscriptions-page,
+  .app-shell .purchase-page,
+  .app-shell .wallet-mobile,
+  .app-shell .wallet-mobile__body,
+  .app-shell .subscriptions-mobile,
+  .app-shell .subscriptions-mobile__body {
+    gap: 6px;
+  }
+
+  .app-shell .subscription-card {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .app-shell .subscription-card__days strong {
+    font-size: 1.5rem;
+  }
+
+  .app-shell .subscription-card .button,
+  .app-shell .dashboard-quick-actions .button {
+    min-height: 38px;
+  }
+
+  .app-shell .dashboard-summary-card {
+    padding: 8px 12px;
+  }
+
+  .app-shell .wallet-mobile__head strong {
+    font-size: 1.3rem;
+  }
+
+  .app-shell .wallet-tabs button {
+    min-height: 34px;
+  }
+
+  .app-shell .wallet-mobile .wallet-preset {
+    min-height: 32px;
+  }
+
+  .app-shell .wallet-mobile .wallet-amount input {
+    min-height: 40px;
+    font-size: 1.15rem;
+  }
+
+  .app-shell .wallet-mobile .wallet-method {
+    min-height: 40px;
+  }
+
+  .app-shell .wallet-mobile .wallet-inline-form input {
+    min-height: 36px;
+  }
+
+  .app-shell .auto-renew {
+    padding: 8px 12px;
+  }
+
+  .app-shell .subscriptions-mobile__action .button,
+  .app-shell .wallet-mobile__action .button,
+  .app-shell .purchase-wizard__action .button {
+    min-height: 42px;
+  }
+
+  .app-shell .subscription-facts__row {
+    padding-bottom: 6px;
+  }
+
+  .app-shell .tariff-card {
+    gap: 4px;
+    padding: 6px 10px;
+  }
+
+  .app-shell .tariff-card__facts {
+    gap: 4px 10px;
+    padding-top: 4px;
+  }
+
+  .app-shell .purchase-wizard__head h2 {
+    font-size: 1rem;
+  }
+
+  .app-shell .period-card {
+    min-height: 68px;
+  }
+}
+
+/* Узкий и короткий одновременно (iPhone SE 1, старые компактные Android):
+   подписи кнопок дашборда не влезают в пол-ширины — мельчим шрифт. */
+@media (max-width: 379px) and (max-height: 720px) {
+  .app-shell .dashboard-quick-actions {
+    gap: 6px;
+  }
+
+  .app-shell .dashboard-quick-actions .button {
+    padding-inline: 4px;
+    font-size: 0.78rem;
+  }
+
+  .app-shell .dashboard-summary-card .button {
+    padding-inline: 8px;
+    font-size: 0.78rem;
+  }
+
+  /* На 320px строки карточки переносятся и добавляют высоту — компенсируем. */
+  .app-shell .subscription-card {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+}
+
