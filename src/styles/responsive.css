@@ -174,10 +174,11 @@
     left: var(--mobile-content-gutter);
     display: grid;
     max-width: 680px;
-    min-height: calc(64px + var(--mobile-safe-bottom));
+    /* Безопасную зону держит только `bottom`: панель плавающая, и добавленная
+       ещё и внутрь она превращалась в пустой хвост под кнопками. */
+    min-height: 64px;
     margin: 0 auto;
     padding: var(--bottom-navigation-padding);
-    padding-bottom: calc(var(--bottom-navigation-padding) + var(--mobile-safe-bottom));
     border: 1px solid var(--color-border-strong);
     border-radius: 20px;
     background: var(--color-navigation-surface);
