@@ -47,9 +47,15 @@ export function DashboardPage(): JSX.Element {
         <Button ref={connectButtonRef} onClick={() => setConnectOpen(true)} variant="primary">
           {t('dashboard.connect')}
         </Button>
-        <Link className="button button--ghost" to="/purchase">
-          {state.subscription ? t('subscriptions.renew') : t('subscriptions.choose')}
-        </Link>
+        {/* При активной подписке "Продлить" ведёт туда же, куда "Управлять
+            подпиской" и вкладка "Подписки", и только опускает главное действие
+            ниже. Без подписки это единственный призыв к покупке на главной,
+            поэтому его оставляем. */}
+        {!state.subscription && (
+          <Link className="button button--ghost" to="/purchase">
+            {t('subscriptions.choose')}
+          </Link>
+        )}
       </div>
 
       <ConnectDeviceDialog
