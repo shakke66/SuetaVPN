@@ -43,6 +43,11 @@
     --mobile-safe-top: env(safe-area-inset-top, 0px);
     --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
     --mobile-zoom: 1;
+    /* Единицы вьюпорта внутри масштабированной оболочки дают долю экрана,
+       а не весь экран: 100dvh при zoom 0.85 это 85% высоты. Компенсируем,
+       иначе снизу остаётся пустая полоса, а контент лезет во внутренний
+       скролл при свободном месте. */
+    --mobile-viewport-height: calc(100dvh / var(--mobile-zoom));
     /* Сколько места экран держит под плавающей панелью: её высота (64) плюс
        отступ от края (10) плюс воздух. */
     --mobile-nav-clearance: 84px;
@@ -104,7 +109,7 @@
     width: 100%;
     min-width: 0;
     min-height: 100vh;
-    min-height: 100dvh;
+    min-height: var(--mobile-viewport-height);
     padding:
       calc(var(--mobile-header-block) + var(--space-3) + var(--mobile-safe-top))
       var(--mobile-content-gutter)
@@ -117,8 +122,8 @@
   .route-viewport:has(.wallet-mobile),
   .route-viewport:has(.subscriptions-mobile),
   .route-viewport:has(.purchase-wizard) {
-    height: 100dvh;
-    max-height: 100dvh;
+    height: var(--mobile-viewport-height);
+    max-height: var(--mobile-viewport-height);
     overflow: hidden;
   }
 
@@ -236,7 +241,7 @@
     right: var(--mobile-content-gutter);
     left: var(--mobile-content-gutter);
     width: auto;
-    max-height: calc(100dvh - var(--mobile-header-block) - var(--mobile-safe-top) - var(--space-5));
+    max-height: calc(var(--mobile-viewport-height) - var(--mobile-header-block) - var(--mobile-safe-top) - var(--space-5));
     overflow-y: auto;
   }
 
