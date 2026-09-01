@@ -2,6 +2,7 @@ import { useRef, useState, type JSX } from 'react';
 import { Link } from 'react-router';
 import { useApp } from '../app/AppProvider';
 import { ConnectDeviceDialog } from '../components/ConnectDeviceDialog';
+import { DeviceRow } from '../components/DeviceRow';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { SubscriptionCard } from '../components/SubscriptionCard';
@@ -27,6 +28,34 @@ export function DashboardPage(): JSX.Element {
         title={t('dashboard.subscription.title')}
       />
 
+      {/* Главный экран VPN-кабинета отвечает на вопрос "что у меня подключено",
+          а не только "сколько осталось дней". До этого от устройств здесь был
+          один счётчик в карточке подписки. */}
+      {state.subscription ? (
+        <section className="dashboard-devices">
+          <header className="dashboard-devices__header">
+            <h2>{t('subscriptions.tabs.devices')}</h2>
+            <span className="dashboard-devices__counter">
+              {t('subscriptions.devicesConnected', {
+                amount: `${state.subscription.devicesUsed}/${state.subscription.devicesLimit}`,
+              })}
+            </span>
+          </header>
+          {state.devices.length > 0 ? (
+            <ul className="device-list">
+              {state.devices.slice(0, 3).map((device) => <DeviceRow device={device} key={device.id} />)}
+            </ul>
+          ) : (
+            <p className="dashboard-devices__empty">{t('subscriptions.devicesEmpty')}</p>
+          )}
+          {/* Действие стоит рядом с тем, к чему относится, а не отдельным
+              блоком под всем экраном. */}
+          <Button ref={connectButtonRef} onClick={() => setConnectOpen(true)} variant="primary">
+            {t('dashboard.connect')}
+          </Button>
+        </section>
+      ) : null}
+
       {/* Кликабельна вся плитка: кнопки внутри забирали лайм у главного
           действия экрана и делали три полосы подряд одинаковыми. */}
       <div className="dashboard-tiles">
@@ -44,20 +73,18 @@ export function DashboardPage(): JSX.Element {
         </Link>
       </div>
 
-      <div className="dashboard-quick-actions">
-        <Button ref={connectButtonRef} onClick={() => setConnectOpen(true)} variant="primary">
-          {t('dashboard.connect')}
-        </Button>
-        {/* При активной подписке "Продлить" ведёт туда же, куда "Управлять
-            подпиской" и вкладка "Подписки", и только опускает главное действие
-            ниже. Без подписки это единственный призыв к покупке на главной,
-            поэтому его оставляем. */}
-        {!state.subscription && (
+      {/* Без подписки на главной нет ни устройств, ни действия с ними, поэтому
+          остаётся единственный призыв: выбрать тариф. */}
+      {!state.subscription && (
+        <div className="dashboard-quick-actions">
+          <Button ref={connectButtonRef} onClick={() => setConnectOpen(true)} variant="primary">
+            {t('dashboard.connect')}
+          </Button>
           <Link className="button button--ghost" to="/purchase">
             {t('subscriptions.choose')}
           </Link>
-        )}
-      </div>
+        </div>
+      )}
 
       <ConnectDeviceDialog
         onClose={() => setConnectOpen(false)}

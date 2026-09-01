@@ -2,6 +2,7 @@ import { useState, type JSX, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { useApp } from '../app/AppProvider';
 import { periodKey, useIsMobile } from '../app/ui';
+import { DeviceRow } from '../components/DeviceRow';
 import { SubscriptionCard } from '../components/SubscriptionCard';
 import { getPrice, getTariff } from '../domain/tariffs';
 import type { Device, Subscription, Transaction } from '../domain/types';
@@ -217,22 +218,6 @@ function MobileTerm({ subscription }: { subscription: Subscription }): JSX.Eleme
         <span>{t('subscriptions.expiresAt', { amount: formatDate(subscription.expiresAt) })}</span>
       </div>
     </div>
-  );
-}
-
-function DeviceRow({ device }: { device: Device }): JSX.Element {
-  const { formatDate, t } = useI18n();
-
-  return (
-    <li className="device-row">
-      <span className="device-row__name">
-        <strong>{device.name}</strong>
-        <span>{device.platform}</span>
-      </span>
-      <span className="device-row__seen">
-        {device.online ? t('subscriptions.online') : t('subscriptions.lastSeen', { amount: formatDate(device.lastSeenAt) })}
-      </span>
-    </li>
   );
 }
 
