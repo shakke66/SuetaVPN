@@ -320,17 +320,17 @@
 
 /* Короткий вьюпорт (мини-апп в Telegram, невысокие телефоны) ужимаем целиком.
    Поля по краям задаются в координатах до масштаба, поэтому gutter растёт:
-   26 x 0.78 и 29 x 0.70 дают одни и те же 20px на экране. */
+   24 x 0.85 и 26 x 0.78 дают одни и те же 20px на экране. */
 @media (max-width: 899px) and (max-height: 760px) {
   :root {
-    --mobile-zoom: 0.78;
-    --mobile-content-gutter: 26px;
+    --mobile-zoom: 0.85;
+    --mobile-content-gutter: 24px;
   }
 }
 
 @media (max-width: 899px) and (max-height: 600px) {
   :root {
-    --mobile-zoom: 0.7;
-    --mobile-content-gutter: 29px;
+    --mobile-zoom: 0.78;
+    --mobile-content-gutter: 26px;
   }
 }
