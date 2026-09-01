@@ -42,6 +42,17 @@
     --mobile-header-block: 72px;
     --mobile-safe-top: env(safe-area-inset-top, 0px);
     --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --mobile-zoom: 1;
+    /* Сколько места экран держит под плавающей панелью: её высота (64) плюс
+       отступ от края (10) плюс воздух. */
+    --mobile-nav-clearance: 84px;
+  }
+
+  /* Вьюпорт мини-аппа короче любого телефонного макета. Вместо переверстки
+     каждого экрана ужимаем оболочку целиком: пропорции и поля сохраняются,
+     фиксированные шапка и панель масштабируются вместе с содержимым. */
+  .app-shell {
+    zoom: var(--mobile-zoom);
   }
 
   .app-header {
@@ -97,17 +108,8 @@
     padding:
       calc(var(--mobile-header-block) + var(--space-3) + var(--mobile-safe-top))
       var(--mobile-content-gutter)
-      calc(110px + var(--mobile-safe-bottom));
-    scroll-padding-bottom: calc(110px + var(--mobile-safe-bottom));
-  }
-
-  /* Экраны с закреплённой снизу кнопкой держат отступ сами: её sticky-подъём
-     уже поднимает её над панелью, и полный резерв добавлял бы пустой хвост. */
-  .route-viewport:has(.wallet-mobile__action),
-  .route-viewport:has(.subscriptions-mobile__action),
-  .route-viewport:has(.purchase-wizard__action) {
-    padding-bottom: calc(84px + var(--mobile-safe-bottom));
-    scroll-padding-bottom: calc(84px + var(--mobile-safe-bottom));
+      calc(var(--mobile-nav-clearance) + var(--mobile-safe-bottom));
+    scroll-padding-bottom: calc(var(--mobile-nav-clearance) + var(--mobile-safe-bottom));
   }
 
   /* Баланс и подписки живут ровно в один экран, как в макете: область
@@ -316,12 +318,19 @@
   }
 }
 
-/* On short phone viewports the fixed navigation occupies a larger share of
-   the screen. Reserve an extra buffer so the final action in a page can be
-   scrolled above the navigation surface instead of staying underneath it. */
-@media (max-width: 899px) and (max-height: 720px) {
-  .route-viewport {
-    padding-bottom: calc(124px + var(--mobile-safe-bottom));
-    scroll-padding-bottom: calc(124px + var(--mobile-safe-bottom));
+/* Короткий вьюпорт (мини-апп в Telegram, невысокие телефоны) ужимаем целиком.
+   Поля по краям задаются в координатах до масштаба, поэтому gutter растёт:
+   26 x 0.78 и 29 x 0.70 дают одни и те же 20px на экране. */
+@media (max-width: 899px) and (max-height: 760px) {
+  :root {
+    --mobile-zoom: 0.78;
+    --mobile-content-gutter: 26px;
+  }
+}
+
+@media (max-width: 899px) and (max-height: 600px) {
+  :root {
+    --mobile-zoom: 0.7;
+    --mobile-content-gutter: 29px;
   }
 }
