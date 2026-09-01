@@ -181,9 +181,9 @@ export const ru = {
   },
   dashboard: {
     title: 'Главная',
-    balance: { title: 'Баланс', topUp: 'Пополнить баланс' },
+    balance: { title: 'Баланс', topUp: 'Пополнить баланс', hint: 'Пополнить' },
     subscription: { title: 'Текущая подписка', none: 'Активной подписки нет', manage: 'Управлять подпиской', daysLeft: 'Осталось {amount} дн.' },
-    referral: { title: 'Реферальная программа', earned: 'Заработано {amount}', open: 'Открыть рефералы' },
+    referral: { title: 'Реферальная программа', short: 'Заработано', earned: 'Заработано {amount}', open: 'Открыть рефералы', hint: 'Пригласить' },
     connect: 'Подключить устройство',
   },
   subscriptions: {
@@ -480,9 +480,9 @@ export const en = {
     period: { one: '1 month', three: '3 months', six: '6 months', twelve: '12 months' }, perMonth: '{amount} per month',
   },
   dashboard: {
-    title: 'Dashboard', balance: { title: 'Balance', topUp: 'Top up balance' },
+    title: 'Dashboard', balance: { title: 'Balance', topUp: 'Top up balance', hint: 'Top up' },
     subscription: { title: 'Current subscription', none: 'No active subscription', manage: 'Manage subscription', daysLeft: '{amount} days left' },
-    referral: { title: 'Referral program', earned: '{amount} earned', open: 'Open referrals' }, connect: 'Connect a device',
+    referral: { title: 'Referral program', short: 'Earned', earned: '{amount} earned', open: 'Open referrals', hint: 'Invite' }, connect: 'Connect a device',
   },
   subscriptions: {
     title: 'Subscriptions', current: 'Current subscription', empty: 'No subscription yet', choose: 'Choose a subscription', renew: 'Renew', changeTariff: 'Change plan', daysUnit: 'd', daysLeftCaption: 'left', expiresAt: 'Valid until {amount}', devices: 'Devices: {amount}', traffic: 'Traffic: {amount}',

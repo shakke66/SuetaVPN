@@ -40,12 +40,13 @@ beforeEach(() => {
 });
 
 describe('dashboard and subscriptions', () => {
-  it('keeps balance and referral content horizontal and explains Base traffic honestly', async () => {
+  it('opens balance and referrals by the whole tile and explains Base traffic honestly', async () => {
     openProtectedRoute('/dashboard');
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Главная' })).toBeInTheDocument();
-    expect(screen.getByTestId('dashboard-balance-card')).toHaveAttribute('data-layout', 'horizontal');
-    expect(screen.getByTestId('dashboard-referral-card')).toHaveAttribute('data-layout', 'horizontal');
+    // Кликабельна вся плитка, отдельной кнопки внутри больше нет.
+    expect(screen.getByTestId('dashboard-balance-card')).toHaveAttribute('href', '#/balance');
+    expect(screen.getByTestId('dashboard-referral-card')).toHaveAttribute('href', '#/referral');
     expect(screen.getByText('Безлимитный трафик')).toBeInTheDocument();
   });
 

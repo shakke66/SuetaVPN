@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { useApp } from '../app/AppProvider';
 import { ConnectDeviceDialog } from '../components/ConnectDeviceDialog';
 import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
 import { SubscriptionCard } from '../components/SubscriptionCard';
 import { useI18n } from '../i18n/I18nProvider';
 
@@ -26,21 +27,21 @@ export function DashboardPage(): JSX.Element {
         title={t('dashboard.subscription.title')}
       />
 
-      <div className="dashboard-summary-grid">
-        <article className="dashboard-summary-card" data-layout="horizontal" data-testid="dashboard-balance-card">
-          <div>
-            <p>{t('dashboard.balance.title')}</p>
-            <strong>{formatMoney(state.wallet.balance)}</strong>
-          </div>
-          <Link className="button button--primary" to="/balance">{t('dashboard.balance.topUp')}</Link>
-        </article>
-        <article className="dashboard-summary-card" data-layout="horizontal" data-testid="dashboard-referral-card">
-          <div>
-            <p>{t('dashboard.referral.title')}</p>
-            <strong>{formatMoney(state.referral.earned)}</strong>
-          </div>
-          <Link className="button button--ghost" to="/referral">{t('dashboard.referral.open')}</Link>
-        </article>
+      {/* Кликабельна вся плитка: кнопки внутри забирали лайм у главного
+          действия экрана и делали три полосы подряд одинаковыми. */}
+      <div className="dashboard-tiles">
+        <Link className="dashboard-tile" data-testid="dashboard-balance-card" to="/balance">
+          <span className="dashboard-tile__label">{t('dashboard.balance.title')}</span>
+          <strong className="dashboard-tile__value">{formatMoney(state.wallet.balance)}</strong>
+          <span className="dashboard-tile__hint">{t('dashboard.balance.hint')}</span>
+          <Icon aria-hidden="true" className="dashboard-tile__chevron" name="chevron-right" size={16} />
+        </Link>
+        <Link className="dashboard-tile" data-testid="dashboard-referral-card" to="/referral">
+          <span className="dashboard-tile__label">{t('dashboard.referral.short')}</span>
+          <strong className="dashboard-tile__value">{formatMoney(state.referral.earned)}</strong>
+          <span className="dashboard-tile__hint">{t('dashboard.referral.hint')}</span>
+          <Icon aria-hidden="true" className="dashboard-tile__chevron" name="chevron-right" size={16} />
+        </Link>
       </div>
 
       <div className="dashboard-quick-actions">
