@@ -30,6 +30,10 @@ export const NAV_ITEMS = [
 
 const BOTTOM_NAV_ITEMS = NAV_ITEMS.filter(({ bottom }) => bottom);
 
+// Порядок вкладок задаёт сторону, с которой приезжает страница: вправо по
+// списку — движение вперёд, влево — назад.
+const NAV_ORDER = BOTTOM_NAV_ITEMS.map(({ path }) => path);
+
 function ShellNavLink({
   icon,
   onNavigate,
@@ -185,7 +189,7 @@ export function AppShell(): JSX.Element {
         id="main-content"
         inert={backgroundInert}
       >
-        <RouteTransition>{outlet}</RouteTransition>
+        <RouteTransition order={NAV_ORDER}>{outlet}</RouteTransition>
       </main>
 
       <Onboarding

@@ -51,7 +51,7 @@
 
   --motion-fast: 160ms;
   --motion-route: 380ms;
-  --motion-overlay: 280ms;
+  --motion-overlay: 340ms;
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 

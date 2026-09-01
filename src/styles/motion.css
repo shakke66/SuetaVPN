@@ -11,6 +11,33 @@ button,
     opacity 220ms var(--motion-ease);
 }
 
+/* Смена вкладки: приезжает только входящая страница, уходящая не рендерится
+   вовсе. Сдвиг небольшой и по направлению списка вкладок, поэтому переход
+   читается как движение, а не как подмена кадра. */
+.route-layer--current {
+  animation: route-enter var(--motion-route) var(--motion-ease) both;
+}
+
+.route-layer--current[data-direction='forward'] {
+  --route-enter-shift: 28px;
+}
+
+.route-layer--current[data-direction='back'] {
+  --route-enter-shift: -28px;
+}
+
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--route-enter-shift, 0), 8px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .bottom-navigation::before {
   transition:
     opacity var(--motion-fast) var(--motion-ease),
@@ -76,13 +103,13 @@ button,
 }
 
 @keyframes drawer-enter {
-  from { transform: translateX(24px); opacity: 0; }
+  from { transform: translateX(100%); opacity: 0.4; }
   to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes drawer-leave {
   from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(100%); opacity: 0.4; }
 }
 
 @keyframes popover-enter {
@@ -111,5 +138,9 @@ button,
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .route-layer--current {
+    animation: none;
   }
 }
