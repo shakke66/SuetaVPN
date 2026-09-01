@@ -57,36 +57,58 @@ export function ReferralPage(): JSX.Element {
     await copyLink();
   };
 
-  const stats = [
-    { label: t('referrals.stats.reward'), value: `${referral.rewardPercent}%` },
-    { label: t('referrals.stats.invited'), value: String(referral.invited) },
-    { label: t('referrals.stats.active'), value: String(referral.active) },
-    { label: t('referrals.stats.earned'), value: formatMoney(referral.earned) },
-  ];
-
   return (
     <section className="wallet-page referral-page">
       <div className="page-heading">
         <h1>{t('referrals.title')}</h1>
-        <p>{t('referrals.description')}</p>
       </div>
 
-      <dl className="referral-stats">
-        {stats.map((stat) => (
-          <div className="wallet-card referral-stats__item" key={stat.label}>
-            <dt>{stat.label}</dt>
-            <dd>{stat.value}</dd>
+      {/* Заработок это ответ на главный вопрос раздела, поэтому он один
+          крупный. Условие и счётчики людей идут подписью, а не четырьмя
+          карточками равного веса. */}
+      <section className="referral-summary" data-testid="referral-summary">
+        <span className="referral-summary__label">{t('referrals.stats.earned')}</span>
+        <strong className="referral-summary__value">{formatMoney(referral.earned)}</strong>
+        <p className="referral-summary__reward">
+          {t('referrals.rewardLine', { amount: String(referral.rewardPercent) })}
+        </p>
+        <dl className="referral-summary__people">
+          <div>
+            <dt>{t('referrals.stats.invited')}</dt>
+            <dd>{referral.invited}</dd>
           </div>
-        ))}
-      </dl>
+          <div>
+            <dt>{t('referrals.stats.active')}</dt>
+            <dd>{referral.active}</dd>
+          </div>
+        </dl>
+      </section>
 
-      <section aria-labelledby="telegram-link-title" className="wallet-card referral-link">
-        <h2 id="telegram-link-title">{t('referrals.telegram.title')}</h2>
-        <p className="referral-link__value">{referral.telegramLink}</p>
-        <div className="referral-link__actions">
-          <Button onClick={() => void copyLink()} variant="utility">{t('referrals.telegram.copy')}</Button>
-          <Button onClick={() => void shareLink()} variant="primary">{t('referrals.telegram.share')}</Button>
+      <section aria-labelledby="telegram-link-title" className="referral-share">
+        <h2 className="referral-share__label" id="telegram-link-title">{t('referrals.telegram.title')}</h2>
+        {/* Ссылку не читают, её копируют, поэтому она в одну строку с
+            обрезкой, а кнопка стоит рядом. */}
+        <div className="referral-share__row">
+          <p className="referral-share__value">{referral.telegramLink}</p>
+          <Button onClick={() => void copyLink()} variant="utility">
+            {t('referrals.telegram.copyShort')}
+          </Button>
         </div>
+        <Button onClick={() => void shareLink()} variant="primary">
+          {t('referrals.telegram.share')}
+        </Button>
+      </section>
+
+      {/* Настоящая последовательность из трёх шагов, поэтому она и
+          пронумерована. Раздел объясняет механику, а не просто показывает
+          сумму. */}
+      <section className="referral-how">
+        <h2 className="referral-share__label">{t('referrals.how.title')}</h2>
+        <ol className="referral-how__steps">
+          <li>{t('referrals.how.share')}</li>
+          <li>{t('referrals.how.pay')}</li>
+          <li>{t('referrals.how.reward')}</li>
+        </ol>
       </section>
     </section>
   );

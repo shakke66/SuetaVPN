@@ -36,14 +36,15 @@ afterEach(() => {
 });
 
 describe('Telegram-only referral flow', () => {
-  it('shows four referral stats and the Telegram link without cabinet links or recent invitees', async () => {
+  it('leads with the earnings, keeps the terms as a caption and shows the Telegram link', async () => {
     openReferral();
 
     expect(await screen.findByRole('heading', { name: 'Реферальная программа' })).toBeInTheDocument();
-    expect(screen.getByText('20%')).toBeInTheDocument();
+    // Заработок это главный показатель раздела, условие и счётчики подпись.
+    expect(screen.getByText('1 480 ₽')).toBeInTheDocument();
+    expect(screen.getByText('20% с каждой оплаты приглашённого')).toBeInTheDocument();
     expect(screen.getByText('8')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
-    expect(screen.getByText('1 480 ₽')).toBeInTheDocument();
     expect(screen.getByText(TELEGRAM_LINK)).toBeInTheDocument();
     expect(screen.queryByText(/ссылка кабинета|cabinet link/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/последние приглаш[её]нные|recent invitees/i)).not.toBeInTheDocument();
@@ -55,14 +56,14 @@ describe('Telegram-only referral flow', () => {
     setClipboard(writeText);
     openReferral();
 
-    await user.click(await screen.findByRole('button', { name: 'Копировать ссылку' }));
+    await user.click(await screen.findByRole('button', { name: 'Копировать' }));
     expect(writeText).toHaveBeenCalledWith(TELEGRAM_LINK);
     expect(await screen.findByText('Ссылка скопирована')).toBeInTheDocument();
 
     setClipboard();
     const execCommand = vi.fn().mockReturnValue(true);
     Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    await user.click(screen.getByRole('button', { name: 'Копировать ссылку' }));
+    await user.click(screen.getByRole('button', { name: 'Копировать' }));
     expect(execCommand).toHaveBeenCalledWith('copy');
   });
 

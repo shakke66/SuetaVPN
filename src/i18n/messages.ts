@@ -306,7 +306,14 @@ export const ru = {
     title: 'Реферальная программа',
     description: 'Приглашайте друзей через Telegram и получайте вознаграждение.',
     stats: { reward: 'Вознаграждение', invited: 'Приглашено', active: 'Активны', earned: 'Заработано' },
-    telegram: { title: 'Ваша ссылка Telegram', copy: 'Копировать ссылку', share: 'Поделиться в Telegram' },
+    rewardLine: '{amount}% с каждой оплаты приглашённого',
+    how: {
+      title: 'Как это работает',
+      share: 'Отправьте ссылку другу',
+      pay: 'Друг оформляет подписку',
+      reward: 'Вознаграждение приходит на ваш баланс',
+    },
+    telegram: { title: 'Ваша ссылка', copy: 'Копировать ссылку', copyShort: 'Копировать', share: 'Поделиться в Telegram' },
     toasts: { copied: 'Ссылка скопирована', copyFailed: 'Не удалось скопировать ссылку' },
   },
   support: {
@@ -532,7 +539,7 @@ export const en = {
     topUp: { success: 'Balance topped up by {amount}', amountInvalid: 'Invalid amount', amountTooLow: 'Minimum amount is RUB 100', amountTooHigh: 'Maximum amount is RUB 50,000', paymentMethodInvalid: 'Choose a payment method' },
     promo: { success: 'Promo code applied', notFound: 'Promo code not found', alreadyUsed: 'Promo code already used' },
   },
-  referrals: { title: 'Referral program', description: 'Invite friends through Telegram and receive rewards.', stats: { reward: 'Reward', invited: 'Invited', active: 'Active', earned: 'Earned' }, telegram: { title: 'Your Telegram link', copy: 'Copy link', share: 'Share in Telegram' }, toasts: { copied: 'Link copied', copyFailed: 'Could not copy the link' } },
+  referrals: { title: 'Referral program', description: 'Invite friends through Telegram and receive rewards.', stats: { reward: 'Reward', invited: 'Invited', active: 'Active', earned: 'Earned' }, rewardLine: '{amount}% of every payment your invitee makes', how: { title: 'How it works', share: 'Send the link to a friend', pay: 'They buy a subscription', reward: 'The reward lands on your balance' }, telegram: { title: 'Your link', copy: 'Copy link', copyShort: 'Copy', share: 'Share in Telegram' }, toasts: { copied: 'Link copied', copyFailed: 'Could not copy the link' } },
   support: {
     title: 'Support', tickets: { title: 'Your tickets', empty: 'No tickets yet', emptyDetail: 'Start with a new ticket', open: 'Open ticket', statusOpen: 'Open', statusAnswered: 'Answered', createdAt: 'Created {amount}', attachment: 'Attachment: {name}' },
     create: { title: 'New ticket', subjectLabel: 'Subject', subjectPlaceholder: 'Briefly describe your question', messageLabel: 'Message', messagePlaceholder: 'Tell us more', attachmentLabel: 'Attach file', submit: 'Create ticket', success: 'Ticket created', subjectRequired: 'Enter a subject', messageRequired: 'Enter a message' },

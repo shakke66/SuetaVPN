@@ -127,14 +127,23 @@
      растягивается на высоту экрана, и без этого свободная высота уходила
      внутрь строк сетки: пустой низ карточки подписки и провал перед кнопкой.
      Незанятое место копится одним хвостом снизу. */
-  .dashboard-page {
+  .dashboard-page,
+  .referral-page {
     align-content: start;
     gap: var(--space-3);
   }
 
+  /* Карточки раздела держат высоту по содержимому: иначе свободная высота
+     экрана расходится внутри них и между строками появляется воздух. */
+  .referral-summary,
+  .referral-share {
+    align-content: start;
+  }
+
   /* Заголовок повторяет подпись активной вкладки внизу, а на телефоне стоит
      сорок пикселей. Убираем с экрана, для скринридеров оставляем. */
-  .dashboard-page > .page-heading {
+  .dashboard-page > .page-heading,
+  .referral-page > .page-heading {
     position: absolute;
     width: 1px;
     height: 1px;
