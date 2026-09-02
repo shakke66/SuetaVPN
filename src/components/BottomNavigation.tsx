@@ -1,4 +1,4 @@
-import type { CSSProperties, JSX } from 'react';
+import { useRef, type CSSProperties, type JSX } from 'react';
 import { NavLink, useLocation } from 'react-router';
 import type { MessageKey } from '../i18n/messages';
 import { useI18n } from '../i18n/I18nProvider';
@@ -20,7 +20,18 @@ export function BottomNavigation({ inert = false, items }: BottomNavigationProps
   const { pathname } = useLocation();
   const normalizedPath = pathname === '/purchase' ? '/subscriptions' : pathname;
   const activeIndex = items.findIndex(({ path }) => path === normalizedPath);
-  const style = { '--active-index': Math.max(activeIndex, 0) } as CSSProperties;
+  // На разделах вне панели, профиль и информация, индекс равен -1: подложка
+  // гаснет на месте вместо переезда к первой вкладке и обратно.
+  const lastIndexRef = useRef(0);
+  if (activeIndex >= 0) lastIndexRef.current = activeIndex;
+  const style = { '--active-index': lastIndexRef.current } as CSSProperties;
+
+  // Отклик на касание там, где он есть: вне Telegram вызова просто нет.
+  const haptic = () => {
+    (window as unknown as {
+      Telegram?: { WebApp?: { HapticFeedback?: { impactOccurred?: (style: string) => void } } };
+    }).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('light');
+  };
 
   return (
     <nav
@@ -33,7 +44,7 @@ export function BottomNavigation({ inert = false, items }: BottomNavigationProps
       style={style}
     >
       {items.map(({ icon, path, titleKey }) => (
-        <NavLink className="bottom-navigation__item" key={path} to={path}>
+        <NavLink className="bottom-navigation__item" key={path} onClick={haptic} to={path}>
           <Icon name={icon} />
           <span>{t(titleKey)}</span>
         </NavLink>

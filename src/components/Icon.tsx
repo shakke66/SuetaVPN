@@ -25,16 +25,82 @@ interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'children' | 'name'> {
 
 function IconPath({ name }: { name: IconName }): JSX.Element {
   switch (name) {
+    // Пять иконок навигации нарисованы парой слоёв: контур для покоя и залитый
+    // силуэт для активного раздела. Силуэт это тот же контур, смещённый наружу
+    // на половину штриха, поэтому при переключении глиф не меняет габарит.
     case 'dashboard':
-      return <><path d="M3.5 11 12 4l8.5 7" /><path d="M5.5 10v10h13V10M9 20v-6h6v6" /></>;
+      return (
+        <>
+          <g data-icon-layer="stroke">
+            <path d="M4 17.2V10.6L12 3.8l8 6.8v6.6a2.8 2.8 0 0 1-2.8 2.8H6.8A2.8 2.8 0 0 1 4 17.2Z" />
+          </g>
+          <g data-icon-layer="fill" fill="currentColor" stroke="none">
+            <path
+              d="M12 2.5 21 10.1v7.1a3.8 3.8 0 0 1-3.8 3.8H6.8A3.8 3.8 0 0 1 3 17.2v-7.1ZM9.6 21v-3.2a2.4 2.4 0 0 1 4.8 0V21Z"
+              fillRule="evenodd"
+            />
+          </g>
+        </>
+      );
     case 'subscriptions':
-      return <><rect x="3.5" y="5" width="17" height="14" rx="3" /><path d="M8 3v4m8-4v4M3.5 10h17" /></>;
+      return (
+        <>
+          <g data-icon-layer="stroke">
+            <circle cx="8.6" cy="15.4" r="3.8" />
+            <path d="M11.3 12.7 19.4 4.6m-3.8 3.8 2.1 2.1m-4.2 0 1.6 1.6" />
+          </g>
+          <g data-icon-layer="fill" fill="currentColor" stroke="none">
+            <path
+              d="M13.4 15.4a4.8 4.8 0 1 0-9.6 0 4.8 4.8 0 1 0 9.6 0Zm-4.8 1.9a1.9 1.9 0 1 0 0-3.8 1.9 1.9 0 0 0 0 3.8Z"
+              fillRule="evenodd"
+            />
+            <path d="M11.3 12.7 19.4 4.6m-3.8 3.8 2.1 2.1m-4.2 0 1.6 1.6" fill="none" stroke="currentColor" />
+          </g>
+        </>
+      );
     case 'balance':
-      return <><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" /><path d="M4 9h16m-5 4h5" /><circle cx="16.5" cy="14" r=".5" fill="currentColor" stroke="none" /></>;
+      return (
+        <>
+          <g data-icon-layer="stroke">
+            <path d="M3.8 8.8A3.4 3.4 0 0 1 7.2 5.4h9.6a3.4 3.4 0 0 1 3.4 3.4v7.8a3.4 3.4 0 0 1-3.4 3.4H7.2a3.4 3.4 0 0 1-3.4-3.4Z" />
+            <path d="M19.2 10.5h-2.6a2.2 2.2 0 0 0 0 4.4h2.6" />
+          </g>
+          <g data-icon-layer="fill" fill="currentColor" stroke="none">
+            <path
+              d="M2.8 8.8A4.4 4.4 0 0 1 7.2 4.4h9.6a4.4 4.4 0 0 1 4.4 4.4v7.8a4.4 4.4 0 0 1-4.4 4.4H7.2a4.4 4.4 0 0 1-4.4-4.4ZM22 11.5h-5.4a1.2 1.2 0 0 0 0 2.4H22Z"
+              fillRule="evenodd"
+            />
+          </g>
+        </>
+      );
     case 'referral':
-      return <><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M2.5 20a5.5 5.5 0 0 1 11 0m.5-5.5a4.5 4.5 0 0 1 7.5 3.4" /></>;
+      return (
+        <>
+          <g data-icon-layer="stroke">
+            <circle cx="6.8" cy="12" r="3" />
+            <circle cx="17.4" cy="5.9" r="2.3" />
+            <circle cx="17.4" cy="18.1" r="2.3" />
+            <path d="m9.4 10.5 6-3.45m-6 6.45 6 3.45" />
+          </g>
+          <g data-icon-layer="fill" fill="currentColor" stroke="none">
+            <circle cx="6.8" cy="12" r="4" />
+            <circle cx="17.4" cy="5.9" r="3.3" />
+            <circle cx="17.4" cy="18.1" r="3.3" />
+            <path d="M6.8 12 17.4 5.9M6.8 12 17.4 18.1" fill="none" stroke="currentColor" />
+          </g>
+        </>
+      );
     case 'support':
-      return <><path d="M4 13a8 8 0 0 1 16 0" /><path d="M4 13v3a2 2 0 0 0 2 2h2v-6H4m16 1v3a2 2 0 0 1-2 2h-2v-6h4m-4 7c0 1.1-.9 2-2 2h-2" /></>;
+      return (
+        <>
+          <g data-icon-layer="stroke">
+            <path d="M20 9.2a3.8 3.8 0 0 0-3.8-3.8H7.8A3.8 3.8 0 0 0 4 9.2v3.6a3.8 3.8 0 0 0 3.8 3.8h.6v3.6l4-3.6h3.8a3.8 3.8 0 0 0 3.8-3.8Z" />
+          </g>
+          <g data-icon-layer="fill" fill="currentColor" stroke="none">
+            <path d="M7.8 4.4h8.4A4.8 4.8 0 0 1 21 9.2v3.6a4.8 4.8 0 0 1-4.8 4.8h-3.4l-5.4 3.9v-3.9H7.8A4.8 4.8 0 0 1 3 12.8V9.2A4.8 4.8 0 0 1 7.8 4.4Z" />
+          </g>
+        </>
+      );
     case 'info':
       return <><circle cx="12" cy="12" r="9" /><path d="M12 10v6m0-9h.01" /></>;
     case 'profile':

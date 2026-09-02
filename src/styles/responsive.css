@@ -48,9 +48,6 @@
        иначе снизу остаётся пустая полоса, а контент лезет во внутренний
        скролл при свободном месте. */
     --mobile-viewport-height: calc(100dvh / var(--mobile-zoom));
-    /* Сколько снизу занимает сама плавающая панель: высота 64 плюс отступ
-       от края 10. */
-    --mobile-nav-block: calc(82px + var(--mobile-safe-bottom));
     /* Сколько места экран держит под ней: панель плюс воздух. */
     --mobile-nav-clearance: 92px;
   }
@@ -217,45 +214,50 @@
     margin-bottom: 0;
   }
 
+  /* Плита навигации. Активный раздел обозначают две вещи: залитый лаймовый
+     глиф вместо контурного и нейтральная подложка под ячейкой, единственное,
+     что едет при смене вкладки. Лаймовой заливки ячейки, круга и свечения
+     здесь нет намеренно, оба варианта заказчик отклонил. */
   .bottom-navigation {
-    --bottom-navigation-padding: 7px;
+    /* Оболочка кабинета ужата через zoom, поэтому размеры, которые обязаны
+       остаться постоянными на экране, делятся на масштаб. */
+    --nav-scale: calc(1 / var(--mobile-zoom, 1));
+    --nav-pad: 6px;
+    --nav-cell: calc(46px * var(--nav-scale));
     position: fixed;
     z-index: 35;
     right: var(--mobile-content-gutter);
-    bottom: calc(10px + var(--mobile-safe-bottom));
+    /* env() внутри zoom-поддерева ужимается сам, инсет возвращается к своей
+       настоящей величине умножением на масштаб. */
+    bottom: calc(10px + var(--mobile-safe-bottom) * var(--nav-scale));
     left: var(--mobile-content-gutter);
     display: grid;
     max-width: 680px;
-    /* Безопасную зону держит только `bottom`: панель плавающая, и добавленная
-       ещё и внутрь она превращалась в пустой хвост под кнопками. */
-    min-height: 72px;
+    min-height: calc(var(--nav-cell) + var(--nav-pad) * 2);
     margin: 0 auto;
-    padding: var(--bottom-navigation-padding);
-    border: 1px solid var(--color-border-strong);
-    /* Капсула, как в образце заказчика: прежний прямоугольник со скруглением
-       читался тяжелее. */
-    border-radius: var(--radius-pill);
+    padding: var(--nav-pad);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 22px;
     background: var(--color-navigation-surface);
-    box-shadow: var(--shadow-overlay);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 14px 30px rgba(0, 0, 0, 0.34);
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   .bottom-navigation::before {
     position: absolute;
     z-index: 0;
-    top: var(--bottom-navigation-padding);
-    bottom: var(--bottom-navigation-padding);
-    left: var(--bottom-navigation-padding);
-    width: calc((100% - (var(--bottom-navigation-padding) * 2)) / 5);
-    border-radius: 14px;
-    background: var(--color-brand);
+    top: var(--nav-pad);
+    bottom: var(--nav-pad);
+    left: var(--nav-pad);
+    width: calc((100% - var(--nav-pad) * 2) / 5);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.07);
     content: '';
-    /* Подсветка переехала на саму иконку: заливка ячейки целиком с тёмной
-       подписью поверх выглядела грубо. */
-    opacity: 0;
     transform: translateX(calc(var(--active-index) * 100%));
+    will-change: transform;
   }
 
+  /* Разделы вне панели: подложка гаснет на месте, а не едет к первой вкладке. */
   .bottom-navigation[data-active-index='-1']::before {
     opacity: 0;
   }
@@ -265,28 +267,45 @@
     z-index: 1;
     display: flex;
     min-width: 0;
-    min-height: 56px;
+    min-height: var(--nav-cell);
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    border-radius: 14px;
+    gap: 3px;
+    border-radius: 16px;
+    outline-offset: -3px;
     color: var(--color-navigation-text);
-    font-size: clamp(0.66rem, 2.4vw, 0.8rem);
-    font-weight: 700;
+    font-size: calc(10.5px * var(--nav-scale));
+    font-weight: 600;
+    letter-spacing: 0.005em;
+    line-height: 1.1;
     text-decoration: none;
+    touch-action: manipulation;
+    user-select: none;
+    white-space: nowrap;
   }
 
-  /* Активный раздел обозначен цветом и мягким кругом вокруг иконки, как
-     в присланном заказчиком образце. */
   .bottom-navigation__item[aria-current='page'] {
+    color: var(--color-navigation-active-text);
+  }
+
+  .bottom-navigation__item svg {
+    width: calc(23px * var(--nav-scale));
+    height: calc(23px * var(--nav-scale));
+    stroke-width: 2;
+  }
+
+  /* Заливка глифа включается только здесь, в остальных местах набор контурный. */
+  .bottom-navigation__item [data-icon-layer='fill'] {
     color: var(--color-brand);
   }
 
-  .bottom-navigation__item[aria-current='page'] svg {
-    background: color-mix(in srgb, var(--color-brand) 26%, transparent);
-    box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--color-brand) 38%, transparent),
-      0 0 16px color-mix(in srgb, var(--color-brand) 26%, transparent);
+  .bottom-navigation__item[aria-current='page'] [data-icon-layer='stroke'] {
+    opacity: 0;
+  }
+
+  .bottom-navigation__item[aria-current='page'] [data-icon-layer='fill'] {
+    opacity: 1;
   }
 
   .brand--compact span {
@@ -307,25 +326,6 @@
     padding: var(--space-5);
     border-radius: var(--radius-panel);
   }
-
-  .bottom-navigation__item {
-    flex-direction: column;
-  }
-
-  .bottom-navigation__item svg {
-    width: 22px;
-    height: 22px;
-    /* Круг рисуется отступом вокруг иконки, поэтому размер самой иконки
-       остаётся прежним. Линии плотнее: тонкий контур выглядел бледно. */
-    box-sizing: content-box;
-    padding: 8px;
-    border-radius: 50%;
-    stroke-width: 2.1;
-    transition:
-      background-color var(--motion-fast) var(--motion-ease),
-      box-shadow var(--motion-fast) var(--motion-ease);
-  }
-
 
   .mini-app-notice {
     width: calc(100% - (var(--mobile-content-gutter) * 2));

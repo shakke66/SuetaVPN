@@ -24,7 +24,7 @@
   --color-navigation-surface: #242525;
   --color-navigation-text: #D6D8D8;
   --color-navigation-active: #FFFFFF;
-  --color-navigation-active-text: #191A1D;
+  --color-navigation-active-text: #FFFFFF;
   --color-header-background: rgba(255, 255, 255, 0.88);
   --shadow-card: 0 12px 32px rgba(25, 26, 29, 0.08);
   --shadow-soft: 0 10px 30px rgba(25, 26, 29, 0.10);
@@ -50,7 +50,7 @@
   --control-min: 44px;
 
   --motion-fast: 160ms;
-  --motion-route: 380ms;
+  --motion-route: 300ms;
   --motion-overlay: 340ms;
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
