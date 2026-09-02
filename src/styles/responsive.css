@@ -232,7 +232,9 @@
     margin: 0 auto;
     padding: var(--bottom-navigation-padding);
     border: 1px solid var(--color-border-strong);
-    border-radius: 20px;
+    /* Капсула, как в образце заказчика: прежний прямоугольник со скруглением
+       читался тяжелее. */
+    border-radius: var(--radius-pill);
     background: var(--color-navigation-surface);
     box-shadow: var(--shadow-overlay);
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -246,11 +248,11 @@
     left: var(--bottom-navigation-padding);
     width: calc((100% - (var(--bottom-navigation-padding) * 2)) / 5);
     border-radius: 14px;
-    /* Заливка фирменным лаймом: подсветка белым на 10% прозрачности читалась
-       так слабо, что заказчик не замечал меню. */
     background: var(--color-brand);
     content: '';
-    opacity: 1;
+    /* Подсветка переехала на саму иконку: заливка ячейки целиком с тёмной
+       подписью поверх выглядела грубо. */
+    opacity: 0;
     transform: translateX(calc(var(--active-index) * 100%));
   }
 
@@ -274,8 +276,17 @@
     text-decoration: none;
   }
 
+  /* Активный раздел обозначен цветом и мягким кругом вокруг иконки, как
+     в присланном заказчиком образце. */
   .bottom-navigation__item[aria-current='page'] {
-    color: var(--color-brand-text);
+    color: var(--color-brand);
+  }
+
+  .bottom-navigation__item[aria-current='page'] svg {
+    background: color-mix(in srgb, var(--color-brand) 26%, transparent);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--color-brand) 38%, transparent),
+      0 0 16px color-mix(in srgb, var(--color-brand) 26%, transparent);
   }
 
   .brand--compact span {
@@ -304,6 +315,15 @@
   .bottom-navigation__item svg {
     width: 22px;
     height: 22px;
+    /* Круг рисуется отступом вокруг иконки, поэтому размер самой иконки
+       остаётся прежним. Линии плотнее: тонкий контур выглядел бледно. */
+    box-sizing: content-box;
+    padding: 8px;
+    border-radius: 50%;
+    stroke-width: 2.1;
+    transition:
+      background-color var(--motion-fast) var(--motion-ease),
+      box-shadow var(--motion-fast) var(--motion-ease);
   }
 
 
