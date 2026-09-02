@@ -50,9 +50,9 @@
     --mobile-viewport-height: calc(100dvh / var(--mobile-zoom));
     /* Сколько снизу занимает сама плавающая панель: высота 64 плюс отступ
        от края 10. */
-    --mobile-nav-block: calc(74px + var(--mobile-safe-bottom));
+    --mobile-nav-block: calc(82px + var(--mobile-safe-bottom));
     /* Сколько места экран держит под ней: панель плюс воздух. */
-    --mobile-nav-clearance: 84px;
+    --mobile-nav-clearance: 92px;
   }
 
   /* Вьюпорт мини-аппа короче любого телефонного макета. Вместо переверстки
@@ -228,7 +228,7 @@
     max-width: 680px;
     /* Безопасную зону держит только `bottom`: панель плавающая, и добавленная
        ещё и внутрь она превращалась в пустой хвост под кнопками. */
-    min-height: 64px;
+    min-height: 72px;
     margin: 0 auto;
     padding: var(--bottom-navigation-padding);
     border: 1px solid var(--color-border-strong);
@@ -246,7 +246,9 @@
     left: var(--bottom-navigation-padding);
     width: calc((100% - (var(--bottom-navigation-padding) * 2)) / 5);
     border-radius: 14px;
-    background: var(--color-navigation-active);
+    /* Заливка фирменным лаймом: подсветка белым на 10% прозрачности читалась
+       так слабо, что заказчик не замечал меню. */
+    background: var(--color-brand);
     content: '';
     opacity: 1;
     transform: translateX(calc(var(--active-index) * 100%));
@@ -261,19 +263,19 @@
     z-index: 1;
     display: flex;
     min-width: 0;
-    min-height: 50px;
+    min-height: 56px;
     align-items: center;
     justify-content: center;
     gap: 2px;
     border-radius: 14px;
     color: var(--color-navigation-text);
-    font-size: clamp(0.58rem, 2.05vw, 0.72rem);
-    font-weight: 650;
+    font-size: clamp(0.66rem, 2.4vw, 0.8rem);
+    font-weight: 700;
     text-decoration: none;
   }
 
   .bottom-navigation__item[aria-current='page'] {
-    color: var(--color-navigation-active-text);
+    color: var(--color-brand-text);
   }
 
   .brand--compact span {
@@ -300,9 +302,10 @@
   }
 
   .bottom-navigation__item svg {
-    width: 19px;
-    height: 19px;
+    width: 22px;
+    height: 22px;
   }
+
 
   .mini-app-notice {
     width: calc(100% - (var(--mobile-content-gutter) * 2));
