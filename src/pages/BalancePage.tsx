@@ -3,6 +3,7 @@ import { useApp } from '../app/AppProvider';
 import { useToast } from '../app/ToastProvider';
 import { moveRadioSelection, useIsMobile } from '../app/ui';
 import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
 import { TransactionHistory } from '../components/TransactionHistory';
 import type { PaymentMethod } from '../domain/operations';
 import { useI18n } from '../i18n/I18nProvider';
@@ -165,7 +166,7 @@ export function BalancePage(): JSX.Element {
           tabIndex={method === item ? 0 : -1}
           type="button"
         >
-          <span aria-hidden="true" className="wallet-method__dot" />
+          <Icon className="wallet-method__dot" name={item === 'sbp' ? 'qr' : 'card'} size={21} />
           <strong>{t(`balance.topUp.${item}`)}</strong>
           <span className="wallet-method__hint">{t(item === 'sbp' ? 'balance.sbpHint' : 'balance.cardHint')}</span>
         </button>

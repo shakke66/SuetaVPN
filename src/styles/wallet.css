@@ -507,6 +507,13 @@
   font-size: 0.82rem;
 }
 
+/* На десктопе способ оплаты объясняют заголовок и подсказка, значок там лишний.
+   До 04.09 в разметке на его месте лежал пустой span, теперь это иконка,
+   поэтому её приходится гасить явно. */
+.wallet-method__dot {
+  display: none;
+}
+
 .wallet-confirm {
   display: flex;
   flex-wrap: wrap;
@@ -765,18 +772,18 @@
     padding: 0 var(--space-4);
   }
 
+  /* Значок способа: QR у СБП, карта у банковской. До 04.09 здесь сидел лаймовый
+     кружок — он повторял лаймовую рамку выбранной строки тем же цветом, ничего
+     к ней не добавлял и перетягивал взгляд с названия. Иконка несёт смысл, а
+     выбор по-прежнему кодирует рамка. */
   .wallet-mobile .wallet-method__dot {
     display: inline-flex;
     flex: 0 0 auto;
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
+    color: var(--color-text-muted);
   }
 
   .wallet-mobile .wallet-method[data-selected='true'] .wallet-method__dot {
-    border-color: var(--color-brand);
-    background: var(--color-brand);
+    color: var(--color-brand);
   }
 
   .wallet-mobile .wallet-method__hint {

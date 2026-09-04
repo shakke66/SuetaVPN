@@ -82,6 +82,22 @@ describe('balance flow', () => {
     expect(screen.queryByLabelText(/номер карты|card number/i)).not.toBeInTheDocument();
   });
 
+  it('gives each payment method its own glyph', async () => {
+    openBalance();
+
+    const methodGroup = await screen.findByRole('radiogroup', { name: 'Способ оплаты' });
+    const sbp = within(methodGroup).getByRole('radio', { name: 'СБП' });
+    const card = within(methodGroup).getByRole('radio', { name: 'Банковская карта' });
+    const sbpGlyph = sbp.querySelector('svg.wallet-method__dot');
+    const cardGlyph = card.querySelector('svg.wallet-method__dot');
+
+    expect(sbpGlyph).not.toBeNull();
+    expect(cardGlyph).not.toBeNull();
+    // До 04.09 у обоих способов стоял один и тот же лаймовый кружок: он
+    // повторял рамку выбранной строки и ничего не говорил о самом способе.
+    expect(sbpGlyph?.innerHTML).not.toEqual(cardGlyph?.innerHTML);
+  });
+
   it('moves keyboard selection between both payment methods', async () => {
     const user = userEvent.setup();
     openBalance();
