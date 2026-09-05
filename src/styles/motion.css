@@ -15,7 +15,10 @@ button,
    приезжает на 60 мс позже. Получается одно движение, цель объявлена и
    содержимое подъехало, а не два независимых. */
 .route-layer--current {
-  animation: route-enter var(--motion-route) var(--motion-ease) 60ms both;
+  /* Без задержки и не с нуля: старая страница размонтируется мгновенно, и пока
+     новая ждала свои 60 мс на нулевой непрозрачности, экран пустовал — переход
+     читался как перезагрузка. */
+  animation: route-enter var(--motion-route) var(--motion-ease) both;
 }
 
 .route-layer--current[data-direction='forward'] {
@@ -28,7 +31,7 @@ button,
 
 @keyframes route-enter {
   from {
-    opacity: 0;
+    opacity: 0.55;
     transform: translate3d(var(--route-enter-shift, 0), 0, 0);
   }
 
@@ -314,4 +317,33 @@ button,
 @keyframes list-item-enter {
   from { transform: translateY(6px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* Где кросс-фейд работает, собственная анимация входа не нужна: иначе страница
+   и растворяется, и въезжает одновременно — два движения вместо одного. */
+@supports (view-transition-name: none) {
+  .route-layer--current { animation: none; }
+}
+
+/* Смена раздела кросс-фейдом. Снимок уходящего кадра делает сам браузер, поэтому
+   двух смонтированных деревьев не появляется — их здесь избегали намеренно.
+   Где View Transitions не поддержаны, остаётся обычная анимация входа выше. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: view-fade-out 220ms var(--motion-ease) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: view-fade-in 220ms var(--motion-ease) both;
+  }
+}
+
+@keyframes view-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes view-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

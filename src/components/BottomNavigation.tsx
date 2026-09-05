@@ -26,13 +26,6 @@ export function BottomNavigation({ inert = false, items }: BottomNavigationProps
   if (activeIndex >= 0) lastIndexRef.current = activeIndex;
   const style = { '--active-index': lastIndexRef.current } as CSSProperties;
 
-  // Отклик на касание там, где он есть: вне Telegram вызова просто нет.
-  const haptic = () => {
-    (window as unknown as {
-      Telegram?: { WebApp?: { HapticFeedback?: { impactOccurred?: (style: string) => void } } };
-    }).Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('light');
-  };
-
   return (
     <nav
       aria-hidden={inert ? 'true' : undefined}
@@ -44,7 +37,7 @@ export function BottomNavigation({ inert = false, items }: BottomNavigationProps
       style={style}
     >
       {items.map(({ icon, path, titleKey }) => (
-        <NavLink className="bottom-navigation__item" key={path} onClick={haptic} to={path}>
+        <NavLink className="bottom-navigation__item" key={path} to={path} viewTransition>
           <Icon name={icon} />
           <span>{t(titleKey)}</span>
         </NavLink>
