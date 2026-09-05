@@ -63,6 +63,8 @@ export interface Subscription {
   tariffId: TariffId;
   status: 'active' | 'expired';
   daysLeft: number;
+  /** Длина оплаченного отрезка: знаменатель для полосы остатка. */
+  periodDays: number;
   expiresAt: string;
   trafficUsed: number;
   trafficLimit: number;

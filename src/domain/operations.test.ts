@@ -143,6 +143,20 @@ describe('purchaseSubscription', () => {
     expect(result.state.wallet.transactions[0].amount).toBe(-total);
   });
 
+  it('records the paid period so the term bar has an honest denominator', () => {
+    const result = purchaseSubscription(stateWithBalance(5_000), 'elite', 3, NOW, fixedId);
+
+    expect(result.state.subscription).toMatchObject({ daysLeft: 90, periodDays: 90 });
+  });
+
+  it('grows the paid period when the same active plan is extended', () => {
+    const first = purchaseSubscription(stateWithBalance(5_000), 'elite', 3, NOW, fixedId);
+
+    const second = purchaseSubscription(first.state, 'elite', 1, NOW, fixedId);
+
+    expect(second.state.subscription).toMatchObject({ daysLeft: 120, periodDays: 120 });
+  });
+
   it('returns insufficient balance with the original state completely untouched', () => {
     const state = stateWithBalance(689);
     const before = structuredClone(state);
@@ -176,6 +190,7 @@ describe('purchaseSubscription', () => {
       tariffId: 'elite',
       status: 'active',
       daysLeft: 90,
+      periodDays: 90,
       expiresAt: '2026-11-11T10:00:00.000Z',
       trafficUsed: 0,
       trafficLimit: 40,
@@ -203,6 +218,7 @@ describe('purchaseSubscription', () => {
       tariffId: 'base',
       status: 'active',
       daysLeft: 19,
+      periodDays: 30,
       expiresAt: '2026-09-01T10:00:00.000Z',
       trafficUsed: 18,
       trafficLimit: 0,
@@ -217,6 +233,7 @@ describe('purchaseSubscription', () => {
       ...state.subscription,
       status: 'active',
       daysLeft: 109,
+      periodDays: 120,
       expiresAt: '2026-11-30T10:00:00.000Z',
     });
   });
@@ -228,6 +245,7 @@ describe('purchaseSubscription', () => {
       tariffId: 'base',
       status: 'active',
       daysLeft: 19,
+      periodDays: 30,
       expiresAt: '2026-09-01T10:00:00.000Z',
       trafficUsed: 18,
       trafficLimit: 0,
@@ -243,6 +261,7 @@ describe('purchaseSubscription', () => {
       tariffId: 'elite',
       status: 'active',
       daysLeft: 30,
+      periodDays: 30,
       expiresAt: '2026-09-12T10:00:00.000Z',
       trafficUsed: 0,
       trafficLimit: 40,

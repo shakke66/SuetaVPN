@@ -262,3 +262,27 @@ describe('hydrateState', () => {
     }]);
   });
 });
+
+describe('term period on hydration', () => {
+  it('falls back to the remaining days when a stored subscription predates the paid period', () => {
+    const state = createInitialState();
+
+    const hydrated = hydrateState(JSON.stringify({
+      ...state,
+      subscription: { ...state.subscription, daysLeft: 24, periodDays: undefined },
+    }), null);
+
+    expect(hydrated.subscription?.periodDays).toBe(24);
+  });
+
+  it('never lets the period fall below the remaining days', () => {
+    const state = createInitialState();
+
+    const hydrated = hydrateState(JSON.stringify({
+      ...state,
+      subscription: { ...state.subscription, daysLeft: 40, periodDays: 10 },
+    }), null);
+
+    expect(hydrated.subscription?.periodDays).toBe(40);
+  });
+});

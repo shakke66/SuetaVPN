@@ -165,6 +165,7 @@ export function purchaseSubscription(
     tariffId,
     status: 'active',
     daysLeft: sameActivePlan ? current.daysLeft + days : days,
+    periodDays: sameActivePlan ? current.periodDays + days : days,
     expiresAt,
     trafficUsed: sameActivePlan ? current.trafficUsed : 0,
     trafficLimit: tariff.traffic.kind === 'bypass' ? tariff.traffic.bypassGb : 0,

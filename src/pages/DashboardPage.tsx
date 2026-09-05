@@ -21,8 +21,11 @@ export function DashboardPage(): JSX.Element {
       </div>
 
       <SubscriptionCard
-        actions={(
-          <Link className="button button--ghost" to="/subscriptions">{t('dashboard.subscription.manage')}</Link>
+        manage={(
+          <Link className="subscription-card__manage" to="/subscriptions">
+            {t('subscriptions.card.manage')}
+            <Icon aria-hidden="true" name="chevron-right" size={14} />
+          </Link>
         )}
         subscription={state.subscription}
         title={t('dashboard.subscription.title')}

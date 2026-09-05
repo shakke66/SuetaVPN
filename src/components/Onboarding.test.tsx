@@ -114,7 +114,7 @@ it('keeps one hidden portal overlay until geometry exists and persists completio
   expect(main).not.toHaveAttribute('inert');
   expect(bottomNavigation).not.toHaveAttribute('aria-hidden');
   expect(bottomNavigation).not.toHaveAttribute('inert');
-  expect(screen.getByRole('link', { name: 'Управлять подпиской' })).toHaveFocus();
+  expect(screen.getByRole('link', { name: 'Управлять' })).toHaveFocus();
 });
 
 it('traps Tab and Shift+Tab within onboarding controls', async () => {

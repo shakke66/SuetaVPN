@@ -26,6 +26,7 @@ export function createInitialState(): AppStateV2 {
       tariffId: 'base',
       status: 'active',
       daysLeft: 24,
+      periodDays: 30,
       expiresAt: '2026-09-04T00:00:00.000Z',
       trafficUsed: 38.4,
       trafficLimit: 0,

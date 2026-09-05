@@ -114,7 +114,7 @@ describe('persistent application shell', () => {
 
     const bell = await screen.findByRole('button', { name: 'Открыть уведомления' });
     expect(bell).toHaveAccessibleName('Открыть уведомления');
-    expect(screen.getByText('2')).toHaveAccessibleName('Непрочитанных уведомлений: 2');
+    expect(screen.getByLabelText('Непрочитанных уведомлений: 2')).toHaveTextContent('2');
 
     await user.click(bell);
     const panel = screen.getByRole('dialog', { name: 'Уведомления о тикетах' });
@@ -127,7 +127,7 @@ describe('persistent application shell', () => {
     await waitFor(() => {
       expect(persistedState().notifications.every(({ read }) => read)).toBe(true);
     });
-    expect(screen.queryByText('2')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/Непрочитанных уведомлений/)).not.toBeInTheDocument();
   });
 
   it('anchors the desktop notification popover to the actual bell and clamps it to the viewport', async () => {

@@ -137,6 +137,7 @@ function normalizeDevice(value: unknown): Device | null {
 function normalizeSubscription(value: unknown, fallback: Subscription | null): Subscription | null {
   if (!isRecord(value)) return fallback;
   const id = string(value.id, fallback?.id ?? 'subscription-current');
+  const daysLeft = number(value.daysLeft, fallback?.daysLeft ?? 0, 0, true);
   const selectedTariff = tariffId(value.tariffId, 'base');
   const tariff = getTariff(selectedTariff);
   if (!tariff) return fallback;
@@ -144,7 +145,8 @@ function normalizeSubscription(value: unknown, fallback: Subscription | null): S
     id,
     tariffId: selectedTariff,
     status: value.status === 'expired' ? 'expired' : 'active',
-    daysLeft: number(value.daysLeft, fallback?.daysLeft ?? 0, 0, true),
+    daysLeft,
+    periodDays: Math.max(daysLeft, number(value.periodDays, daysLeft, 0, true)),
     expiresAt: date(value.expiresAt, fallback?.expiresAt ?? '2026-09-04T00:00:00.000Z'),
     trafficUsed: number(value.trafficUsed, fallback?.trafficUsed ?? 0),
     trafficLimit: tariff.traffic.kind === 'bypass' ? tariff.traffic.bypassGb : 0,

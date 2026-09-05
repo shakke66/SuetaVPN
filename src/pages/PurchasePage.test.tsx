@@ -47,7 +47,7 @@ describe('dashboard and subscriptions', () => {
     // Кликабельна вся плитка, отдельной кнопки внутри больше нет.
     expect(screen.getByTestId('dashboard-balance-card')).toHaveAttribute('href', '#/balance');
     expect(screen.getByTestId('dashboard-referral-card')).toHaveAttribute('href', '#/referral');
-    expect(screen.getByText('Безлимитный трафик')).toBeInTheDocument();
+    expect(screen.getByText('Безлимит')).toBeInTheDocument();
   });
 
   it('shows the Elite bypass allowance separately from unlimited regular servers', async () => {
@@ -57,6 +57,7 @@ describe('dashboard and subscriptions', () => {
         tariffId: 'elite',
         status: 'active',
         daysLeft: 25,
+        periodDays: 30,
         expiresAt: '2026-09-07T10:00:00.000Z',
         trafficUsed: 7,
         trafficLimit: 40,
@@ -65,8 +66,9 @@ describe('dashboard and subscriptions', () => {
       };
     });
 
-    expect(await screen.findByText('40 ГБ обходного трафика')).toBeInTheDocument();
-    expect(screen.getByText('Обычные серверы без ограничений')).toBeInTheDocument();
+    // Подпись ячейки не даёт принять 40 ГБ обхода за общий лимит тарифа.
+    expect(await screen.findByText('Трафик обхода')).toBeInTheDocument();
+    expect(screen.getByText('ГБ')).toBeInTheDocument();
   });
 
   it('shows only the current subscription and routes its actions to purchase', async () => {
@@ -214,6 +216,7 @@ describe('purchase flow', () => {
         tariffId: 'base',
         status: 'active',
         daysLeft: 19,
+        periodDays: 30,
         expiresAt: '2026-09-01T10:00:00.000Z',
         trafficUsed: 18,
         trafficLimit: 0,
