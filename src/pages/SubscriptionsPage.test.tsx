@@ -73,3 +73,33 @@ describe('subscriptions screen', () => {
     expect(screen.queryByRole('switch', { name: 'Автопродление' })).not.toBeInTheDocument();
   });
 });
+
+describe('subscriptions screen on a phone', () => {
+  const realMatchMedia = window.matchMedia;
+
+  function useMobileLayout() {
+    window.matchMedia = ((query: string) => ({
+      matches: query === '(max-width: 767px)',
+      media: query,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    })) as unknown as typeof window.matchMedia;
+  }
+
+  afterEach(() => {
+    window.matchMedia = realMatchMedia;
+  });
+
+  it('открывается той же карточкой подписки, что и главный экран', async () => {
+    useMobileLayout();
+
+    openSubscriptions();
+
+    expect(await screen.findByText('из 30 дней')).toBeInTheDocument();
+    expect(screen.getByTestId('subscription-term-bar')).toHaveStyle({ width: '80%' });
+  });
+});
