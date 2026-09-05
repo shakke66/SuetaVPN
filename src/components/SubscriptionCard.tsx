@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from 'react';
 import { getTariff } from '../domain/tariffs';
-import { termState } from '../domain/term';
+import { termState, trafficState } from '../domain/term';
 import type { Subscription } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
 
@@ -14,7 +14,7 @@ interface SubscriptionCardProps {
 }
 
 export function SubscriptionCard({ actions, manage, subscription, title }: SubscriptionCardProps): JSX.Element {
-  const { formatDate, t } = useI18n();
+  const { formatAmount, formatDate, t } = useI18n();
 
   if (!subscription) {
     return (
@@ -29,6 +29,12 @@ export function SubscriptionCard({ actions, manage, subscription, title }: Subsc
   const tariff = getTariff(subscription.tariffId);
   const copy = subscription.tariffId === 'elite' ? 'elite' : 'base';
   const bypass = tariff?.traffic.kind === 'bypass';
+  // Лимит берём из подписки, а не из каталога: полоса показывает остаток человека, а не обещание тарифа.
+  const trafficLeftState = trafficState(subscription.trafficUsed, subscription.trafficLimit);
+  const trafficLeft = Math.max(0, Math.round((subscription.trafficLimit - subscription.trafficUsed) * 10) / 10);
+  const trafficPercent = subscription.trafficLimit > 0
+    ? Math.max(0, Math.min(100, Math.round((trafficLeft / subscription.trafficLimit) * 100)))
+    : 0;
   // Полоса меряет остаток от оплаченного срока: у годовой подписки знаменатель 360, а не 30.
   const termPercent = Math.max(0, Math.min(100, Math.round((subscription.daysLeft / subscription.periodDays) * 100)));
   // Intl в русской локали даёт «1 октября 2026 г.»; в карточке этот хвост — канцелярский шум.
@@ -95,20 +101,40 @@ export function SubscriptionCard({ actions, manage, subscription, title }: Subsc
           </dd>
         </div>
 
-        <div className="subscription-card__fact">
+        <div className="subscription-card__fact" data-traffic-state={trafficLeftState ?? undefined}>
           <dt className="subscription-card__label">
             {bypass ? t('subscriptions.card.trafficBypass') : t('subscriptions.card.traffic')}
           </dt>
           <dd className="subscription-card__value">
-            {bypass && tariff?.traffic.kind === 'bypass' ? (
+            {trafficLeftState ? (
               <>
-                {tariff.traffic.bypassGb}
-                <span className="subscription-card__unit"> {t('subscriptions.card.gb')}</span>
+                {formatAmount(trafficLeft)}
+                <span className="subscription-card__unit">
+                  {' '}
+                  {t('subscriptions.card.ofGb', { amount: subscription.trafficLimit })}
+                </span>
               </>
             ) : (
               t('subscriptions.card.unlimited')
             )}
           </dd>
+          {trafficLeftState ? (
+            <div
+              aria-label={t('subscriptions.card.trafficLeft', {
+                amount: formatAmount(trafficLeft), name: subscription.trafficLimit,
+              })}
+              className="subscription-card__traffic-track"
+              role="img"
+            >
+              {trafficPercent > 0 ? (
+                <span
+                  className="subscription-card__traffic-bar"
+                  data-testid="subscription-traffic-bar"
+                  style={{ width: `${trafficPercent}%` }}
+                />
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </dl>
 

@@ -18,3 +18,19 @@ export function termState(subscription: Subscription | null): TermState {
   if (subscription.daysLeft <= TERM_WARN_DAYS) return 'warn';
   return 'ok';
 }
+
+/**
+ * Остаток обходного трафика. Здесь, в отличие от срока, лимит фиксирован
+ * (40 ГБ в месяц у ЭЛИТЫ), поэтому доля осмысленна: четверть запаса — повод
+ * присмотреться, десятая часть — повод экономить. У тарифов без лимита
+ * состояния нет вовсе: полосе нечего показывать.
+ */
+export function trafficState(usedGb: number, limitGb: number): TermState | null {
+  if (limitGb <= 0) return null;
+  const left = limitGb - usedGb;
+  if (left <= 0) return 'off';
+  const share = left / limitGb;
+  if (share <= 0.1) return 'crit';
+  if (share <= 0.25) return 'warn';
+  return 'ok';
+}

@@ -61,3 +61,31 @@ it.each([
 
   expect(container.querySelector('.subscription-card')).toHaveAttribute('data-state', state);
 });
+
+it('показывает остаток обходного трафика и заполняет его полосу', () => {
+  const { container } = renderCard({ ...subscription, trafficUsed: 12, trafficLimit: 40 });
+
+  expect(screen.getByText('из 40 ГБ')).toBeInTheDocument();
+  expect(screen.getByTestId('subscription-traffic-bar')).toHaveStyle({ width: '70%' });
+});
+
+it('красит полосу трафика тревожно, когда обхода осталось меньше четверти', () => {
+  const { container } = renderCard({ ...subscription, trafficUsed: 32, trafficLimit: 40 });
+
+  expect(container.querySelector('[data-traffic-state]')).toHaveAttribute('data-traffic-state', 'warn');
+});
+
+it('не рисует полосу трафика на БАЗЕ — там безлимит, показывать нечего', () => {
+  const { container } = renderCard({
+    ...subscription, tariffId: 'base', devicesLimit: 4, trafficUsed: 38.4, trafficLimit: 0,
+  });
+
+  expect(screen.getByText('Безлимит')).toBeInTheDocument();
+  expect(container.querySelector('[data-testid="subscription-traffic-bar"]')).toBeNull();
+});
+
+it('печатает дробный остаток трафика по-русски, через запятую', () => {
+  renderCard({ ...subscription, trafficUsed: 37.5, trafficLimit: 40 });
+
+  expect(screen.getByText('2,5')).toBeInTheDocument();
+});

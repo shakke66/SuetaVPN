@@ -21,6 +21,8 @@ export interface I18nValue {
   locale: Locale;
   t: (key: MessageKey, variables?: MessageVariables) => string;
   formatMoney: (value: number) => string;
+  /** Дробные величины вроде остатка трафика: в русской локали через запятую. */
+  formatAmount: (value: number) => string;
   formatDate: (value: string | Date) => string;
   setLocale: (locale: Locale) => void;
 }
@@ -49,6 +51,7 @@ export function I18nProvider({
       currency: 'RUB',
       maximumFractionDigits: 0,
     });
+    const amountFormatter = new Intl.NumberFormat(intlLocale, { maximumFractionDigits: 1 });
     const dateFormatter = new Intl.DateTimeFormat(intlLocale, {
       dateStyle: 'long',
       timeZone: 'UTC',
@@ -59,6 +62,7 @@ export function I18nProvider({
       setLocale,
       t: (key, variables) => getMessage(locale, key, variables),
       formatMoney: (amount) => moneyFormatter.format(amount),
+      formatAmount: (amount) => amountFormatter.format(amount),
       formatDate: (date) => dateFormatter.format(new Date(date)),
     };
   }, [locale, setLocale]);

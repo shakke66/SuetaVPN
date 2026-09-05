@@ -1726,3 +1726,35 @@
   background: var(--color-danger);
   color: var(--color-brand-text);
 }
+
+/* полоса обходного трафика: тот же язык, что у срока, но своя шкала в долях лимита */
+.subscription-card__fact[data-traffic-state] { --traffic-accent: var(--color-brand); }
+.subscription-card__fact[data-traffic-state='warn'] { --traffic-accent: var(--color-warning); }
+.subscription-card__fact[data-traffic-state='crit'],
+.subscription-card__fact[data-traffic-state='off'] { --traffic-accent: var(--color-danger); }
+
+.subscription-card__traffic-track {
+  overflow: hidden;
+  height: 4px;
+  margin-top: 8px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-text-strong) 12%, transparent);
+}
+
+.subscription-card__fact[data-traffic-state='crit'] .subscription-card__traffic-track,
+.subscription-card__fact[data-traffic-state='off'] .subscription-card__traffic-track {
+  background: color-mix(in srgb, var(--color-danger) 22%, transparent);
+}
+
+.subscription-card__traffic-bar {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  border-radius: inherit;
+  background: var(--traffic-accent);
+  animation: subscription-term-fill 520ms var(--motion-ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subscription-card__traffic-bar { animation: none; }
+}

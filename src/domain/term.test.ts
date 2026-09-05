@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { termState } from './term';
+import { termState, trafficState } from './term';
 import type { Subscription } from './types';
 
 const base: Subscription = {
@@ -38,5 +38,27 @@ describe('termState', () => {
 
   it('считает подписку выключенной, когда её нет вовсе', () => {
     expect(termState(null)).toBe('off');
+  });
+});
+
+/** У обхода лимит фиксированный, поэтому здесь процент остатка осмыслен — в отличие от срока.
+    Границы включительные: ровно четверть запаса — уже предупреждение, ровно десятая — уже критично. */
+describe('trafficState', () => {
+  it.each([
+    { used: 0, expected: 'ok' },
+    { used: 20, expected: 'ok' },
+    { used: 29, expected: 'ok' },
+    { used: 30, expected: 'warn' },
+    { used: 35, expected: 'warn' },
+    { used: 36, expected: 'crit' },
+    { used: 39.9, expected: 'crit' },
+    { used: 40, expected: 'off' },
+    { used: 45, expected: 'off' },
+  ])('на израсходованных $used ГБ из 40 даёт $expected', ({ used, expected }) => {
+    expect(trafficState(used, 40)).toBe(expected);
+  });
+
+  it('молчит, когда лимита нет вовсе — у БАЗЫ полосы быть не должно', () => {
+    expect(trafficState(38.4, 0)).toBeNull();
   });
 });

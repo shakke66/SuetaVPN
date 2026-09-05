@@ -68,7 +68,9 @@ describe('dashboard and subscriptions', () => {
 
     // Подпись ячейки не даёт принять 40 ГБ обхода за общий лимит тарифа.
     expect(await screen.findByText('Трафик обхода')).toBeInTheDocument();
-    expect(screen.getByText('ГБ')).toBeInTheDocument();
+    // 40 ГБ лимита минус 7 израсходованных: человек видит остаток, а не обещание тарифа.
+    expect(screen.getByText('из 40 ГБ')).toBeInTheDocument();
+    expect(screen.getByTestId('subscription-traffic-bar')).toHaveStyle({ width: '83%' });
   });
 
   it('shows only the current subscription and routes its actions to purchase', async () => {

@@ -199,7 +199,8 @@ export const ru = {
     card: {
       left: 'Осталось', ofDays: 'из {amount} дней', until: 'Действует до',
       devices: 'Устройства', ofLimit: 'из {amount}',
-      trafficBypass: 'Трафик обхода', traffic: 'Трафик', unlimited: 'Безлимит', gb: 'ГБ',
+      trafficBypass: 'Трафик обхода', traffic: 'Трафик', unlimited: 'Безлимит', gb: 'ГБ', ofGb: 'из {amount} ГБ',
+      trafficLeft: 'Осталось {amount} из {name} ГБ обхода',
       manage: 'Управлять', term: 'Осталось {amount} из {name} дней',
     },
     daysUnit: 'дн.',
@@ -501,7 +502,7 @@ export const en = {
     referral: { title: 'Referral program', short: 'Earned', earned: '{amount} earned', open: 'Open referrals', hint: 'Invite' }, connect: 'Connect a device',
   },
   subscriptions: {
-    title: 'Subscriptions', current: 'Current subscription', empty: 'No subscription yet', choose: 'Choose a subscription', renew: 'Renew', changeTariff: 'Change plan', term: { inactive: 'Inactive', warn: 'time to renew', crit: 'renew now', off: 'access disabled' }, card: { left: 'Left', ofDays: 'of {amount} days', until: 'Valid until', devices: 'Devices', ofLimit: 'of {amount}', trafficBypass: 'Bypass traffic', traffic: 'Traffic', unlimited: 'Unlimited', gb: 'GB', manage: 'Manage', term: '{amount} of {name} days left' }, daysUnit: 'd', daysLeftCaption: 'left', expiresAt: 'Valid until {amount}', devices: 'Devices: {amount}', traffic: 'Traffic: {amount}',
+    title: 'Subscriptions', current: 'Current subscription', empty: 'No subscription yet', choose: 'Choose a subscription', renew: 'Renew', changeTariff: 'Change plan', term: { inactive: 'Inactive', warn: 'time to renew', crit: 'renew now', off: 'access disabled' }, card: { left: 'Left', ofDays: 'of {amount} days', until: 'Valid until', devices: 'Devices', ofLimit: 'of {amount}', trafficBypass: 'Bypass traffic', traffic: 'Traffic', unlimited: 'Unlimited', gb: 'GB', ofGb: 'of {amount} GB', trafficLeft: '{amount} of {name} GB bypass left', manage: 'Manage', term: '{amount} of {name} days left' }, daysUnit: 'd', daysLeftCaption: 'left', expiresAt: 'Valid until {amount}', devices: 'Devices: {amount}', traffic: 'Traffic: {amount}',
     devicesTitle: 'Devices', devicesConnected: '{amount} connected', devicesEmpty: 'No device connected yet', connectDevice: 'Connect a device', online: 'online now', lastSeen: 'last seen {amount}',
     autoRenew: {
       title: 'Auto-renewal',
