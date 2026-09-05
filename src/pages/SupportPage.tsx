@@ -24,15 +24,15 @@ function requestedTicketId(value: unknown): string | null {
   return typeof ticketId === 'string' ? ticketId : null;
 }
 
-function TicketConversation({ ticket }: { ticket: Ticket }): JSX.Element {
-  const { formatDate, t } = useI18n();
+function TicketConversation({ ticket, userName }: { ticket: Ticket; userName: string }): JSX.Element {
+  const { formatDay, t } = useI18n();
   return (
     <ol aria-label={t('support.accessibility.conversation')} className="ticket-conversation">
       {ticket.messages.map((message) => (
         <li className={`ticket-message ticket-message--${message.author}`} key={message.id}>
-          <strong>{message.author === 'support' ? t('navigation.support') : t('profile.name')}</strong>
+          <strong>{message.author === 'support' ? t('navigation.support') : userName}</strong>
           <p>{message.text}</p>
-          <time dateTime={message.date}>{formatDate(message.date)}</time>
+          <time dateTime={message.date}>{formatDay(message.date)}</time>
         </li>
       ))}
     </ol>
@@ -42,7 +42,7 @@ function TicketConversation({ ticket }: { ticket: Ticket }): JSX.Element {
 export function SupportPage(): JSX.Element {
   const { createTicket, pending, replyTicket, state } = useApp();
   const { showToast } = useToast();
-  const { formatDate, t } = useI18n();
+  const { formatDate, formatDay, t } = useI18n();
   const location = useLocation();
   const isMobile = useIsMobile();
   const conversationRef = useRef<HTMLDivElement>(null);
@@ -154,7 +154,7 @@ export function SupportPage(): JSX.Element {
                       <span className="ticket-chip" data-status={ticket.status}>
                         {t(ticket.status === 'answered' ? 'support.tickets.statusAnswered' : 'support.tickets.statusOpen')}
                       </span>
-                      <time dateTime={ticket.createdAt}>{formatDate(ticket.createdAt)}</time>
+                      <time dateTime={ticket.createdAt}>{formatDay(ticket.createdAt)}</time>
                     </span>
                   </button>
                 </li>
@@ -185,7 +185,7 @@ export function SupportPage(): JSX.Element {
                     <span className="ticket-chip" data-status={selectedTicket.status}>
                       {t(selectedTicket.status === 'answered' ? 'support.tickets.statusAnswered' : 'support.tickets.statusOpen')}
                     </span>
-                    <time dateTime={selectedTicket.createdAt}>{formatDate(selectedTicket.createdAt)}</time>
+                    <time dateTime={selectedTicket.createdAt}>{formatDay(selectedTicket.createdAt)}</time>
                   </p>
                 </div>
               </header>
@@ -193,10 +193,10 @@ export function SupportPage(): JSX.Element {
                 <p className="ticket-attachment">{t('support.tickets.attachment', { name: selectedTicket.attachmentName })}</p>
               ) : null}
               <div className="ticket-detail__thread" ref={conversationRef}>
-                <TicketConversation ticket={selectedTicket} />
+                <TicketConversation ticket={selectedTicket} userName={state.profile.name} />
               </div>
               <form className="ticket-reply" onSubmit={(event) => void submitReply(event)}>
-                <label htmlFor="ticket-reply">{t('support.reply.messageLabel')}</label>
+                <label className="visually-hidden" htmlFor="ticket-reply">{t('support.reply.messageLabel')}</label>
                 <textarea
                   id="ticket-reply"
                   onChange={(event) => setReply(event.target.value)}
@@ -204,7 +204,7 @@ export function SupportPage(): JSX.Element {
                   value={reply}
                 />
                 {replyError ? <p className="field-error" role="alert">{replyError}</p> : null}
-                <Button disabled={pending.includes('replyTicket')} type="submit">{t('support.reply.submit')}</Button>
+                <Button disabled={pending.includes('replyTicket')} type="submit" variant="primary">{t('support.reply.submit')}</Button>
               </form>
             </>
           ) : (
@@ -231,7 +231,7 @@ export function SupportPage(): JSX.Element {
           {ticketErrors.message ? <p className="field-error" role="alert">{ticketErrors.message}</p> : null}
           <label htmlFor="ticket-attachment">{t('support.create.attachmentLabel')}</label>
           <input id="ticket-attachment" onChange={(event) => setAttachmentName(event.target.files?.[0]?.name ?? '')} type="file" />
-          <Button disabled={pending.includes('createTicket')} type="submit">{t('support.create.submit')}</Button>
+          <Button disabled={pending.includes('createTicket')} type="submit" variant="primary">{t('support.create.submit')}</Button>
         </form>
       </Modal>
 

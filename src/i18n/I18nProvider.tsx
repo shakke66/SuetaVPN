@@ -23,6 +23,8 @@ export interface I18nValue {
   formatMoney: (value: number) => string;
   /** Дробные величины вроде остатка трафика: в русской локали через запятую. */
   formatAmount: (value: number) => string;
+  /** Дата без канцелярского «г.» в конце — Intl добавляет его в русской локали. */
+  formatDay: (value: string | Date) => string;
   formatDate: (value: string | Date) => string;
   setLocale: (locale: Locale) => void;
 }
@@ -64,6 +66,7 @@ export function I18nProvider({
       formatMoney: (amount) => moneyFormatter.format(amount),
       formatAmount: (amount) => amountFormatter.format(amount),
       formatDate: (date) => dateFormatter.format(new Date(date)),
+      formatDay: (date) => dateFormatter.format(new Date(date)).replace(/\s*г\.$/u, ''),
     };
   }, [locale, setLocale]);
 

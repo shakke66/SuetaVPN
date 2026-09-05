@@ -145,6 +145,23 @@ describe('поддержка на телефоне', () => {
     expect(screen.queryByRole('button', { name: 'Как подключить устройство?' })).not.toBeInTheDocument();
   });
 
+  it('подписывает своё сообщение именем человека, а не словом «Имя»', async () => {
+    const user = userEvent.setup();
+    useMobileLayout();
+
+    const { container } = openSupport((state) => {
+      state.profile.name = 'Валерия';
+    });
+    await user.click(await screen.findByRole('button', { name: 'Как подключить устройство?' }));
+    await user.type(screen.getByLabelText('Ответ'), 'Спасибо, разобралась');
+    await user.click(screen.getByRole('button', { name: 'Отправить ответ' }));
+
+    const conversation = within(container.querySelector('.ticket-conversation') as HTMLElement);
+    expect(await conversation.findByText('Спасибо, разобралась')).toBeInTheDocument();
+    expect(conversation.getByText('Валерия')).toBeInTheDocument();
+    expect(conversation.queryByText('Имя')).not.toBeInTheDocument();
+  });
+
   it('возвращает к списку кнопкой «назад»', async () => {
     const user = userEvent.setup();
     useMobileLayout();

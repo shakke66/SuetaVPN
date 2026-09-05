@@ -363,12 +363,19 @@
     min-height: 0;
   }
 
+  /* flex, а не grid с жёстко перечисленными строками: вложение бывает, а бывает
+     нет, и тогда лишний 1fr доставался форме — лента прижималась к шапке. */
   .support-layout[data-view='detail'] .ticket-detail {
-    display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    display: flex;
+    flex-direction: column;
     height: 100%;
     min-height: 0;
+    gap: 0;
     padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+
+  .support-layout[data-view='detail'] .ticket-detail__thread {
+    flex: 1 1 auto;
   }
 
   .support-layout[data-view='detail'] .ticket-detail__thread {
@@ -421,7 +428,114 @@
     font-size: 0.78rem;
   }
 
-  .ticket-reply textarea { min-height: 44px; }
+  /* ── переписка: пузыри и строка ответа, а не карточки и поле на пол-экрана ── */
+
+  .support-layout[data-view='detail'] .ticket-detail__header {
+    justify-content: flex-start;
+    gap: var(--space-1);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* Переписка живёт у поля ввода, как в мессенджере. Прижимаем отступом сверху,
+     а не justify-content: flex-end — иначе при переполнении начало ленты
+     уезжает за кромку и до него не докрутить. */
+  .support-layout[data-view='detail'] .ticket-detail__thread {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .support-layout[data-view='detail'] .ticket-conversation {
+    gap: var(--space-3);
+    margin-top: auto;
+    padding: var(--space-3) 0;
+  }
+
+  .support-layout[data-view='detail'] .ticket-message {
+    display: grid;
+    gap: 2px;
+    max-width: 86%;
+    padding: var(--space-3);
+    border-radius: 14px;
+    background: var(--color-surface-raised);
+  }
+
+  /* своё сообщение — справа и без рамки, чужое — слева: диалог читается формой */
+  .support-layout[data-view='detail'] .ticket-message--user {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--color-brand) 14%, var(--color-surface-raised));
+  }
+
+  .support-layout[data-view='detail'] .ticket-message strong {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .support-layout[data-view='detail'] .ticket-message p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .support-layout[data-view='detail'] .ticket-message time {
+    font-size: 0.7rem;
+  }
+
+  /* строка ответа: поле в одну строку и компактная кнопка рядом */
+  .support-layout[data-view='detail'] .ticket-reply {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .support-layout[data-view='detail'] .ticket-reply textarea {
+    /* у textarea своя минимальная ширина по атрибуту cols: без min-width поле
+       не сжимается и делит строку с кнопкой поровну */
+    width: 100%;
+    min-width: 0;
+    min-height: var(--control-min);
+    max-height: 96px;
+    padding: 11px var(--space-3);
+    resize: none;
+  }
+
+  .support-layout[data-view='detail'] .ticket-reply .button {
+    width: auto;
+    min-height: var(--control-min);
+    padding-inline: var(--space-3);
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+
+  .support-layout[data-view='detail'] .ticket-reply .field-error {
+    grid-column: 1 / -1;
+    font-size: 0.8rem;
+  }
+
+  /* форма нового обращения: файл выбирается кнопкой, а не сырым инпутом */
+  .ticket-create-form input[type='file'] {
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+  }
+
+  .ticket-create-form input[type='file']::file-selector-button {
+    margin-right: var(--space-3);
+    padding: 8px var(--space-3);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.8rem;
+  }
+
+  .ticket-create-form textarea { min-height: 96px; }
 }
 
 /* чип статуса: состояние читается пятном, а не обычным текстом */

@@ -14,7 +14,7 @@ interface SubscriptionCardProps {
 }
 
 export function SubscriptionCard({ actions, manage, subscription, title }: SubscriptionCardProps): JSX.Element {
-  const { formatAmount, formatDate, t } = useI18n();
+  const { formatAmount, formatDay, t } = useI18n();
 
   if (!subscription) {
     return (
@@ -37,8 +37,7 @@ export function SubscriptionCard({ actions, manage, subscription, title }: Subsc
     : 0;
   // Полоса меряет остаток от оплаченного срока: у годовой подписки знаменатель 360, а не 30.
   const termPercent = Math.max(0, Math.min(100, Math.round((subscription.daysLeft / subscription.periodDays) * 100)));
-  // Intl в русской локали даёт «1 октября 2026 г.»; в карточке этот хвост — канцелярский шум.
-  const expiresAt = formatDate(subscription.expiresAt).replace(/\s*г\.$/u, '');
+  const expiresAt = formatDay(subscription.expiresAt);
 
   return (
     <article
