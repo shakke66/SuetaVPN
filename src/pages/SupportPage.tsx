@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type JSX } from 'react';
 import { useLocation } from 'react-router';
 import { useApp } from '../app/AppProvider';
+import { useIsMobile } from '../app/ui';
 import { useToast } from '../app/ToastProvider';
 import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
 import { Modal } from '../components/Modal';
 import type { Ticket } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
@@ -42,6 +44,8 @@ export function SupportPage(): JSX.Element {
   const { showToast } = useToast();
   const { formatDate, t } = useI18n();
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const conversationRef = useRef<HTMLDivElement>(null);
   const createTriggerRef = useRef<HTMLButtonElement>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
@@ -63,8 +67,15 @@ export function SupportPage(): JSX.Element {
       return;
     }
     if (selectedTicketId && state.tickets.some(({ id }) => id === selectedTicketId)) return;
-    setSelectedTicketId(state.tickets[0]?.id ?? null);
-  }, [location.key, location.state, selectedTicketId, state.tickets]);
+    // На телефоне список и переписка — разные виды, поэтому первый тикет сам не открывается.
+    setSelectedTicketId(isMobile ? null : state.tickets[0]?.id ?? null);
+  }, [isMobile, location.key, location.state, selectedTicketId, state.tickets]);
+
+  // Открывая переписку, показываем последнее сообщение, а не самое старое.
+  useEffect(() => {
+    const node = conversationRef.current;
+    if (node) node.scrollTop = node.scrollHeight;
+  }, [selectedTicketId, selectedTicket?.messages.length]);
 
   const submitTicket = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -104,12 +115,25 @@ export function SupportPage(): JSX.Element {
 
   return (
     <section className="support-page">
-      <div className="page-heading support-page__heading">
-        <h1>{t('support.title')}</h1>
-        <Button ref={createTriggerRef} onClick={() => setCreateOpen(true)}>{t('support.create.title')}</Button>
-      </div>
+      {isMobile && selectedTicket ? null : (
+        <div className="page-heading support-page__heading">
+          <h1>{t('support.title')}</h1>
+          <Button ref={createTriggerRef} onClick={() => setCreateOpen(true)}>{t('support.create.title')}</Button>
+        </div>
+      )}
 
-      <div className="support-layout">
+      <div className="support-layout" data-view={isMobile ? (selectedTicket ? 'detail' : 'list') : 'both'}>
+        {isMobile && selectedTicket ? null : isMobile && state.tickets.length === 0 ? (
+          // Нулевой случай самый частый: он должен читаться как норма, а не как пустая карточка.
+          <div className="support-empty">
+            <span aria-hidden="true" className="support-empty__icon">
+              <Icon name="support" size={26} />
+            </span>
+            <h2>{t('support.tickets.empty')}</h2>
+            <p>{t('support.tickets.emptyHint')}</p>
+            <Button onClick={() => setCreateOpen(true)} variant="primary">{t('support.create.title')}</Button>
+          </div>
+        ) : (
         <aside aria-label={t('support.accessibility.ticketList')} className="ticket-list-panel">
           <h2>{t('support.tickets.title')}</h2>
           {state.tickets.length === 0 ? (
@@ -126,29 +150,51 @@ export function SupportPage(): JSX.Element {
                     type="button"
                   >
                     <strong>{ticket.subject}</strong>
-                    <span>{t(ticket.status === 'answered' ? 'support.tickets.statusAnswered' : 'support.tickets.statusOpen')}</span>
-                    <time dateTime={ticket.createdAt}>{t('support.tickets.createdAt', { amount: formatDate(ticket.createdAt) })}</time>
+                    <span className="ticket-list__meta">
+                      <span className="ticket-chip" data-status={ticket.status}>
+                        {t(ticket.status === 'answered' ? 'support.tickets.statusAnswered' : 'support.tickets.statusOpen')}
+                      </span>
+                      <time dateTime={ticket.createdAt}>{formatDate(ticket.createdAt)}</time>
+                    </span>
                   </button>
                 </li>
               ))}
             </ul>
           )}
         </aside>
+        )}
 
+        {isMobile && !selectedTicket ? null : (
         <article className="ticket-detail">
           {selectedTicket ? (
             <>
               <header className="ticket-detail__header">
-                <div>
+                {isMobile ? (
+                  <button
+                    aria-label={t('support.accessibility.back')}
+                    className="ticket-detail__back"
+                    onClick={() => setSelectedTicketId(null)}
+                    type="button"
+                  >
+                    <Icon aria-hidden="true" name="chevron-right" size={20} />
+                  </button>
+                ) : null}
+                <div className="ticket-detail__title">
                   <h2>{selectedTicket.subject}</h2>
-                  <p>{t(selectedTicket.status === 'answered' ? 'support.tickets.statusAnswered' : 'support.tickets.statusOpen')}</p>
+                  <p className="ticket-detail__meta">
+                    <span className="ticket-chip" data-status={selectedTicket.status}>
+                      {t(selectedTicket.status === 'answered' ? 'support.tickets.statusAnswered' : 'support.tickets.statusOpen')}
+                    </span>
+                    <time dateTime={selectedTicket.createdAt}>{formatDate(selectedTicket.createdAt)}</time>
+                  </p>
                 </div>
-                <time dateTime={selectedTicket.createdAt}>{formatDate(selectedTicket.createdAt)}</time>
               </header>
               {selectedTicket.attachmentName ? (
                 <p className="ticket-attachment">{t('support.tickets.attachment', { name: selectedTicket.attachmentName })}</p>
               ) : null}
-              <TicketConversation ticket={selectedTicket} />
+              <div className="ticket-detail__thread" ref={conversationRef}>
+                <TicketConversation ticket={selectedTicket} />
+              </div>
               <form className="ticket-reply" onSubmit={(event) => void submitReply(event)}>
                 <label htmlFor="ticket-reply">{t('support.reply.messageLabel')}</label>
                 <textarea
@@ -172,6 +218,7 @@ export function SupportPage(): JSX.Element {
             </div>
           )}
         </article>
+        )}
       </div>
 
       <Modal onClose={() => setCreateOpen(false)} open={createOpen} returnFocusRef={createTriggerRef} title={t('support.create.title')}>

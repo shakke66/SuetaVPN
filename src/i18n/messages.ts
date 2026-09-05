@@ -328,10 +328,10 @@ export const ru = {
   },
   support: {
     title: 'Поддержка',
-    tickets: { title: 'Ваши обращения', empty: 'Обращений пока нет', emptyDetail: 'Начните с нового обращения', open: 'Открыть обращение', statusOpen: 'Открыто', statusAnswered: 'Получен ответ', createdAt: 'Создано {amount}', attachment: 'Вложение: {name}' },
+    tickets: { title: 'Ваши обращения', empty: 'Обращений пока нет', emptyHint: 'Всё работает. Появится вопрос по подписке или подключению — напишите, ответим здесь же.', emptyDetail: 'Начните с нового обращения', open: 'Открыть обращение', statusOpen: 'Открыто', statusAnswered: 'Получен ответ', createdAt: 'Создано {amount}', attachment: 'Вложение: {name}' },
     create: { title: 'Новое обращение', subjectLabel: 'Тема', subjectPlaceholder: 'Кратко опишите вопрос', messageLabel: 'Сообщение', messagePlaceholder: 'Расскажите подробнее', attachmentLabel: 'Прикрепить файл', submit: 'Создать обращение', success: 'Обращение создано', subjectRequired: 'Укажите тему', messageRequired: 'Введите сообщение' },
     reply: { messageLabel: 'Ответ', messagePlaceholder: 'Введите ответ', submit: 'Отправить ответ', success: 'Ответ отправлен', messageRequired: 'Введите сообщение', notFound: 'Обращение не найдено' },
-    accessibility: { ticketList: 'Список обращений', conversation: 'Переписка по обращению' },
+    accessibility: { ticketList: 'Список обращений', conversation: 'Переписка по обращению', back: 'К списку обращений' },
   },
   tickets: {
     create: { success: 'Обращение создано', subjectRequired: 'Укажите тему', messageRequired: 'Введите сообщение' },
@@ -551,9 +551,9 @@ export const en = {
   },
   referrals: { title: 'Referral program', description: 'Invite friends through Telegram and receive rewards.', stats: { reward: 'Reward', invited: 'Invited', active: 'Active', earned: 'Earned' }, rewardLine: '{amount}% of every payment your invitee makes', how: { title: 'How it works', share: 'Send the link to a friend', pay: 'They buy a subscription', reward: 'The reward lands on your balance' }, telegram: { title: 'Your link', copy: 'Copy link', copyShort: 'Copy', share: 'Share in Telegram' }, toasts: { copied: 'Link copied', copyFailed: 'Could not copy the link' } },
   support: {
-    title: 'Support', tickets: { title: 'Your tickets', empty: 'No tickets yet', emptyDetail: 'Start with a new ticket', open: 'Open ticket', statusOpen: 'Open', statusAnswered: 'Answered', createdAt: 'Created {amount}', attachment: 'Attachment: {name}' },
+    title: 'Support', tickets: { title: 'Your tickets', empty: 'No tickets yet', emptyHint: 'All good. If a question about your plan or setup comes up, write to us — we answer right here.', emptyDetail: 'Start with a new ticket', open: 'Open ticket', statusOpen: 'Open', statusAnswered: 'Answered', createdAt: 'Created {amount}', attachment: 'Attachment: {name}' },
     create: { title: 'New ticket', subjectLabel: 'Subject', subjectPlaceholder: 'Briefly describe your question', messageLabel: 'Message', messagePlaceholder: 'Tell us more', attachmentLabel: 'Attach file', submit: 'Create ticket', success: 'Ticket created', subjectRequired: 'Enter a subject', messageRequired: 'Enter a message' },
-    reply: { messageLabel: 'Reply', messagePlaceholder: 'Enter your reply', submit: 'Send reply', success: 'Reply sent', messageRequired: 'Enter a message', notFound: 'Ticket not found' }, accessibility: { ticketList: 'Ticket list', conversation: 'Ticket conversation' },
+    reply: { messageLabel: 'Reply', messagePlaceholder: 'Enter your reply', submit: 'Send reply', success: 'Reply sent', messageRequired: 'Enter a message', notFound: 'Ticket not found' }, accessibility: { ticketList: 'Ticket list', conversation: 'Ticket conversation', back: 'Back to tickets' },
   },
   tickets: { create: { success: 'Ticket created', subjectRequired: 'Enter a subject', messageRequired: 'Enter a message' }, reply: { success: 'Reply sent', messageRequired: 'Enter a message', notFound: 'Ticket not found' } },
   ticketNotifications: { title: 'Ticket notifications', ticketCreated: 'Ticket "{name}" created', ticketReplied: 'New reply in "{name}"', openTicket: 'Open ticket', markRead: 'Mark as read' },

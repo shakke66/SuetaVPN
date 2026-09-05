@@ -284,3 +284,205 @@
     width: 100%;
   }
 }
+
+/* ── Телефон: список и переписка — разные виды (05.09.2026) ──
+   Раньше десктопная раскладка складывалась пополам, и на экране разом жили
+   список, дубль заголовка и переписка, а поле ответа уезжало под навигацию. */
+@media (max-width: 767px) {
+  /* Заголовок страницы мельче: место нужно содержимому, а не шапке.
+     Селектор с двумя классами обязателен — в responsive.css есть
+     `.page-heading h1` того же веса, и он идёт позже в собранном файле. */
+  .support-page .support-page__heading {
+    align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .support-page .support-page__heading h1 {
+    margin-bottom: 0;
+    font-size: 1.35rem;
+    line-height: 1.2;
+  }
+
+  .support-page .support-page__heading .button {
+    min-height: var(--control-min);
+    padding-inline: var(--space-4);
+    font-size: 0.86rem;
+  }
+
+  /* «Ваши обращения» — подпись к списку, а не второй заголовок экрана */
+  .support-page .ticket-list-panel h2 {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  /* строка списка: тема, чип статуса и дата — предсказуемая высота */
+  .ticket-list__button {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    min-height: var(--control-min);
+    padding: var(--space-3);
+    text-align: left;
+  }
+
+  .ticket-list__button strong {
+    overflow: hidden;
+    color: var(--color-text-strong);
+    font-size: 0.95rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ticket-list__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+  }
+
+  /* Список прижат к верху: без этого строки грида делят высоту экрана поровну
+     и шапка раздувается до 258px пустотой. */
+  .support-page:has(.support-layout[data-view='list']) {
+    align-content: start;
+  }
+
+  /* Переписке, наоборот, нужна вся высота — она внутри себя раскладывает ленту и поле. */
+  .support-page:has(.support-layout[data-view='detail']) {
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
+    min-height: 0;
+  }
+
+  /* переписка занимает весь экран: лента прокручивается, ответ закреплён */
+  .support-layout[data-view='detail'] {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .support-layout[data-view='detail'] .ticket-detail {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    height: 100%;
+    min-height: 0;
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+
+  .support-layout[data-view='detail'] .ticket-detail__thread {
+    overflow-y: auto;
+    min-height: 0;
+    /* лента — единственный скроллящийся блок, поле ответа не сдвигается */
+    overscroll-behavior: contain;
+  }
+
+  .ticket-detail__header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .ticket-detail__back {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-min);
+    height: var(--control-min);
+    margin-left: calc(var(--space-2) * -1);
+    border: 0;
+    background: none;
+    color: var(--color-text);
+    /* стрелка «вправо» из набора, развёрнутая в «назад» */
+    transform: rotate(180deg);
+    cursor: pointer;
+  }
+
+  .ticket-detail__back:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
+
+  .ticket-detail__title { min-width: 0; }
+
+  .ticket-detail__title h2 {
+    overflow: hidden;
+    font-size: 1.05rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ticket-detail__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 4px 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+  }
+
+  .ticket-reply textarea { min-height: 44px; }
+}
+
+/* чип статуса: состояние читается пятном, а не обычным текстом */
+.ticket-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.ticket-chip::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-warning);
+}
+
+.ticket-chip[data-status='answered']::before { background: var(--color-positive); }
+
+/* пустое состояние на телефоне: спокойный блок вместо карточки с одной строкой */
+@media (max-width: 767px) {
+  .support-empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    text-align: center;
+  }
+
+  .support-empty__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-subtle);
+    color: var(--color-text-muted);
+  }
+
+  .support-empty h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--color-text-strong);
+  }
+
+  .support-empty p {
+    margin: 0;
+    max-width: 30ch;
+    color: var(--color-text-muted);
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+
+  .support-empty .button { width: 100%; }
+}

@@ -91,3 +91,90 @@ describe('support page', () => {
     });
   });
 });
+
+describe('поддержка на телефоне', () => {
+  const realMatchMedia = window.matchMedia;
+
+  function useMobileLayout() {
+    window.matchMedia = ((query: string) => ({
+      matches: query === '(max-width: 767px)',
+      media: query,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    })) as unknown as typeof window.matchMedia;
+  }
+
+  afterEach(() => {
+    window.matchMedia = realMatchMedia;
+  });
+
+  it('открывается списком обращений, а не сразу перепиской', async () => {
+    useMobileLayout();
+
+    openSupport();
+
+    expect(await screen.findByRole('button', { name: 'Как подключить устройство?' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Переписка по обращению')).not.toBeInTheDocument();
+  });
+
+  it('без обращений показывает объяснение и кнопку, а не пустую карточку списка', async () => {
+    useMobileLayout();
+
+    openSupport((state) => {
+      state.tickets = [];
+      state.notifications = [];
+    });
+
+    expect(await screen.findByText('Обращений пока нет')).toBeInTheDocument();
+    expect(screen.getByText(/ответим здесь же/)).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Ваши обращения' })).not.toBeInTheDocument();
+  });
+
+  it('по тапу показывает переписку и прячет список', async () => {
+    const user = userEvent.setup();
+    useMobileLayout();
+
+    openSupport();
+    await user.click(await screen.findByRole('button', { name: 'Как подключить устройство?' }));
+
+    expect(screen.getByLabelText('Переписка по обращению')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Как подключить устройство?' })).not.toBeInTheDocument();
+  });
+
+  it('возвращает к списку кнопкой «назад»', async () => {
+    const user = userEvent.setup();
+    useMobileLayout();
+
+    openSupport();
+    await user.click(await screen.findByRole('button', { name: 'Как подключить устройство?' }));
+    await user.click(screen.getByRole('button', { name: 'К списку обращений' }));
+
+    expect(screen.getByRole('button', { name: 'Как подключить устройство?' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Переписка по обращению')).not.toBeInTheDocument();
+  });
+
+  it('из уведомления открывает саму переписку, минуя список', async () => {
+    const user = userEvent.setup();
+    useMobileLayout();
+
+    openSupport((state) => {
+      state.notifications = [{
+        id: 'notification-answered',
+        type: 'ticket-replied',
+        ticketId: state.tickets[0].id,
+        read: false,
+        readAt: null,
+        createdAt: '2026-08-09T10:00:00.000Z',
+      }];
+    });
+    await user.click(await screen.findByRole('button', { name: 'Открыть уведомления' }));
+    const notifications = screen.getByRole('dialog', { name: 'Уведомления о тикетах' });
+    await user.click(within(notifications).getByRole('link', { name: /Как подключить устройство/ }));
+
+    expect(await screen.findByLabelText('Переписка по обращению')).toBeInTheDocument();
+  });
+});
