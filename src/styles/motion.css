@@ -325,25 +325,74 @@ button,
   .route-layer--current { animation: none; }
 }
 
-/* Смена раздела кросс-фейдом. Снимок уходящего кадра делает сам браузер, поэтому
+/* Смена раздела движением, а не растворением: чистый кросс-фейд читается как
+   перелистывание фотографий. Снимок уходящего кадра делает сам браузер, поэтому
    двух смонтированных деревьев не появляется — их здесь избегали намеренно.
-   Где View Transitions не поддержаны, остаётся обычная анимация входа выше. */
+   Где View Transitions не поддержаны, остаётся анимация входа выше. */
 @media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    /* Свою пару анимаций назначаем сами, иначе поверх ляжет браузерный кросс-фейд. */
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  /* Направление задаёт нижняя навигация в момент касания. Без него — переход
+     по ссылке внутри страницы — уходим в мягкое приближение, чтобы движение
+     не спорило со смыслом: это не соседний раздел, а шаг вглубь. */
   ::view-transition-old(root) {
-    animation: view-fade-out 220ms var(--motion-ease) both;
+    animation: view-zoom-out 260ms var(--motion-ease) both;
   }
 
   ::view-transition-new(root) {
-    animation: view-fade-in 220ms var(--motion-ease) both;
+    animation: view-zoom-in 260ms var(--motion-ease) both;
+  }
+
+  :root[data-nav-direction='forward']::view-transition-old(root) {
+    animation: view-slide-out-left 280ms var(--motion-ease) both;
+  }
+
+  :root[data-nav-direction='forward']::view-transition-new(root) {
+    animation: view-slide-in-right 280ms var(--motion-ease) both;
+  }
+
+  :root[data-nav-direction='back']::view-transition-old(root) {
+    animation: view-slide-out-right 280ms var(--motion-ease) both;
+  }
+
+  :root[data-nav-direction='back']::view-transition-new(root) {
+    animation: view-slide-in-left 280ms var(--motion-ease) both;
   }
 }
 
-@keyframes view-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
+/* Уходящий экран сдвигается меньше приходящего: так он читается как слой,
+   который остаётся позади, а не улетает вместе с ним. */
+@keyframes view-slide-out-left {
+  from { transform: translate3d(0, 0, 0); opacity: 1; }
+  to { transform: translate3d(-24%, 0, 0); opacity: 0; }
 }
 
-@keyframes view-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes view-slide-in-right {
+  from { transform: translate3d(100%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes view-slide-out-right {
+  from { transform: translate3d(0, 0, 0); opacity: 1; }
+  to { transform: translate3d(24%, 0, 0); opacity: 0; }
+}
+
+@keyframes view-slide-in-left {
+  from { transform: translate3d(-100%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes view-zoom-out {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.98); opacity: 0; }
+}
+
+@keyframes view-zoom-in {
+  from { transform: scale(1.01); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
