@@ -51,3 +51,13 @@ it('печатает дату окончания без канцелярског
 
   expect(screen.getByText('1 октября 2026')).toBeInTheDocument();
 });
+
+it.each([
+  { daysLeft: 30, state: 'ok' },
+  { daysLeft: 9, state: 'warn' },
+  { daysLeft: 2, state: 'crit' },
+])('помечает карточку состоянием $state на $daysLeft днях, чтобы полоса меняла цвет', ({ daysLeft, state }) => {
+  const { container } = renderCard({ ...subscription, daysLeft });
+
+  expect(container.querySelector('.subscription-card')).toHaveAttribute('data-state', state);
+});

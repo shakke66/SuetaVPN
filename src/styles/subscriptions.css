@@ -1668,3 +1668,61 @@
 }
 
 .subscription-card__manage:hover { background: var(--color-surface-hover); }
+
+
+/* ── Шкала срока: цвет полосы говорит, сколько осталось (05.09.2026) ──
+   Пороги в днях живут в src/domain/term.ts. Длина полосы — доля от оплаченного
+   срока, цвет — остаток в днях: они отвечают за разное. */
+.subscription-card,
+.subscriptions-mobile__term {
+  --term-accent: var(--color-brand);
+  --term-track: color-mix(in srgb, var(--color-text-strong) 12%, transparent);
+}
+
+.subscription-card[data-state='warn'],
+.subscriptions-mobile__term[data-state='warn'] {
+  --term-accent: var(--color-warning);
+}
+
+.subscription-card[data-state='crit'],
+.subscription-card[data-state='off'],
+.subscriptions-mobile__term[data-state='crit'],
+.subscriptions-mobile__term[data-state='off'] {
+  --term-accent: var(--color-danger);
+  --term-track: color-mix(in srgb, var(--color-danger) 22%, transparent);
+}
+
+/* карточка на главной */
+.subscription-card .subscription-card__term-track { background: var(--term-track); }
+.subscription-card .subscription-card__term-bar,
+.subscription-card[data-tariff='elite'] .subscription-card__term-bar { background: var(--term-accent); }
+
+/* шапка экрана подписок */
+.subscriptions-mobile__term .subscription-card__track {
+  height: 8px;
+  background: var(--term-track);
+}
+
+.subscriptions-mobile__term .subscription-card__bar,
+.subscriptions-mobile__term .subscription-card__track[data-tariff='elite'] .subscription-card__bar {
+  /* при одном дне из тридцати остаток — 3%: без минимума его попросту не видно */
+  min-width: 8px;
+  background: var(--term-accent);
+}
+
+.subscriptions-mobile__term .subscription-card__days strong { font-size: 2.75rem; }
+
+.subscriptions-mobile__term[data-state='off'] .subscription-card__days strong {
+  color: var(--color-text-muted);
+}
+
+.subscriptions-mobile__tail {
+  color: var(--term-accent);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.subscription-card__plan[data-tariff='off'] {
+  background: var(--color-danger);
+  color: var(--color-brand-text);
+}

@@ -5,11 +5,10 @@ import { periodKey, useIsMobile } from '../app/ui';
 import { DeviceRow } from '../components/DeviceRow';
 import { SubscriptionCard } from '../components/SubscriptionCard';
 import { getPrice, getTariff } from '../domain/tariffs';
+import { termState } from '../domain/term';
 import type { Device, Subscription, Transaction } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
 
-/** Полоса остатка считается так же, как в карточке подписки: 24 дня из 30 — 80%. */
-const TERM_SCALE_DAYS = 30;
 
 type Tab = 'plan' | 'devices' | 'history';
 
@@ -194,29 +193,38 @@ export function SubscriptionsPage(): JSX.Element {
 }
 
 function MobileTerm({ subscription }: { subscription: Subscription }): JSX.Element {
-  const { formatDate, t } = useI18n();
+  const { t } = useI18n();
   const copy = subscription.tariffId === 'elite' ? 'elite' : 'base';
-  const termPercent = Math.max(4, Math.min(100, Math.round((subscription.daysLeft / TERM_SCALE_DAYS) * 100)));
+  const state = termState(subscription);
+  // Длина — доля от оплаченного срока, цвет — остаток в днях: они отвечают за разное.
+  const termPercent = Math.max(0, Math.min(100, Math.round((subscription.daysLeft / subscription.periodDays) * 100)));
 
   return (
-    <div className="subscriptions-mobile__term">
+    <div className="subscriptions-mobile__term" data-state={state}>
       <div className="subscriptions-mobile__badges">
-        <span className="subscription-card__plan" data-tariff={subscription.tariffId}>
-          {t(`tariffs.${copy}.name`)}
+        <span className="subscription-card__plan" data-tariff={state === 'off' ? 'off' : subscription.tariffId}>
+          {state === 'off' ? t('subscriptions.term.inactive') : t(`tariffs.${copy}.name`)}
         </span>
-        <span className="status-badge">{t(`common.status.${subscription.status}`)}</span>
       </div>
       <p className="subscription-card__days">
         <strong>{subscription.daysLeft}</strong>
         <span className="subscription-card__days-unit">{t('subscriptions.daysUnit')}</span>
-        <span className="subscription-card__days-caption">{t('subscriptions.daysLeftCaption')}</span>
-      </p>
-      <div className="subscription-card__progress">
-        <span aria-hidden="true" className="subscription-card__track" data-tariff={subscription.tariffId}>
-          <span className="subscription-card__bar" style={{ width: `${termPercent}%` }} />
+        <span className="subscription-card__days-caption">
+          {t('subscriptions.daysLeftCaption')}
+          {state === 'ok' ? null : (
+            <span className="subscriptions-mobile__tail"> · {t(`subscriptions.term.${state}`)}</span>
+          )}
         </span>
-        <span>{t('subscriptions.expiresAt', { amount: formatDate(subscription.expiresAt) })}</span>
-      </div>
+      </p>
+      <span
+        aria-label={t('subscriptions.card.term', { amount: subscription.daysLeft, name: subscription.periodDays })}
+        className="subscription-card__track"
+        role="img"
+      >
+        {termPercent > 0 ? (
+          <span className="subscription-card__bar" style={{ width: `${termPercent}%` }} />
+        ) : null}
+      </span>
     </div>
   );
 }

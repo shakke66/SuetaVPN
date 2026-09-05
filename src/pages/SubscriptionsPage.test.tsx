@@ -73,3 +73,82 @@ describe('subscriptions screen', () => {
     expect(screen.queryByRole('switch', { name: 'Автопродление' })).not.toBeInTheDocument();
   });
 });
+
+describe('шапка подписки на телефоне', () => {
+  const realMatchMedia = window.matchMedia;
+
+  function useMobileLayout() {
+    window.matchMedia = ((query: string) => ({
+      matches: query === '(max-width: 767px)',
+      media: query,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    })) as unknown as typeof window.matchMedia;
+  }
+
+  function term(container: HTMLElement): HTMLElement {
+    const node = container.querySelector('.subscriptions-mobile__term');
+    if (!node) throw new Error('expected the term block on the phone layout');
+    return node as HTMLElement;
+  }
+
+  afterEach(() => {
+    window.matchMedia = realMatchMedia;
+  });
+
+  it('не показывает ни бейдж статуса, ни дату окончания — состояние держит полоса', async () => {
+    useMobileLayout();
+
+    const { container } = openSubscriptions();
+    await screen.findByRole('tablist', { name: 'Разделы подписки' });
+
+    expect(term(container)).not.toHaveTextContent('Активна');
+    expect(term(container)).not.toHaveTextContent('Действует до');
+  });
+
+  it('на девяти днях зовёт продлить и красит полосу в предупреждающее состояние', async () => {
+    useMobileLayout();
+
+    const { container } = openSubscriptions((state) => {
+      if (state.subscription) state.subscription.daysLeft = 9;
+    });
+    await screen.findByRole('tablist', { name: 'Разделы подписки' });
+
+    expect(term(container)).toHaveTextContent('пора продлить');
+    expect(term(container).dataset.state).toBe('warn');
+  });
+
+  it('на нуле не рисует заливку полосы — пустая дорожка и есть сообщение', async () => {
+    useMobileLayout();
+
+    const { container } = openSubscriptions((state) => {
+      if (state.subscription) {
+        state.subscription.status = 'expired';
+        state.subscription.daysLeft = 0;
+      }
+    });
+    await screen.findByRole('tablist', { name: 'Разделы подписки' });
+
+    expect(term(container).querySelector('.subscription-card__bar')).toBeNull();
+  });
+
+  it('на истёкшей подписке меняет бейдж тарифа на «Неактивно»', async () => {
+    useMobileLayout();
+
+    const { container } = openSubscriptions((state) => {
+      if (state.subscription) {
+        state.subscription.status = 'expired';
+        state.subscription.daysLeft = 0;
+      }
+    });
+    await screen.findByRole('tablist', { name: 'Разделы подписки' });
+
+    expect(term(container)).toHaveTextContent('Неактивно');
+    expect(term(container)).not.toHaveTextContent('БАЗА');
+    expect(term(container).dataset.state).toBe('off');
+  });
+});

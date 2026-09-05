@@ -1,5 +1,6 @@
 import type { JSX, ReactNode } from 'react';
 import { getTariff } from '../domain/tariffs';
+import { termState } from '../domain/term';
 import type { Subscription } from '../domain/types';
 import { useI18n } from '../i18n/I18nProvider';
 
@@ -34,7 +35,12 @@ export function SubscriptionCard({ actions, manage, subscription, title }: Subsc
   const expiresAt = formatDate(subscription.expiresAt).replace(/\s*г\.$/u, '');
 
   return (
-    <article className="subscription-card" data-onboarding-target="subscription" data-tariff={subscription.tariffId}>
+    <article
+      className="subscription-card"
+      data-onboarding-target="subscription"
+      data-state={termState(subscription)}
+      data-tariff={subscription.tariffId}
+    >
       <header className="subscription-card__head">
         <div className="subscription-card__head-main">
           <h2 className="subscription-card__eyebrow">{title}</h2>

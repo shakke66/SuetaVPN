@@ -17,6 +17,7 @@
   --color-brand: #C9FF2F;
   --color-brand-text: #151515;
   --color-positive: #168451;
+  --color-warning: #C2410C;
   --color-danger: #C43A3A;
   --color-danger-soft: #FFF0F0;
   --color-focus: #477BFF;
@@ -71,6 +72,7 @@
   --color-accent: #EDEDED;
   --color-accent-text: #151515;
   --color-positive: #45D483;
+  --color-warning: #FF8A1E;
   --color-danger: #FF6F79;
   --color-danger-soft: rgba(255, 111, 121, 0.12);
   --color-focus: #89A8FF;
