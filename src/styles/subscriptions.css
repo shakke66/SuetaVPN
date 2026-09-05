@@ -1208,10 +1208,6 @@
   .subscriptions-mobile {
     grid-template-rows: auto auto 1fr auto;
     gap: var(--space-4);
-    /* Без высоты по родителю строка 1fr не сжимается: сетка растёт по контенту
-       и кнопка с подписью уезжают под нижнюю навигацию. */
-    height: 100%;
-    min-height: 0;
   }
 
   .subscriptions-mobile__term {
