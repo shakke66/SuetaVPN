@@ -47,6 +47,7 @@ export function SupportPage(): JSX.Element {
   const isMobile = useIsMobile();
   const conversationRef = useRef<HTMLDivElement>(null);
   const createTriggerRef = useRef<HTMLButtonElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [subject, setSubject] = useState('');
@@ -230,7 +231,25 @@ export function SupportPage(): JSX.Element {
           <textarea id="ticket-message" onChange={(event) => setMessage(event.target.value)} placeholder={t('support.create.messagePlaceholder')} value={message} />
           {ticketErrors.message ? <p className="field-error" role="alert">{ticketErrors.message}</p> : null}
           <label htmlFor="ticket-attachment">{t('support.create.attachmentLabel')}</label>
-          <input id="ticket-attachment" onChange={(event) => setAttachmentName(event.target.files?.[0]?.name ?? '')} type="file" />
+          <div className="ticket-attachment-field">
+            <button
+              className="ticket-attachment-field__button"
+              onClick={() => fileRef.current?.click()}
+              type="button"
+            >
+              {t('support.create.attachmentChoose')}
+            </button>
+            <span className="ticket-attachment-field__name" data-empty={attachmentName ? undefined : 'true'}>
+              {attachmentName || t('support.create.attachmentEmpty')}
+            </span>
+          </div>
+          <input
+            className="visually-hidden"
+            id="ticket-attachment"
+            onChange={(event) => setAttachmentName(event.target.files?.[0]?.name ?? '')}
+            ref={fileRef}
+            type="file"
+          />
           <Button disabled={pending.includes('createTicket')} type="submit" variant="primary">{t('support.create.submit')}</Button>
         </form>
       </Modal>

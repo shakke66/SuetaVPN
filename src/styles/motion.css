@@ -190,3 +190,57 @@ button,
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Модальное окно: затемнение фона и подъём листа. Раньше оно просто возникало,
+   и переход читался как смена слайда. */
+.modal-backdrop {
+  animation: overlay-fade-in var(--motion-overlay) var(--motion-ease) both;
+}
+
+.modal-backdrop .modal {
+  animation: modal-enter var(--motion-overlay) var(--motion-ease) both;
+}
+
+@keyframes modal-enter {
+  from { transform: translateY(12px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* На телефоне окно прижато к низу, поэтому и приходить ему естественно снизу. */
+@media (max-width: 767px) {
+  @keyframes modal-enter {
+    from { transform: translateY(24px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+/* Поддержка: список и переписка — разные виды, переход между ними должен
+   читаться направлением, а не подменой кадра. */
+.support-layout[data-view='detail'] .ticket-detail {
+  animation: support-detail-enter var(--motion-route) var(--motion-ease) both;
+}
+
+.support-layout[data-view='list'] .ticket-list-panel,
+.support-layout[data-view='list'] .support-empty {
+  animation: support-list-enter var(--motion-route) var(--motion-ease) both;
+}
+
+@keyframes support-detail-enter {
+  from { transform: translateX(16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes support-list-enter {
+  from { transform: translateX(-12px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Новое сообщение в переписке приходит, а не появляется скачком. */
+.ticket-message {
+  animation: ticket-message-enter var(--motion-fast) var(--motion-ease) both;
+}
+
+@keyframes ticket-message-enter {
+  from { transform: translateY(6px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
