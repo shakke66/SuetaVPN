@@ -244,3 +244,74 @@ button,
   from { transform: translateY(6px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* ── Отклик на касание: один язык на весь кабинет ──
+   До этого :active стоял ровно в двух местах при полутора десятках
+   интерактивных элементов, поэтому интерфейс не отвечал на нажатие и
+   ощущался неживым. Селекторы в :where(), чтобы ничего не перебивать. */
+:where(
+  button,
+  a.button,
+  [role='button'],
+  [role='tab'],
+  [role='radio'],
+  .dashboard-tile,
+  .ticket-list__button,
+  .subscription-card__manage,
+  .device-row button,
+  .accordion summary,
+  .notification-item
+) {
+  transition:
+    transform 130ms var(--motion-ease),
+    background-color 180ms var(--motion-ease),
+    border-color 180ms var(--motion-ease),
+    color 180ms var(--motion-ease),
+    opacity 180ms var(--motion-ease);
+}
+
+/* Нажатие проминает элемент. Нижняя навигация исключена — у неё свой отклик,
+   а переключатели не проминаются, иначе движение спорит с ходом тумблера. */
+:where(
+  button,
+  a.button,
+  [role='button'],
+  [role='tab'],
+  [role='radio'],
+  .dashboard-tile,
+  .ticket-list__button,
+  .subscription-card__manage,
+  .accordion summary
+):not(.bottom-navigation__item):not([role='switch']):active {
+  transform: scale(0.975);
+}
+
+/* Крупные полотна проминаются меньше: одинаковый масштаб на кнопке и на
+   плитке во весь экран читается как разная сила нажатия. */
+:where(.dashboard-tile, .ticket-list__button, .subscription-card__manage):active {
+  transform: scale(0.99);
+}
+
+/* Содержимое вкладок не подменяется кадром, а проявляется. */
+:where([role='tabpanel']) {
+  animation: tabpanel-enter var(--motion-fast) var(--motion-ease) both;
+}
+
+@keyframes tabpanel-enter {
+  from { transform: translateY(4px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Списки приходят по очереди, а не всей стеной сразу. */
+:where(.dashboard-tiles, .device-list, .ticket-list) > * {
+  animation: list-item-enter var(--motion-fast) var(--motion-ease) both;
+}
+
+:where(.dashboard-tiles, .device-list, .ticket-list) > :nth-child(2) { animation-delay: 40ms; }
+:where(.dashboard-tiles, .device-list, .ticket-list) > :nth-child(3) { animation-delay: 80ms; }
+:where(.dashboard-tiles, .device-list, .ticket-list) > :nth-child(n+4) { animation-delay: 120ms; }
+
+@keyframes list-item-enter {
+  from { transform: translateY(6px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
